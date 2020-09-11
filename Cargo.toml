@@ -10,13 +10,9 @@ edition = "2018"
 name = "linear_sumcheck"
 path = "src/lib.rs"
 
-
 [dependencies]
-algebra-core = { git = "https://github.com/scipr-lab/zexe/", default-features = false, features = [ "derive" ] }
+algebra = { git = "https://github.com/scipr-lab/zexe/", default-features = false, features=["bls12_377", "ed_on_bls12_381", "derive"] }
 rand_core = { version = "0.5", default-features = false }
+ff-fft = { git = "https://github.com/scipr-lab/zexe/", default-features = false}
 rand = "0.7.3"
 blake2 = { version = "0.9", default-features = false }
-
-[dev-dependencies]
-ff-fft = { git = "https://github.com/scipr-lab/zexe/", default-features = false} # for unit testing
-algebra = { git = "https://github.com/scipr-lab/zexe/", default-features = false, features = [ "bls12_377", "ed_on_bls12_381" ] }
