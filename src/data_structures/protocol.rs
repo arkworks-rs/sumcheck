@@ -1,6 +1,6 @@
 use std::fmt::{Debug, Display};
 
-use algebra_core::{CanonicalDeserialize, CanonicalSerialize, ToBytes};
+use algebra::{CanonicalDeserialize, CanonicalSerialize, ToBytes};
 
 use crate::error::Error;
 
@@ -20,7 +20,7 @@ pub(crate) trait Protocol: Sized {
     /// Message sent **from** this protocol to others.
     type OutBoundMessage: Message;
     /// Type of error
-    type Error: algebra_core::Error + From<Error> + Display;
+    type Error: algebra::Error + From<Error> + Display;
 
     /// Get current round.
     /// If the protocol is not active (e.g. in accepted or rejected status), `current_round`
@@ -48,6 +48,9 @@ pub(crate) trait Protocol: Sized {
 /// represents the state of verifier
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub(crate) enum VerifierState {
+    /// The verifier need prover's message to setup.
+    #[cfg(test)] // setup is currently not used by main code.
+    Setup,
     /// The verifier is listening. It is not yet convinced.
     /// The data includes the round number (from `1` to `2n` inclusive), where `n` is dimension of `x` and `y`.
     Round(u32),
@@ -157,7 +160,9 @@ pub(crate) mod tests {
             if let VerifierState::Round(i) = verifier.get_state() {
                 assert_eq!(i, round, "round mismatch") // should be correct state
             } else {
-                panic!("Invalid verifier state")
+                if VerifierState::Setup != verifier.get_state() {
+                    panic!("Invalid verifier state")
+                }
             };
             let a = prover.get_message(round).unwrap();
             verifier.push_message(&a).unwrap(); // A -> B

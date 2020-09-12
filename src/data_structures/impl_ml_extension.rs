@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::marker::PhantomData;
 
-use algebra_core::Field;
+use algebra::Field;
 
 use crate::data_structures::ml_extension::{GKRFunction, MLExtension, SparseMLExtension};
 
@@ -11,11 +11,24 @@ pub struct MLExtensionArray<F: Field> {
     num_variables: usize,
 }
 
-use algebra_core::log2;
+fn log2(mut x: u32) -> usize {
+    let mut c: u32 = 0u32;
+    for scale in (1u32..8).rev() {
+        while x & ((1 << scale) - 1) == 0 {
+            c += scale;
+            x >>= scale;
+        }
+    }
+    c as usize
+}
+
+#[inline]
+fn is_power_of_two(x: usize) -> bool {
+    !(x == 0 || (x != 1 && (x & (x - 1) != 0)))
+}
 
 /// Evaluate a multilinear extension.
-/// * `poly`: array form of multilinear extension. The index of the array is the little endian
-/// binary form of the point on domain hypercube, and the entry is the evaluation at that point.
+/// * `poly`: array form of multilinear extension
 /// * `nv`: number of variables
 /// * `at`: the point we want to evaluate
 fn eval_dense<F: Field>(poly: &[F], nv: usize, at: &[F]) -> Result<F, crate::Error> {
@@ -36,30 +49,15 @@ fn eval_dense<F: Field>(poly: &[F], nv: usize, at: &[F]) -> Result<F, crate::Err
     Ok(a[0])
 }
 impl<F: Field> MLExtensionArray<F> {
-    /// Generate the MLExtension from slice in array form. Copy all the data into the MLExtension.
-    ///
-    /// For example, suppose we have a polynomial P of 4 variables. If P(1,1,0,1)=7, then in
-    /// array form P[`0b1011`]=7 (i.e. P[11]=7)
-    ///
-    /// ```
-    /// # use algebra::{UniformRand, Field, One, Zero, test_rng};
-    /// # use linear_sumcheck::data_structures::MLExtensionArray;
-    /// # use linear_sumcheck::data_structures::ml_extension::MLExtension;
-    /// # type F = algebra::bls12_377::Fr;
-    /// // create a degree-4 polynomial.
-    /// # let mut rng = test_rng();
-    /// let poly: Vec<_> = (0..(1<<4)).map(|_|F::rand(&mut rng)).collect();
-    /// let mle = MLExtensionArray::from_slice(&poly).unwrap();
-    /// assert_eq!(*(poly.get(0b1011).unwrap()), mle.eval_at(&vec![F::one(),F::one(),F::zero(),F::one()]).unwrap())
-    /// ```
+    /// Generate the MLExtension from slice. Copy all the data into the MLExtension.
     pub fn from_slice(data: &[F]) -> Result<Self, crate::Error> {
         let len = data.len();
-        if !len.is_power_of_two() {
+        if !is_power_of_two(len) {
             return Err(crate::Error::InvalidArgumentError(Some(String::from(
                 "Data should have size of power of 2. ",
             ))));
         }
-        let num_variables = log2(len) as usize;
+        let num_variables = log2(len as u32);
         let data = data.to_vec();
         Ok(Self {
             num_variables,
@@ -77,12 +75,12 @@ impl<F: Field> MLExtension<F> for MLExtensionArray<F> {
     }
 
     fn eval_binary(&self, point: Self::BinaryArg) -> Result<F, Self::Error> {
-        self.store
-            .get(point)
-            .ok_or(Self::Error::InternalDataStructureCorruption(Some(
-                "Unable to get element from array".into(),
-            )))
-            .map(|v| *v)
+        match self.store.get(point) {
+            Some(v) => Ok(*v),
+            None => Err(Self::Error::InternalDataStructureCorruption(Some(
+                String::from("Unable to get element from array. "),
+            ))),
+        }
     }
 
     /// Evaluate a point of the polynomial in field. This method will take linear time and linear space to the size of
@@ -104,17 +102,14 @@ pub struct MLExtensionRefArray<'a, F: Field> {
 
 impl<'a, F: Field> MLExtensionRefArray<'a, F> {
     /// Generate the MLExtension from slice. Copy all the data into the MLExtension.
-    ///
-    /// Go to [MLExtensionArray](struct.MLExtensionArray.html#method.from_slice) to learn more about
-    /// how the polynomial is represented.
     pub fn from_slice(data: &'a [F]) -> Result<Self, crate::Error> {
         let len = data.len();
-        if !len.is_power_of_two() {
+        if !is_power_of_two(len) {
             return Err(crate::Error::InvalidArgumentError(Some(String::from(
                 "Data should have size of power of 2. ",
             ))));
         }
-        let num_variables = log2(len) as usize;
+        let num_variables = log2(len as u32);
         Ok(Self {
             num_variables,
             store: data,
@@ -131,12 +126,12 @@ impl<'a, F: Field> MLExtension<F> for MLExtensionRefArray<'a, F> {
     }
 
     fn eval_binary(&self, point: Self::BinaryArg) -> Result<F, Self::Error> {
-        self.store
-            .get(point)
-            .ok_or(Self::Error::InternalDataStructureCorruption(Some(
-                "Unable to get element from array".into(),
-            )))
-            .map(|v| *v)
+        match self.store.get(point) {
+            Some(v) => Ok(*v),
+            None => Err(Self::Error::InternalDataStructureCorruption(Some(
+                String::from("Unable to get element from array. "),
+            ))),
+        }
     }
 
     fn eval_at(&self, point: &[F]) -> Result<F, Self::Error> {
@@ -231,7 +226,11 @@ impl<F: Field> MLExtension<F> for SparseMLExtensionHashMap<F> {
             dp1 = HashMap::new();
         }
 
-        Ok(*(dp0.entry(0usize).or_insert(F::zero())))
+        if let Some(v) = dp0.get(&0usize) {
+            Ok(*v)
+        } else {
+            Ok(F::zero())
+        }
     }
 
     fn table(&self) -> Result<Vec<F>, Self::Error> {
@@ -240,10 +239,11 @@ impl<F: Field> MLExtension<F> for SparseMLExtensionHashMap<F> {
             table.push(F::zero());
         }
         for (arg, v) in self.store.iter() {
-            let result = table
-                .get_mut(*arg)
-                .ok_or(Self::Error::InternalDataStructureCorruption(None));
-            *(unwrap_safe!(result)) = *v;
+            if let Some(entry) = table.get_mut(*arg) {
+                *entry = *v;
+            } else {
+                return Err(Self::Error::InternalDataStructureCorruption(None));
+            }
         }
 
         Ok(table)

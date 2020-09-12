@@ -2,7 +2,7 @@
 //!
 //! More details can be found in the documentation of [`MLSumcheck`](trait.MLSumcheck.html)
 
-use algebra_core::{CanonicalDeserialize, CanonicalSerialize, Field};
+use algebra::{CanonicalDeserialize, CanonicalSerialize, Field};
 
 use crate::data_structures::ml_extension::MLExtension;
 
@@ -48,7 +48,7 @@ where
     /// proof of the claim
     type Proof: Clone + CanonicalSerialize + CanonicalDeserialize;
     /// error type
-    type Error: algebra_core::Error + From<crate::Error>;
+    type Error: algebra::Error + From<crate::Error>;
     /// subclaim outputted: if the claim is true, the subclaim should be true
     type SubClaim: MLSumcheckSubclaim<F>;
 

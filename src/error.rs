@@ -1,6 +1,6 @@
 use core::fmt;
 
-use algebra_core::alloc::fmt::Formatter;
+use algebra::alloc::fmt::Formatter;
 
 /// Error type for this crate
 #[derive(Debug)]
@@ -27,4 +27,4 @@ impl fmt::Display for Error {
     }
 }
 
-impl algebra_core::Error for Error {}
+impl algebra::Error for Error {}

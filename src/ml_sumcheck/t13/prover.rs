@@ -1,4 +1,4 @@
-use algebra_core::Field;
+use algebra::Field;
 
 use crate::data_structures::ml_extension::MLExtension;
 use crate::data_structures::protocol::Protocol;

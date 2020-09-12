@@ -1,8 +1,8 @@
 #![macro_use]
 
-use algebra_core::alloc::fmt::Display;
+use algebra::alloc::fmt::Display;
 /// multilinear extensions
-use algebra_core::Field;
+use algebra::Field;
 
 use crate::error::Error;
 
@@ -23,7 +23,7 @@ where
     type BinaryArg: From<usize> + Into<usize> + Copy;
 
     /// Error Type
-    type Error: algebra_core::Error + From<Error> + Display;
+    type Error: algebra::Error + From<Error> + Display;
 
     /// Number of variables (L)
     ///
@@ -35,7 +35,6 @@ where
     ///
     /// This function takes a binary point and evaluate the polynomial at that point.
     /// This is equivalent to accessing an element in the array by index.
-    /// Learn more about how the binary argument work in the doc of [MLExtensionArray](../struct.MLExtensionArray.html#method.from_slice)
     fn eval_binary(&self, point: Self::BinaryArg) -> Result<F, Self::Error>;
 
     /// Evaluate the polynomial at a point in Field
@@ -55,7 +54,7 @@ where
     fn sparse_table(&self) -> Result<Vec<(Self::BinaryArg, F)>, Self::Error>;
 }
 
-/// Represents the GKR Function as described in [[XZZPS19]](https://eprint.iacr.org/2019/317.pdf#page=15).
+/// Represents GKR Function as described in https://eprint.iacr.org/2019/317.pdf#page=15
 ///
 /// `GKR(g, x, y) = f1(g, x, y)*f2(x)*f3(y)`
 pub trait GKRFunction<F, S, D>: Sized
@@ -65,7 +64,7 @@ where
     D: MLExtension<F>,
 {
     /// Error Type
-    type Error: algebra_core::Error + From<Error> + Display;
+    type Error: algebra::Error + From<Error> + Display;
 
     /// Get f1
     fn get_f1(&self) -> &S;

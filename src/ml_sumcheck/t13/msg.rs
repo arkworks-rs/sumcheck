@@ -1,6 +1,6 @@
-use algebra_core::io::Result as IOResult;
-use algebra_core::{CanonicalDeserialize, CanonicalSerialize, Read, SerializationError, Write};
-use algebra_core::{Field, ToBytes};
+use algebra::io::Result as IOResult;
+use algebra::{CanonicalDeserialize, CanonicalSerialize, Read, SerializationError, Write};
+use algebra::{Field, ToBytes};
 
 use crate::data_structures::protocol::Message;
 

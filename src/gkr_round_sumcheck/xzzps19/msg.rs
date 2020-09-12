@@ -1,5 +1,5 @@
-use algebra_core::io::{Error as IOError, Read, Result as IOResult, Write};
-use algebra_core::{CanonicalDeserialize, CanonicalSerialize, Field, SerializationError, ToBytes};
+use algebra::io::{Error as IOError, Read, Result as IOResult, Write};
+use algebra::{CanonicalDeserialize, CanonicalSerialize, Field, SerializationError, ToBytes};
 
 use crate::data_structures::protocol::Message;
 

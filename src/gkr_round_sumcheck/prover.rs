@@ -1,4 +1,4 @@
-use algebra_core::Field;
+use algebra::Field;
 use rand_core::RngCore;
 
 use crate::data_structures::ml_extension::{GKRFunction, MLExtension, SparseMLExtension};

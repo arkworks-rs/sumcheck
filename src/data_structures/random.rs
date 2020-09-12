@@ -1,4 +1,4 @@
-use algebra_core::{Error, Field, ToBytes};
+use algebra::{Error, Field, ToBytes};
 use rand_core::RngCore;
 
 /// Random Field Element Generator

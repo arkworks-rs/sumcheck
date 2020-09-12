@@ -1,4 +1,4 @@
-use algebra_core::Field;
+use algebra::Field;
 
 use crate::data_structures::protocol::{Protocol, VerifierProtocol, VerifierState};
 use crate::data_structures::random::{FeedableRNG, RnFg};
