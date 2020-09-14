@@ -1,20 +1,20 @@
+#![allow(unreachable_pub)]
 use std::fmt::{Debug, Display};
 
 use algebra::{CanonicalDeserialize, CanonicalSerialize, ToBytes};
 
 use crate::error::Error;
 
-/// Message trait
-pub(crate) trait Message:
+/// Message that is transferred between protocols. The message can be (de)serialized and
+/// can be converted to bytes deterministically.
+pub trait Message:
     CanonicalSerialize + CanonicalDeserialize + ToBytes + Clone
 {
     // nothing required
 }
 
-/// Trait for protocol: can be either prover or verifier.
-///
-/// The protocol should store all messages being sent.
-pub(crate) trait Protocol: Sized {
+/// Interactive protocol
+pub trait Protocol: Sized {
     /// Message sent **to** this protocol from others.
     type InboundMessage: Message;
     /// Message sent **from** this protocol to others.
@@ -27,27 +27,33 @@ pub(crate) trait Protocol: Sized {
     /// should return an InvalidOperationError.
     fn current_round(&self) -> Result<u32, Self::Error>;
 
-    /// return if current protocol is active (can push message)
+    /// If this method is true, user can push message to this protocol at this time.
+    ///
+    /// Note: inactive doesn't mean user cannot get latest message.
     fn is_active(&self) -> bool;
 
     /// Get message from this protocol at round
     ///
-    /// If round < current round, the prover simply returns message from cache.
+    /// If round < current round, the protocol simply returns message from cache.
+    /// If the protocol does not support cache, this protocol will return an error.
     fn get_message(&self, round: u32) -> Result<Self::OutBoundMessage, Self::Error>;
 
     /// get message from this protocol at current round
+    ///
+    /// Repeatedly calling `get_latest_message` without pushing lead to same result.
     fn get_latest_message(&mut self) -> Result<Self::OutBoundMessage, Self::Error> {
         self.get_message(self.current_round()?)
     }
 
     /// Push message to this protocol
+    ///
     /// Protocol goes to next round, or become inactive.
     fn push_message(&mut self, msg: &Self::InboundMessage) -> Result<(), Self::Error>;
 }
 
 /// represents the state of verifier
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub(crate) enum VerifierState {
+pub enum VerifierState {
     /// The verifier need prover's message to setup.
     #[cfg(test)] // setup is currently not used by main code.
     Setup,
@@ -64,7 +70,7 @@ pub(crate) enum VerifierState {
 }
 
 /// General Verifier Protocol
-pub(crate) trait VerifierProtocol: Protocol {
+pub trait VerifierProtocol: Protocol {
     /// Get state of the verifier.
     fn get_state(&self) -> VerifierState;
 }
