@@ -7,7 +7,7 @@
 //! might need to implement the traits by themselves.
 //!
 //! For example, user might implement `MLExtension` as a reference to their own GKR circuit,
-//! so that the sumcheck protocol do not need to copy the data.
+//! so that the sumcheck protocol does not need to copy the data.
 //!
 
 pub use impl_ml_extension::{
