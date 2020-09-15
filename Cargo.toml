@@ -6,10 +6,6 @@ authors = [
 ]
 edition = "2018"
 
-[features]
-# use the interactive protocol API
-interactive = []
-
 [lib]
 name = "linear_sumcheck"
 path = "src/lib.rs"
