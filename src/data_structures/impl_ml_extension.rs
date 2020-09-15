@@ -60,7 +60,7 @@ impl<F: Field> MLExtensionArray<F> {
                 "Data should have size of power of 2. ",
             ))));
         }
-        let num_variables = log2(len) as usize - 1;
+        let num_variables = log2(len) as usize;
         let data = data.to_vec();
         Ok(Self {
             num_variables,
@@ -107,7 +107,7 @@ impl<'a, F: Field> MLExtensionRefArray<'a, F> {
     /// Generate the MLExtension from slice. Copy all the data into the MLExtension.
     ///
     /// Go to [MLExtensionArray](struct.MLExtensionArray.html#method.from_slice) to learn more about
-    /// how the polynomial is represented. 
+    /// how the polynomial is represented.
     pub fn from_slice(data: &'a [F]) -> Result<Self, crate::Error> {
         let len = data.len();
         if !len.is_power_of_two() {
@@ -115,7 +115,7 @@ impl<'a, F: Field> MLExtensionRefArray<'a, F> {
                 "Data should have size of power of 2. ",
             ))));
         }
-        let num_variables = log2(len) as usize - 1;
+        let num_variables = log2(len) as usize;
         Ok(Self {
             num_variables,
             store: data,
