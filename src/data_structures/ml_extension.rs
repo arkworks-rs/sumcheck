@@ -35,6 +35,7 @@ where
     ///
     /// This function takes a binary point and evaluate the polynomial at that point.
     /// This is equivalent to accessing an element in the array by index.
+    /// Learn more about how the binary argument work in the doc of [MLExtensionArray](../struct.MLExtensionArray.html#method.from_slice)
     fn eval_binary(&self, point: Self::BinaryArg) -> Result<F, Self::Error>;
 
     /// Evaluate the polynomial at a point in Field
