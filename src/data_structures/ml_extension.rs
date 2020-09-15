@@ -55,7 +55,7 @@ where
     fn sparse_table(&self) -> Result<Vec<(Self::BinaryArg, F)>, Self::Error>;
 }
 
-/// Represents GKR Function as described in https://eprint.iacr.org/2019/317.pdf#page=15
+/// Represents the GKR Function as described in [[XZZPS19]](https://eprint.iacr.org/2019/317.pdf#page=15).
 ///
 /// `GKR(g, x, y) = f1(g, x, y)*f2(x)*f3(y)`
 pub trait GKRFunction<F, S, D>: Sized
