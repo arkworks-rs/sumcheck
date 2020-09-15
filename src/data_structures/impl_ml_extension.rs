@@ -11,16 +11,7 @@ pub struct MLExtensionArray<F: Field> {
     num_variables: usize,
 }
 
-fn log2(mut x: u32) -> usize {
-    let mut c: u32 = 0u32;
-    for scale in (1u32..8).rev() {
-        while x & ((1 << scale) - 1) == 0 {
-            c += scale;
-            x >>= scale;
-        }
-    }
-    c as usize
-}
+use algebra::log2;
 
 #[inline]
 fn is_power_of_two(x: usize) -> bool {
@@ -57,7 +48,7 @@ impl<F: Field> MLExtensionArray<F> {
                 "Data should have size of power of 2. ",
             ))));
         }
-        let num_variables = log2(len as u32);
+        let num_variables = log2(len) as usize - 1;
         let data = data.to_vec();
         Ok(Self {
             num_variables,
@@ -109,7 +100,7 @@ impl<'a, F: Field> MLExtensionRefArray<'a, F> {
                 "Data should have size of power of 2. ",
             ))));
         }
-        let num_variables = log2(len as u32);
+        let num_variables = log2(len) as usize - 1;
         Ok(Self {
             num_variables,
             store: data,
