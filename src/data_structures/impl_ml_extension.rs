@@ -222,11 +222,8 @@ impl<F: Field> MLExtension<F> for SparseMLExtensionHashMap<F> {
             dp1 = HashMap::new();
         }
 
-        if let Some(v) = dp0.get(&0usize) {
-            Ok(*v)
-        } else {
-            Ok(F::zero())
-        }
+        Ok(*(dp0.entry(0usize).
+            or_insert(F::zero())))
     }
 
     fn table(&self) -> Result<Vec<F>, Self::Error> {
