@@ -232,11 +232,8 @@ impl<F: Field> MLExtension<F> for SparseMLExtensionHashMap<F> {
             table.push(F::zero());
         }
         for (arg, v) in self.store.iter() {
-            if let Some(entry) = table.get_mut(*arg) {
-                *entry = *v;
-            } else {
-                return Err(Self::Error::InternalDataStructureCorruption(None));
-            }
+            let result = table.get_mut(*arg).ok_or(Self::Error::InternalDataStructureCorruption(None));
+            *(unwrap_safe!(result)) = *v;
         }
 
         Ok(table)
