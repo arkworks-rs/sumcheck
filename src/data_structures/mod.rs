@@ -1,6 +1,6 @@
 //!
 //!
-//! The `data_structures` modules mainly consists of representations of polynomials.
+//! The `data_structures` module mainly consists of representations of polynomials.
 //!
 //! This module provides traits that the sumcheck protocol accept as input, and provides
 //! several common implementations of those traits for convenience. In practice, users
