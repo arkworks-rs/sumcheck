@@ -13,10 +13,6 @@ pub struct MLExtensionArray<F: Field> {
 
 use algebra::log2;
 
-#[inline]
-fn is_power_of_two(x: usize) -> bool {
-    !(x == 0 || (x != 1 && (x & (x - 1) != 0)))
-}
 
 /// Evaluate a multilinear extension.
 /// * `poly`: array form of multilinear extension
@@ -43,7 +39,7 @@ impl<F: Field> MLExtensionArray<F> {
     /// Generate the MLExtension from slice. Copy all the data into the MLExtension.
     pub fn from_slice(data: &[F]) -> Result<Self, crate::Error> {
         let len = data.len();
-        if !is_power_of_two(len) {
+        if !len.is_power_of_two() {
             return Err(crate::Error::InvalidArgumentError(Some(String::from(
                 "Data should have size of power of 2. ",
             ))));
@@ -95,7 +91,7 @@ impl<'a, F: Field> MLExtensionRefArray<'a, F> {
     /// Generate the MLExtension from slice. Copy all the data into the MLExtension.
     pub fn from_slice(data: &'a [F]) -> Result<Self, crate::Error> {
         let len = data.len();
-        if !is_power_of_two(len) {
+        if !len.is_power_of_two() {
             return Err(crate::Error::InvalidArgumentError(Some(String::from(
                 "Data should have size of power of 2. ",
             ))));
