@@ -15,7 +15,8 @@ use algebra::log2;
 
 
 /// Evaluate a multilinear extension.
-/// * `poly`: array form of multilinear extension
+/// * `poly`: array form of multilinear extension. The index of the array is the little endian
+/// binary form of the point on domain hypercube, and the entry is the evaluation at that point.
 /// * `nv`: number of variables
 /// * `at`: the point we want to evaluate
 fn eval_dense<F: Field>(poly: &[F], nv: usize, at: &[F]) -> Result<F, crate::Error> {
@@ -36,7 +37,22 @@ fn eval_dense<F: Field>(poly: &[F], nv: usize, at: &[F]) -> Result<F, crate::Err
     Ok(a[0])
 }
 impl<F: Field> MLExtensionArray<F> {
-    /// Generate the MLExtension from slice. Copy all the data into the MLExtension.
+    /// Generate the MLExtension from slice in array form. Copy all the data into the MLExtension.
+    ///
+    /// For example, suppose we have a polynomial P of 4 variables. If P(1,1,0,1)=7, then in
+    /// array form P[`0b1011`]=7 (i.e. P[11]=7)
+    ///
+    /// ```
+    /// # use algebra::{UniformRand, Field, One, Zero, test_rng};
+    /// # use linear_sumcheck::data_structures::MLExtensionArray;
+    /// # use linear_sumcheck::data_structures::ml_extension::MLExtension;
+    /// # type F = algebra::bls12_377::Fr;
+    /// // create a degree-4 polynomial.
+    /// # let mut rng = test_rng();
+    /// let poly: Vec<_> = (0..(1<<4)).map(|_|F::rand(&mut rng)).collect();
+    /// let mle = MLExtensionArray::from_slice(&poly).unwrap();
+    /// assert_eq!(*(poly.get(0b1011).unwrap()), mle.eval_at(&vec![F::one(),F::one(),F::zero(),F::one()]).unwrap())
+    /// ```
     pub fn from_slice(data: &[F]) -> Result<Self, crate::Error> {
         let len = data.len();
         if !len.is_power_of_two() {
@@ -89,6 +105,9 @@ pub struct MLExtensionRefArray<'a, F: Field> {
 
 impl<'a, F: Field> MLExtensionRefArray<'a, F> {
     /// Generate the MLExtension from slice. Copy all the data into the MLExtension.
+    ///
+    /// Go to [MLExtensionArray](struct.MLExtensionArray.html#method.from_slice) to learn more about
+    /// how the polynomial is represented. 
     pub fn from_slice(data: &'a [F]) -> Result<Self, crate::Error> {
         let len = data.len();
         if !len.is_power_of_two() {
