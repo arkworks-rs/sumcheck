@@ -23,11 +23,7 @@ pub use impl_random::{AsDummyFeedable, Blake2s512Rng};
 pub mod ml_extension;
 
 /// protocol
-#[cfg(not(any(doc, feature="interactive")))]
 pub(crate) mod protocol;
-#[cfg(any(doc, feature="interactive"))]
-/// raw interactive protocol. This module is visible when optional feature `interactive` is on.
-pub mod protocol;
 
 /// high-level abstraction of randomness
 pub mod random;
@@ -37,7 +33,8 @@ pub mod random;
 mod impl_ml_extension;
 /// implementation of random
 mod impl_random;
-
+/// mask used by gkr prover for zero knowledge proof
+// pub mod mask;
 /// field (used only for testing)
 #[cfg(test)]
 pub mod test_field;
