@@ -78,8 +78,7 @@ impl<F: Field> MLExtension<F> for MLExtensionArray<F> {
     }
 
     fn eval_binary(&self, point: Self::BinaryArg) -> Result<F, Self::Error> {
-        self.store.get(point).ok_or(Self::Error::InternalDataStructureCorruption(Some("Unable to get element from array".into()))).map(|v| *v),
-        }
+        self.store.get(point).ok_or(Self::Error::InternalDataStructureCorruption(Some("Unable to get element from array".into()))).map(|v| *v)
     }
 
     /// Evaluate a point of the polynomial in field. This method will take linear time and linear space to the size of
@@ -128,12 +127,7 @@ impl<'a, F: Field> MLExtension<F> for MLExtensionRefArray<'a, F> {
     }
 
     fn eval_binary(&self, point: Self::BinaryArg) -> Result<F, Self::Error> {
-        match self.store.get(point) {
-            Some(v) => Ok(*v),
-            None => Err(Self::Error::InternalDataStructureCorruption(Some(
-                String::from("Unable to get element from array. "),
-            ))),
-        }
+        self.store.get(point).ok_or(Self::Error::InternalDataStructureCorruption(Some("Unable to get element from array".into()))).map(|v| *v)
     }
 
     fn eval_at(&self, point: &[F]) -> Result<F, Self::Error> {
