@@ -1,6 +1,6 @@
 use std::fmt::{Debug, Display};
 
-use algebra::{CanonicalDeserialize, CanonicalSerialize, ToBytes};
+use algebra_core::{CanonicalDeserialize, CanonicalSerialize, ToBytes};
 
 use crate::error::Error;
 
@@ -20,7 +20,7 @@ pub(crate) trait Protocol: Sized {
     /// Message sent **from** this protocol to others.
     type OutBoundMessage: Message;
     /// Type of error
-    type Error: algebra::Error + From<Error> + Display;
+    type Error: algebra_core::Error + From<Error> + Display;
 
     /// Get current round.
     /// If the protocol is not active (e.g. in accepted or rejected status), `current_round`

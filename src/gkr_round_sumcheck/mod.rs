@@ -2,7 +2,7 @@
 //!
 //! More details can be found in the documentation of [`GKRRoundSumcheck`](trait.GKRRoundSumcheck.html).
 
-use algebra::{CanonicalDeserialize, CanonicalSerialize, Field};
+use algebra_core::{CanonicalDeserialize, CanonicalSerialize, Field};
 
 pub(crate) use prover::Prover;
 pub(crate) use verifier::{GKRFuncVerifierSubclaim, Verifier};
@@ -38,7 +38,7 @@ where
     /// The proof of the claim that can be verified offline.
     type Proof: GKRRoundProof;
     /// type of Error
-    type Error: algebra::Error + From<crate::Error>;
+    type Error: algebra_core::Error + From<crate::Error>;
     /// The output of the function `verify_proof`. If the claim is true, then the subclaim must be true.
     type SubClaim: GKRRoundSubClaim<F>;
     /// Given the GKR function and fixed point `g`, calculate the sum and generate a claim of the sum.

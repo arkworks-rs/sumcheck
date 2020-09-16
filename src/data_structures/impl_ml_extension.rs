@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::marker::PhantomData;
 
-use algebra::Field;
+use algebra_core::Field;
 
 use crate::data_structures::ml_extension::{GKRFunction, MLExtension, SparseMLExtension};
 
@@ -11,7 +11,7 @@ pub struct MLExtensionArray<F: Field> {
     num_variables: usize,
 }
 
-use algebra::log2;
+use algebra_core::log2;
 
 
 /// Evaluate a multilinear extension.
