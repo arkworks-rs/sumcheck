@@ -1,5 +1,5 @@
-use algebra::io::{Read, Write};
-use algebra::{CanonicalDeserialize, CanonicalSerialize, Field, SerializationError};
+use algebra_core::io::{Read, Write};
+use algebra_core::{CanonicalDeserialize, CanonicalSerialize, Field, SerializationError};
 
 use crate::data_structures::protocol::{Protocol, VerifierProtocol, VerifierState};
 use crate::data_structures::random::{FeedableRNG, RnFg};

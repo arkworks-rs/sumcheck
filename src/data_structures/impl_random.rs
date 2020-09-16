@@ -1,6 +1,6 @@
 use std::io::Write;
 
-use algebra::{Field, ToBytes};
+use algebra_core::{Field, ToBytes};
 use blake2::{Blake2s, Digest};
 use rand_core::{Error, RngCore};
 

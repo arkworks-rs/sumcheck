@@ -1,7 +1,7 @@
 use std::marker::PhantomData;
 
-use algebra::io::{Read, Write};
-use algebra::{CanonicalDeserialize, CanonicalSerialize, Field, SerializationError};
+use algebra_core::io::{Read, Write};
+use algebra_core::{CanonicalDeserialize, CanonicalSerialize, Field, SerializationError};
 
 use crate::data_structures::ml_extension::{MLExtension, SparseMLExtension};
 use crate::data_structures::protocol::Protocol;

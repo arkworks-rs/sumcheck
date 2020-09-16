@@ -1,5 +1,5 @@
 /// interactive protocol for GKR function
-use algebra::{CanonicalDeserialize, CanonicalSerialize, Field};
+use algebra_core::{CanonicalDeserialize, CanonicalSerialize, Field};
 
 use crate::data_structures::protocol::VerifierProtocol;
 use crate::data_structures::random::RnFg;

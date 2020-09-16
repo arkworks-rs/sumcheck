@@ -1,8 +1,8 @@
 #![macro_use]
 
-use algebra::alloc::fmt::Display;
+use algebra_core::alloc::fmt::Display;
 /// multilinear extensions
-use algebra::Field;
+use algebra_core::Field;
 
 use crate::error::Error;
 
@@ -23,7 +23,7 @@ where
     type BinaryArg: From<usize> + Into<usize> + Copy;
 
     /// Error Type
-    type Error: algebra::Error + From<Error> + Display;
+    type Error: algebra_core::Error + From<Error> + Display;
 
     /// Number of variables (L)
     ///
@@ -65,7 +65,7 @@ where
     D: MLExtension<F>,
 {
     /// Error Type
-    type Error: algebra::Error + From<Error> + Display;
+    type Error: algebra_core::Error + From<Error> + Display;
 
     /// Get f1
     fn get_f1(&self) -> &S;
