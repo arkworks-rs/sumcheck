@@ -13,7 +13,6 @@ pub struct MLExtensionArray<F: Field> {
 
 use algebra_core::log2;
 
-
 /// Evaluate a multilinear extension.
 /// * `poly`: array form of multilinear extension. The index of the array is the little endian
 /// binary form of the point on domain hypercube, and the entry is the evaluation at that point.
@@ -78,7 +77,12 @@ impl<F: Field> MLExtension<F> for MLExtensionArray<F> {
     }
 
     fn eval_binary(&self, point: Self::BinaryArg) -> Result<F, Self::Error> {
-        self.store.get(point).ok_or(Self::Error::InternalDataStructureCorruption(Some("Unable to get element from array".into()))).map(|v| *v)
+        self.store
+            .get(point)
+            .ok_or(Self::Error::InternalDataStructureCorruption(Some(
+                "Unable to get element from array".into(),
+            )))
+            .map(|v| *v)
     }
 
     /// Evaluate a point of the polynomial in field. This method will take linear time and linear space to the size of
@@ -127,7 +131,12 @@ impl<'a, F: Field> MLExtension<F> for MLExtensionRefArray<'a, F> {
     }
 
     fn eval_binary(&self, point: Self::BinaryArg) -> Result<F, Self::Error> {
-        self.store.get(point).ok_or(Self::Error::InternalDataStructureCorruption(Some("Unable to get element from array".into()))).map(|v| *v)
+        self.store
+            .get(point)
+            .ok_or(Self::Error::InternalDataStructureCorruption(Some(
+                "Unable to get element from array".into(),
+            )))
+            .map(|v| *v)
     }
 
     fn eval_at(&self, point: &[F]) -> Result<F, Self::Error> {
@@ -222,8 +231,7 @@ impl<F: Field> MLExtension<F> for SparseMLExtensionHashMap<F> {
             dp1 = HashMap::new();
         }
 
-        Ok(*(dp0.entry(0usize).
-            or_insert(F::zero())))
+        Ok(*(dp0.entry(0usize).or_insert(F::zero())))
     }
 
     fn table(&self) -> Result<Vec<F>, Self::Error> {
@@ -232,7 +240,9 @@ impl<F: Field> MLExtension<F> for SparseMLExtensionHashMap<F> {
             table.push(F::zero());
         }
         for (arg, v) in self.store.iter() {
-            let result = table.get_mut(*arg).ok_or(Self::Error::InternalDataStructureCorruption(None));
+            let result = table
+                .get_mut(*arg)
+                .ok_or(Self::Error::InternalDataStructureCorruption(None));
             *(unwrap_safe!(result)) = *v;
         }
 

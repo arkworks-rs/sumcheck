@@ -10,12 +10,12 @@
 //! so that the sumcheck protocol does not need to copy the data.
 //!
 
-pub use impl_ml_extension::{
-    GKRAsLink, MLExtensionArray, MLExtensionRefArray, SparseMLExtensionHashMap,
-};
 /// some test helpers
 #[cfg(test)]
 pub use impl_ml_extension::tests;
+pub use impl_ml_extension::{
+    GKRAsLink, MLExtensionArray, MLExtensionRefArray, SparseMLExtensionHashMap,
+};
 pub use impl_random::{AsDummyFeedable, Blake2s512Rng};
 
 /// traits of data representations of multilinear extensions
