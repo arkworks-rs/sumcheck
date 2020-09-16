@@ -3,7 +3,7 @@ use algebra_core::Field;
 use crate::data_structures::ml_extension::MLExtension;
 use crate::data_structures::protocol::Protocol;
 use crate::ml_sumcheck::t13::msg::{MLLibraPMsg, MLLibraVMsg};
-
+use algebra_core::vec::Vec;
 pub(crate) struct MLLibraProver<F: Field> {
     generated_messages: Vec<MLLibraPMsg<F>>,
     randomness: Vec<F>,
@@ -20,7 +20,7 @@ impl<F: Field> MLLibraProver<F> {
         let num_multiplicands = poly.len();
         if num_multiplicands < 1 {
             return Err(crate::Error::InvalidArgumentError(Some(
-                "num_multiplicands < 1".to_string(),
+                "num_multiplicands < 1".into()
             )));
         }
         let mut tables = Vec::with_capacity(num_multiplicands);
@@ -28,7 +28,7 @@ impl<F: Field> MLLibraProver<F> {
         for single_poly in poly {
             if unwrap_safe!(single_poly.num_variables()) != nv {
                 return Err(crate::Error::InvalidArgumentError(Some(
-                    "polynomials should be same number of variables".to_string(),
+                    "polynomials should be same number of variables".into(),
                 )));
             }
 
@@ -109,7 +109,7 @@ impl<F: Field> Protocol for MLLibraProver<F> {
         let round = round as usize;
         if round > self.round {
             return Err(Self::Error::InvalidOperationError(Some(
-                "round > current_round".to_string(),
+                "round > current_round".into(),
             )));
         }
         Ok(self.generated_messages[round - 1].clone())
@@ -118,7 +118,7 @@ impl<F: Field> Protocol for MLLibraProver<F> {
     fn push_message(&mut self, msg: &Self::InboundMessage) -> Result<(), Self::Error> {
         if !self.is_active() {
             return Err(Self::Error::InvalidOperationError(Some(
-                "not active".to_string(),
+                "not active".into(),
             )));
         }
 
@@ -133,7 +133,7 @@ impl<F: Field> Protocol for MLLibraProver<F> {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature="std"))]
 mod tests {
     use algebra::{test_rng, UniformRand};
 

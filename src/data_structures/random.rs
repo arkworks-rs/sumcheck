@@ -31,7 +31,7 @@ pub mod tests {
     use rand_core::RngCore;
 
     use crate::data_structures::random::{FeedableRNG, RnFg};
-
+    use algebra_core::vec::Vec;
     /// Special type of input used for test.
     pub struct TestMessage {
         data: Vec<u8>,

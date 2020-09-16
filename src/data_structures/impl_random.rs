@@ -1,10 +1,12 @@
-use std::io::Write;
+#[allow(unused_imports)]
 
+use algebra_core::vec::Vec;
 use algebra_core::{Field, ToBytes};
 use blake2::{Blake2s, Digest};
 use rand_core::{Error, RngCore};
 
 use crate::data_structures::random::{FeedableRNG, RnFg};
+
 
 /// Convert any RngCore to Feedable RNG (feed is no-op)
 pub struct AsDummyFeedable<R: RngCore> {
@@ -92,33 +94,12 @@ impl RngCore for Blake2s512Rng {
         u64::from_le_bytes(temp)
     }
 
-    fn fill_bytes(&mut self, mut dest: &mut [u8]) {
-        let output_len = dest.len();
-        let mut ptr = 0usize;
-        while ptr < output_len {
-            let digest = self.current_digest.clone();
-            let output = digest.finalize();
-            let n = dest.write(&output).unwrap();
-            ptr += n;
-            self.current_digest.update(&output);
-        }
+    fn fill_bytes(&mut self, dest: &mut [u8]) {
+        self.try_fill_bytes(dest).unwrap()
     }
 
-    fn try_fill_bytes(&mut self, mut dest: &mut [u8]) -> Result<(), Error> {
-        let output_len = dest.len();
-        let mut ptr = 0usize;
-        while ptr < output_len {
-            let digest = self.current_digest.clone();
-            let output = digest.finalize();
-            let n = if let Ok(n) = dest.write(&output) {
-                n
-            } else {
-                return Err(Error::new("Cannot write".to_string()));
-            };
-            ptr += n;
-            self.current_digest.update(&output);
-        }
-        Ok(())
+    fn try_fill_bytes(&mut self, _dest: &mut [u8]) -> Result<(), Error> {
+        todo!()
     }
 }
 

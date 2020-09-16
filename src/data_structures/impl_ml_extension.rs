@@ -1,17 +1,89 @@
+use core::marker::PhantomData;
+#[cfg(feature="std")]
 use std::collections::HashMap;
-use std::marker::PhantomData;
 
+use algebra_core::{String, Vec};
+#[cfg(not(feature="std"))]
+use algebra_core::BTreeMap;
 use algebra_core::Field;
+use algebra_core::log2;
 
 use crate::data_structures::ml_extension::{GKRFunction, MLExtension, SparseMLExtension};
+
+#[cfg(feature = "std")]
+type SparseMap<F: Field> = HashMap<usize, F>;
+#[cfg(not(feature = "std"))]
+type SparseMap<F> = BTreeMap<usize, F>;
+
+/// This GKR is simply a reference to address of underlying MLExtensions.
+pub struct GKRAsLink<'a, F, S, D>
+    where
+        F: Field,
+        S: SparseMLExtension<F>,
+        D: MLExtension<F>,
+{
+    f1: &'a S,
+    f2: &'a D,
+    f3: &'a D,
+    phantom: PhantomData<F>,
+}
+
+impl<'a, F, S, D> GKRAsLink<'a, F, S, D>
+    where
+        F: Field,
+        S: SparseMLExtension<F>,
+        D: MLExtension<F>,
+{
+    /// create a new GKR that references f1, f2, f3
+    pub fn new(f1: &'a S, f2: &'a D, f3: &'a D) -> Result<Self, crate::Error> {
+        let nv1 = unwrap_safe!(f1.num_variables());
+        let nv2 = unwrap_safe!(f2.num_variables());
+        let nv3 = unwrap_safe!(f3.num_variables());
+        if nv2 != nv3 || nv1 != 3 * nv2 || nv1 != 3 * nv3 {
+            return Err(crate::Error::InvalidArgumentError(Some(algebra_core::format!(
+                "Numbers of variables mismatch. {}, {}, {}",
+                nv1, nv2, nv3
+            ))));
+        }
+        Ok(GKRAsLink {
+            f1,
+            f2,
+            f3,
+            phantom: PhantomData,
+        })
+    }
+}
+
+impl<'a, F, S, D> GKRFunction<F, S, D> for GKRAsLink<'a, F, S, D>
+    where
+        F: Field,
+        S: SparseMLExtension<F>,
+        D: MLExtension<F>,
+{
+    type Error = crate::Error;
+
+    fn get_f1(&self) -> &S {
+        self.f1
+    }
+
+    fn get_f2(&self) -> &D {
+        self.f2
+    }
+
+    fn get_f3(&self) -> &D {
+        self.f3
+    }
+
+    fn get_l(&self) -> Result<usize, Self::Error> {
+        Ok(unwrap_safe!(self.f2.num_variables()))
+    }
+}
 
 /// An implementation of multilinear extension, storing the data of underlying array.
 pub struct MLExtensionArray<F: Field> {
     store: Vec<F>,
     num_variables: usize,
 }
-
-use algebra_core::log2;
 
 /// Evaluate a multilinear extension.
 /// * `poly`: array form of multilinear extension. The index of the array is the little endian
@@ -35,6 +107,7 @@ fn eval_dense<F: Field>(poly: &[F], nv: usize, at: &[F]) -> Result<F, crate::Err
 
     Ok(a[0])
 }
+
 impl<F: Field> MLExtensionArray<F> {
     /// Generate the MLExtension from slice in array form. Copy all the data into the MLExtension.
     ///
@@ -149,27 +222,27 @@ impl<'a, F: Field> MLExtension<F> for MLExtensionRefArray<'a, F> {
 }
 
 /// Sparse multilinear extension implementation
-pub struct SparseMLExtensionHashMap<F: Field> {
-    store: HashMap<usize, F>,
+pub struct SparseMLExtensionMap<F: Field> {
+    store: SparseMap<F>,
     num_variables: usize,
 }
 
-impl<F: Field> SparseMLExtensionHashMap<F> {
+impl<F: Field> SparseMLExtensionMap<F> {
     /// construct a sparse multilinear extension from slice
     /// * `data`: Slice of tuple (binary arg, value)
     /// * `num_variables`: Number of variables
     /// Any duplicate arg will cause an error.
     pub fn from_slice(data: &[(usize, F)], num_variables: usize) -> Result<Self, crate::Error> {
-        let mut store = HashMap::new();
+        let mut store = SparseMap::new();
         for (arg, v) in data {
             if *arg >= (1 << num_variables) {
-                return Err(crate::Error::InvalidArgumentError(Some(format!(
+                return Err(crate::Error::InvalidArgumentError(Some(algebra_core::format!(
                     "Binary Argument {} is too large.",
                     arg
                 ))));
             }
             if let Some(pv) = store.insert(*arg, *v) {
-                return Err(crate::Error::InvalidArgumentError(Some(format!(
+                return Err(crate::Error::InvalidArgumentError(Some(algebra_core::format!(
                     "Duplicate argument ({}, {}) and ({}, {})",
                     arg, pv, arg, v
                 ))));
@@ -182,13 +255,13 @@ impl<F: Field> SparseMLExtensionHashMap<F> {
     }
 }
 
-impl<F: Field> SparseMLExtension<F> for SparseMLExtensionHashMap<F> {
+impl<F: Field> SparseMLExtension<F> for SparseMLExtensionMap<F> {
     fn sparse_table(&self) -> Result<Vec<(Self::BinaryArg, F)>, Self::Error> {
         Ok(self.store.iter().map(|(arg, val)| (*arg, *val)).collect())
     }
 }
 
-impl<F: Field> MLExtension<F> for SparseMLExtensionHashMap<F> {
+impl<F: Field> MLExtension<F> for SparseMLExtensionMap<F> {
     type BinaryArg = usize;
     type Error = crate::Error;
 
@@ -208,7 +281,7 @@ impl<F: Field> MLExtension<F> for SparseMLExtensionHashMap<F> {
     fn eval_at(&self, point: &[F]) -> Result<F, Self::Error> {
         let nv = self.num_variables;
         if point.len() != nv {
-            return Err(Self::Error::InvalidArgumentError(Some(format!(
+            return Err(Self::Error::InvalidArgumentError(Some(algebra_core::format!(
                 "Size of point mismatch. {} != {}",
                 point.len(),
                 nv
@@ -216,7 +289,7 @@ impl<F: Field> MLExtension<F> for SparseMLExtensionHashMap<F> {
         }
 
         let mut dp0 = self.store.clone();
-        let mut dp1 = HashMap::new();
+        let mut dp1 = SparseMap::new();
         for i in 0..nv {
             let r = point[i];
             for (k, v) in dp0.iter() {
@@ -228,7 +301,7 @@ impl<F: Field> MLExtension<F> for SparseMLExtensionHashMap<F> {
                 }
             }
             dp0 = dp1;
-            dp1 = HashMap::new();
+            dp1 = SparseMap::new();
         }
 
         Ok(*(dp0.entry(0usize).or_insert(F::zero())))
@@ -250,85 +323,31 @@ impl<F: Field> MLExtension<F> for SparseMLExtensionHashMap<F> {
     }
 }
 
-/// This GKR is simply a reference to address of underlying MLExtensions.
-pub struct GKRAsLink<'a, F, S, D>
-where
-    F: Field,
-    S: SparseMLExtension<F>,
-    D: MLExtension<F>,
-{
-    f1: &'a S,
-    f2: &'a D,
-    f3: &'a D,
-    phantom: PhantomData<F>,
-}
-
-impl<'a, F, S, D> GKRAsLink<'a, F, S, D>
-where
-    F: Field,
-    S: SparseMLExtension<F>,
-    D: MLExtension<F>,
-{
-    /// create a new GKR that references f1, f2, f3
-    pub fn new(f1: &'a S, f2: &'a D, f3: &'a D) -> Result<Self, crate::Error> {
-        let nv1 = unwrap_safe!(f1.num_variables());
-        let nv2 = unwrap_safe!(f2.num_variables());
-        let nv3 = unwrap_safe!(f3.num_variables());
-        if nv2 != nv3 || nv1 != 3 * nv2 || nv1 != 3 * nv3 {
-            return Err(crate::Error::InvalidArgumentError(Some(format!(
-                "Numbers of variables mismatch. {}, {}, {}",
-                nv1, nv2, nv3
-            ))));
-        }
-        Ok(GKRAsLink {
-            f1,
-            f2,
-            f3,
-            phantom: PhantomData,
-        })
-    }
-}
-
-impl<'a, F, S, D> GKRFunction<F, S, D> for GKRAsLink<'a, F, S, D>
-where
-    F: Field,
-    S: SparseMLExtension<F>,
-    D: MLExtension<F>,
-{
-    type Error = crate::Error;
-
-    fn get_f1(&self) -> &S {
-        self.f1
-    }
-
-    fn get_f2(&self) -> &D {
-        self.f2
-    }
-
-    fn get_f3(&self) -> &D {
-        self.f3
-    }
-
-    fn get_l(&self) -> Result<usize, Self::Error> {
-        Ok(unwrap_safe!(self.f2.num_variables()))
-    }
-}
 
 #[cfg(test)]
 pub mod tests {
+    #[cfg(feature = "std")]
     use std::collections::HashMap;
 
-    use algebra::{test_rng, Field, UniformRand};
+    use algebra::{Field, test_rng, UniformRand};
+    #[cfg(not(feature = "std"))]
+    use algebra_core::BTreeMap;
+    use algebra_core::Vec;
     use rand::Rng;
     use rand_core::RngCore;
 
     use crate::data_structures::impl_ml_extension::{
-        MLExtensionArray, MLExtensionRefArray, SparseMLExtensionHashMap,
+        MLExtensionArray, MLExtensionRefArray, SparseMLExtensionMap,
     };
     use crate::data_structures::ml_extension::tests::{
         test_basic_extension_methods, test_sparse_extension_methods,
     };
     use crate::data_structures::test_field::TestField;
+
+    #[cfg(feature = "std")]
+    pub type SparseMap<F: Field> = HashMap<usize, F>;
+    #[cfg(not(feature = "std"))]
+    pub type SparseMap<F> = BTreeMap<usize, F>;
 
     #[test]
     /// Test multilinear extension works.
@@ -372,14 +391,14 @@ pub mod tests {
 
         // test basic extension method
         for _ in 0..DENSE_ITER {
-            let (poly, table): (SparseMLExtensionHashMap<F>, Vec<F>) =
+            let (poly, table): (SparseMLExtensionMap<F>, Vec<F>) =
                 random_sparse_poly(NUM_VARS, &mut rng);
             test_basic_extension_methods(&poly, &table);
         }
 
         // test sparse extension method
         for _ in 0..SPARSE_ITER {
-            let (poly, table): (SparseMLExtensionHashMap<F>, Vec<F>) =
+            let (poly, table): (SparseMLExtensionMap<F>, Vec<F>) =
                 random_sparse_poly(NUM_VARS, &mut rng);
             test_sparse_extension_methods(&poly, &table);
         }
@@ -388,7 +407,7 @@ pub mod tests {
     pub fn random_sparse_poly<F: Field, R: RngCore>(
         nv: usize,
         rng: &mut R,
-    ) -> (SparseMLExtensionHashMap<F>, Vec<F>) {
+    ) -> (SparseMLExtensionMap<F>, Vec<F>) {
         let mut arr = fill_vec!(1 << nv, F::zero());
         for _ in 0..1 << (nv / 3) {
             // store 2^dim values
@@ -401,7 +420,7 @@ pub mod tests {
                 buf.push((arg, *v));
             }
         }
-        let poly = SparseMLExtensionHashMap::from_slice(&buf, nv).unwrap();
+        let poly = SparseMLExtensionMap::from_slice(&buf, nv).unwrap();
         (poly, arr)
     }
 
@@ -409,8 +428,8 @@ pub mod tests {
     pub fn random_sparse_poly_fast<F: Field, R: RngCore>(
         nv: usize,
         rng: &mut R,
-    ) -> SparseMLExtensionHashMap<F> {
-        let mut map = HashMap::new();
+    ) -> SparseMLExtensionMap<F> {
+        let mut map = SparseMap::new();
         for _ in 0..1 << (nv / 3) {
             // store 2^dim values
             let mut index = rng.gen::<usize>() % (1 << nv);
@@ -425,6 +444,6 @@ pub mod tests {
                 buf.push((*arg, *v));
             }
         }
-        SparseMLExtensionHashMap::from_slice(&buf, nv).unwrap()
+        SparseMLExtensionMap::from_slice(&buf, nv).unwrap()
     }
 }

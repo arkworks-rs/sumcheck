@@ -10,12 +10,7 @@
 //! so that the sumcheck protocol does not need to copy the data.
 //!
 
-/// some test helpers
-#[cfg(test)]
-pub use impl_ml_extension::tests;
-pub use impl_ml_extension::{
-    GKRAsLink, MLExtensionArray, MLExtensionRefArray, SparseMLExtensionHashMap,
-};
+
 pub use impl_random::{AsDummyFeedable, Blake2s512Rng};
 
 /// traits of data representations of multilinear extensions
@@ -27,13 +22,24 @@ pub(crate) mod protocol;
 /// high-level abstraction of randomness
 pub mod random;
 
-// mod impl_log_gkr_mask;
-/// implementation of multilinear extensions
+/// implementation of multilinear extensions. This implementation is only available when
+/// the standard library is on.
+
 mod impl_ml_extension;
+
+/// some test helpers
+#[cfg(test)]
+pub use impl_ml_extension::tests;
+
+pub use impl_ml_extension::{
+    SparseMLExtensionMap, GKRAsLink, MLExtensionArray, MLExtensionRefArray
+};
+
+
+
 /// implementation of random
 mod impl_random;
-/// mask used by gkr prover for zero knowledge proof
-// pub mod mask;
+
 /// field (used only for testing)
 #[cfg(test)]
 pub mod test_field;

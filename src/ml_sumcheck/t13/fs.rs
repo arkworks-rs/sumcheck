@@ -1,5 +1,5 @@
-use std::marker::PhantomData;
-
+use core::marker::PhantomData;
+use algebra_core::vec::Vec;
 use algebra_core::Field;
 use algebra_core::{CanonicalDeserialize, CanonicalSerialize, Read, SerializationError, Write};
 
@@ -120,7 +120,7 @@ impl<F: Field> MLSumcheckSubclaim<F> for T13Subclaim<F> {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature="std"))]
 mod tests {
     use crate::data_structures::test_field::TestField;
     use crate::ml_sumcheck::t13::fs::T13Sumcheck;

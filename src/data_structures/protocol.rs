@@ -1,4 +1,4 @@
-use std::fmt::{Debug, Display};
+use core::fmt::{Debug, Display};
 
 use algebra_core::{CanonicalDeserialize, CanonicalSerialize, ToBytes};
 
@@ -68,10 +68,11 @@ pub(crate) trait VerifierProtocol: Protocol {
 
 #[cfg(test)]
 pub(crate) mod tests {
+    #[cfg(feature="std")]
     use std::time::{Duration, Instant};
 
     use crate::data_structures::protocol::{Message, Protocol, VerifierProtocol, VerifierState};
-
+    use algebra_core::Vec;
     /// Make sure the protocol is not broken, and make sure the protocol halts eventually.
     ///
     /// * `alice` - protocol that sends message first
@@ -194,6 +195,7 @@ pub(crate) mod tests {
     /// * `bob` - protocol that responds `prover` and acts as a verifier
     /// * `max_rounds_allowed` - max rounds allowed
     /// * *return*: `((t_alice_get, t_alice_push), (t_bob_get, t_bob_push))`
+    #[cfg(feature="std")]
     pub(crate) fn test_protocol_benchmark<P, V>(
         mut alice: P,
         mut bob: V,

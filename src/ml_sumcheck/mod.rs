@@ -5,7 +5,7 @@
 use algebra_core::{CanonicalDeserialize, CanonicalSerialize, Field};
 
 use crate::data_structures::ml_extension::MLExtension;
-
+use algebra_core::vec::Vec;
 pub mod t13;
 
 /// ### Sumcheck protocol for products of multilinear functions
@@ -87,7 +87,7 @@ pub trait MLSumcheckSubclaim<F>: Clone + CanonicalSerialize + CanonicalDeseriali
     fn expected_evaluations(&self) -> F;
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature="std"))]
 pub mod tests {
     use algebra::{test_rng, Field};
 

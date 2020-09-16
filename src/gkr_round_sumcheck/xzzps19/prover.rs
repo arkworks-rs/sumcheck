@@ -5,7 +5,7 @@ use crate::data_structures::protocol::Protocol;
 use crate::data_structures::GKRAsLink;
 use crate::gkr_round_sumcheck::xzzps19::msg::{XZZPS19PMsg, XZZPS19VMsg};
 use crate::gkr_round_sumcheck::Prover;
-
+use algebra_core::vec::Vec;
 /// XZZPS19 implementation of GKR sumcheck prover
 pub(crate) struct XZZPS19Prover<'a, F, S, D>
 where
@@ -75,7 +75,7 @@ where
                 *r
             } else {
                 return Err(crate::Error::InvalidOperationError(Some(
-                    format!("Attempt to get message at round {} without pushing message at previous round. ", self.dim + 1))));
+                    algebra_core::format!("Attempt to get message at round {} without pushing message at previous round. ", self.dim + 1))));
             };
             Self::single_round_2mf_fix(p1, p2, self.dim, self.dim, r); // fix for last round
             let f2u = p2[0];
@@ -123,7 +123,7 @@ where
                 *r
             } else {
                 return Err(crate::Error::InvalidOperationError(Some(
-                    format!("Attempt to get message at round {} without pushing message at previous round. ", round))));
+                    algebra_core::format!("Attempt to get message at round {} without pushing message at previous round. ", round))));
             };
             Self::single_round_2mf_fix(p1, p2, self.dim, round - 1, r); // fix for last round
         }
@@ -150,7 +150,7 @@ where
                 *r
             } else {
                 return Err(crate::Error::InvalidOperationError(Some(
-                    format!("Attempt to get message at round {} without pushing message at previous round. ", round_in_phase))));
+                    algebra_core::format!("Attempt to get message at round {} without pushing message at previous round. ", round_in_phase))));
             };
             Self::single_round_2mf_fix(p1, p2, self.dim, round_in_phase - 1, r);
         }
@@ -221,12 +221,12 @@ where
     fn setup(gkr: &'a Self::GKRFunc, g: &[F]) -> Result<Self, Self::Error> {
         let dim = unwrap_safe!(gkr.get_l());
         if g.len() == 0 {
-            return Err(Self::Error::InvalidArgumentError(Some(String::from(
-                "g is empty",
-            ))));
+            return Err(Self::Error::InvalidArgumentError(
+                Some("g is empty".into())
+            ));
         }
         if g.len() != dim {
-            return Err(Self::Error::InvalidArgumentError(Some(format!(
+            return Err(Self::Error::InvalidArgumentError(Some(algebra_core::format!(
                 "dim = {} but size of g = {}",
                 dim,
                 g.len()
@@ -279,7 +279,7 @@ where
         let current_round = self.current_round().unwrap() as usize;
         assert_safe!(round > 0);
         if round > current_round {
-            return Err(Self::Error::InvalidOperationError(Some(format!(
+            return Err(Self::Error::InvalidOperationError(Some(algebra_core::format!(
                 "Current round is {}, request message of round {}",
                 current_round, round
             ))));

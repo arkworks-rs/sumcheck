@@ -3,7 +3,7 @@
 //! More details can be found in the documentation of [`GKRRoundSumcheck`](trait.GKRRoundSumcheck.html).
 
 use algebra_core::{CanonicalDeserialize, CanonicalSerialize, Field};
-
+use algebra_core::vec::Vec;
 pub(crate) use prover::Prover;
 pub(crate) use verifier::{GKRFuncVerifierSubclaim, Verifier};
 
@@ -139,7 +139,7 @@ pub mod tests {
 
         if !state {
             return Err(crate::Error::Reject(Some(
-                "Fail to verify subclaim. ".to_string(),
+                "Fail to verify subclaim. ".into(),
             )));
         };
         Ok(())

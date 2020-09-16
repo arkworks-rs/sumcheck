@@ -5,7 +5,7 @@ use crate::data_structures::protocol::{Protocol, VerifierProtocol, VerifierState
 use crate::data_structures::random::{FeedableRNG, RnFg};
 use crate::gkr_round_sumcheck::xzzps19::msg::{XZZPS19PMsg, XZZPS19VMsg};
 use crate::gkr_round_sumcheck::{GKRFuncVerifierSubclaim, Verifier as GKRRoundVerifier};
-
+use algebra_core::vec::Vec;
 /// Verifier for GKR Protocol.
 pub(crate) struct XZZPS19Verifier<F: Field, R: RnFg<F> + FeedableRNG> {
     /// Random generator
@@ -94,7 +94,7 @@ impl<F: Field, R: RnFg<F> + FeedableRNG> Protocol for XZZPS19Verifier<F, R> {
     fn get_message(&self, round: u32) -> Result<Self::OutBoundMessage, Self::Error> {
         // current round's message has not come out at this point, because `push_message` has not been called.
         if round >= self.round {
-            Err(Self::Error::InvalidOperationError(Some(format!(
+            Err(Self::Error::InvalidOperationError(Some(algebra_core::format!(
                 "Only Message earlier than round {} is sent. Requested message at round {}. ",
                 self.round, round
             ))))

@@ -1,4 +1,5 @@
 #![forbid(unsafe_code)]
+#![cfg_attr(not(feature = "std"), no_std)]
 //! A crate for sum-check protocol of GKR functions
 #![deny(unused_import_braces, unused_qualifications, trivial_casts)]
 #![deny(trivial_numeric_casts, private_in_public, variant_size_differences)]
@@ -24,6 +25,7 @@ pub mod ml_sumcheck;
 
 /// data structures
 pub mod data_structures;
+
 
 #[cfg(test)]
 mod tests {}

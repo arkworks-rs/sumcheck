@@ -3,7 +3,7 @@ use algebra_core::{CanonicalDeserialize, CanonicalSerialize, Read, Serialization
 use algebra_core::{Field, ToBytes};
 
 use crate::data_structures::protocol::Message;
-
+use algebra_core::vec::Vec;
 #[derive(Clone, CanonicalSerialize, CanonicalDeserialize)]
 pub(crate) struct MLLibraPMsg<F: Field> {
     /// evaluations on P(0), P(1), P(2), ...

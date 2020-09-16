@@ -1,4 +1,4 @@
-use std::marker::PhantomData;
+use core::marker::PhantomData;
 
 use algebra_core::io::{Read, Write};
 use algebra_core::{CanonicalDeserialize, CanonicalSerialize, Field, SerializationError};
@@ -13,7 +13,7 @@ use crate::gkr_round_sumcheck::{
     GKRFuncVerifierSubclaim, GKRRoundClaim, GKRRoundProof, GKRRoundSubClaim, GKRRoundSumcheck,
     Prover, Verifier,
 };
-
+use algebra_core::vec::Vec;
 /// Linear GKRFunction Sumcheck Protocol introduced by Xie et.al
 pub struct XZZPS19Sumcheck<F: Field, S: SparseMLExtension<F>, D: MLExtension<F>> {
     _marker: PhantomData<(F, S, D)>,
@@ -153,7 +153,7 @@ impl<F: Field> GKRRoundSubClaim<F> for XZZPS19SubClaim<F> {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature="std"))]
 mod tests {
     use algebra::{test_rng, UniformRand};
 

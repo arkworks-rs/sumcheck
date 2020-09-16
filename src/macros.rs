@@ -14,15 +14,15 @@ macro_rules! unwrap_safe {
         match $exp {
             Ok(ans) => ans,
             Err(e) => {
-                #[cfg(test)]
+                #[cfg(all(test, feature="std"))]
                 {
-                    println!(
+                    algebra_core::println!(
                         "error: {} \n        at {:?}",
                         stringify!($exp),
                         file!().to_string() + ":" + &line!().to_string()
                     );
                 }
-                return Err(crate::Error::CausedBy(format!("{}", e)));
+                return Err(crate::Error::CausedBy(algebra_core::format!("{}", e)));
             }
         }
     }};
@@ -33,7 +33,7 @@ macro_rules! extract_safe {
     ($exp: expr) => {
         unwrap_safe!(
             $exp.ok_or(crate::Error::InternalDataStructureCorruption(Some(
-                format!("{} is None", stringify!($exp))
+                algebra_core::format!("{} is None", stringify!($exp))
             )))
         )
     };
@@ -44,7 +44,7 @@ macro_rules! assert_safe {
     ($exp: expr) => {{
         if !($exp) {
             return Err(crate::Error::InternalDataStructureCorruption(Some(
-                format!("Assertion Failed: {} is false", stringify!($exp)),
+                algebra_core::format!("Assertion Failed: {} is false", stringify!($exp)),
             )));
         }
     }};
@@ -52,7 +52,7 @@ macro_rules! assert_safe {
 
 /// utility for benchmark: time the function
 #[allow(unused_macros)]
-#[cfg(test)]
+#[cfg(all(test, feature="std"))]
 macro_rules! timeit {
     ($exp:expr) => {{
         use std::time::Instant;
@@ -82,7 +82,7 @@ macro_rules! timeit {
 
 /// only output timeit information in testing
 #[allow(unused_macros)]
-#[cfg(not(test))]
+#[cfg(any(not(test), not(feature="std")))]
 macro_rules! timeit {
     ($exp:expr) => {
         $exp

@@ -3,7 +3,7 @@ use algebra_core::Field;
 use crate::data_structures::protocol::{Protocol, VerifierProtocol, VerifierState};
 use crate::data_structures::random::{FeedableRNG, RnFg};
 use crate::ml_sumcheck::t13::msg::{MLLibraPMsg, MLLibraVMsg};
-
+use algebra_core::vec::Vec;
 pub(crate) struct MLLibraVerifier<F: Field, R: RnFg<F> + FeedableRNG> {
     rng: R,
     can_push: bool,
@@ -18,7 +18,7 @@ impl<F: Field, R: RnFg<F> + FeedableRNG> MLLibraVerifier<F, R> {
     pub(crate) fn setup(num_variables: u32, asserted_sum: F, rng: R) -> Result<Self, crate::Error> {
         if num_variables < 1 {
             unwrap_safe!(Err(crate::Error::InvalidArgumentError(Some(
-                "num_variables < 1".to_string()
+                "num_variables < 1".into()
             ))));
         }
         Ok(Self {
@@ -35,7 +35,7 @@ impl<F: Field, R: RnFg<F> + FeedableRNG> MLLibraVerifier<F, R> {
     pub(crate) fn subclaim_fixed_args(&self) -> Result<Vec<F>, crate::Error> {
         if self.get_state() != VerifierState::Convinced {
             return Err(crate::Error::InvalidOperationError(Some(
-                "Verifier has not convinced. ".to_string(),
+                "Verifier has not convinced. ".into(),
             )));
         }
         Ok(self.fixed_args.to_vec())
@@ -44,7 +44,7 @@ impl<F: Field, R: RnFg<F> + FeedableRNG> MLLibraVerifier<F, R> {
     pub(crate) fn subclaim_evaluation_at_fixed_point(&self) -> Result<F, crate::Error> {
         if self.get_state() != VerifierState::Convinced {
             return Err(crate::Error::InvalidOperationError(Some(
-                "Verifier has not convinced. ".to_string(),
+                "Verifier has not convinced. ".into(),
             )));
         }
         Ok(self.expected)
@@ -97,7 +97,7 @@ impl<F: Field, R: RnFg<F> + FeedableRNG> Protocol for MLLibraVerifier<F, R> {
     fn get_message(&self, round: u32) -> Result<Self::OutBoundMessage, Self::Error> {
         // current round's message has not come out at this point, because `push_message` has not been called.
         if round >= self.round {
-            Err(Self::Error::InvalidOperationError(Some(format!(
+            Err(Self::Error::InvalidOperationError(Some(algebra_core::format!(
                 "Only Message earlier than round {} is sent. Requested message at round {}. ",
                 self.round, round
             ))))
@@ -118,14 +118,14 @@ impl<F: Field, R: RnFg<F> + FeedableRNG> Protocol for MLLibraVerifier<F, R> {
                 .evaluations
                 .get(0)
                 .ok_or_else(|| Self::Error::InvalidArgumentError(Some(
-                    "invalid message length".to_string()
+                    "invalid message length".into()
                 ))));
         let p1: &F =
             unwrap_safe!(msg
                 .evaluations
                 .get(1)
                 .ok_or_else(|| Self::Error::InvalidArgumentError(Some(
-                    "invalid message length".to_string()
+                    "invalid message length".into()
                 ))));
         if *p0 + *p1 != self.expected {
             self.reject_and_close();
@@ -172,7 +172,7 @@ mod tests {
 
     use crate::data_structures::test_field::TestField;
     use crate::ml_sumcheck::t13::verifier::interpolate_deg_n_poly;
-
+    use algebra_core::vec::Vec;
     //noinspection RsBorrowChecker
     #[test]
     fn test_interpolate() {

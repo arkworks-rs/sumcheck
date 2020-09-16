@@ -1,7 +1,7 @@
 use core::fmt;
 
 use algebra_core::alloc::fmt::Formatter;
-
+use algebra_core::String;
 /// Error type for this crate
 #[derive(Debug)]
 pub enum Error {

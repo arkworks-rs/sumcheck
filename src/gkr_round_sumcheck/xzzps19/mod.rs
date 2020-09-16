@@ -20,25 +20,27 @@ mod verifier;
 
 #[cfg(test)]
 pub mod tests {
+    #[cfg(feature="std")]
     use std::time::Instant;
 
     use algebra::{test_rng, UniformRand};
 
     use crate::data_structures::ml_extension::{GKRFunction, MLExtension};
     use crate::data_structures::protocol::tests::{
-        test_communication, test_protocol_benchmark, test_protocol_completeness,
+        test_communication,
+        test_protocol_completeness,
     };
     use crate::data_structures::random::FeedableRNG;
     use crate::data_structures::test_field::TestField;
     use crate::data_structures::{
-        AsDummyFeedable, Blake2s512Rng, MLExtensionRefArray, SparseMLExtensionHashMap,
+        AsDummyFeedable, Blake2s512Rng, MLExtensionRefArray, SparseMLExtensionMap,
     };
     use crate::gkr_round_sumcheck::xzzps19::prover::XZZPS19Prover;
     use crate::gkr_round_sumcheck::xzzps19::verifier::XZZPS19Verifier;
     use crate::gkr_round_sumcheck::{GKRFuncVerifierSubclaim, Prover, Verifier as _};
-
+    use algebra_core::Vec;
     type F = TestField;
-    type S = SparseMLExtensionHashMap<F>;
+    type S = SparseMLExtensionMap<F>;
     type D<'a> = MLExtensionRefArray<'a, F>;
 
     #[test]
@@ -90,6 +92,7 @@ pub mod tests {
     }
 
     #[test]
+    #[cfg(feature="std")]
     fn benchmark() {
         println!("Runtime analysis for XZZPS19 GKRFunc sumcheck protocol");
         timeit!(benchmark_for(7));
@@ -105,7 +108,9 @@ pub mod tests {
         timeit!(benchmark_for(17));
     }
 
+    #[cfg(feature="std")]
     fn benchmark_for(dim: usize) {
+        use crate::data_structures::protocol::tests::test_protocol_benchmark;
         let mut rng = test_rng();
         random_gkr!(&mut rng, dim, gkr);
         let g = fill_vec!(dim, F::rand(&mut rng));
