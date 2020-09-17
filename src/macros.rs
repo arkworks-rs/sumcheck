@@ -16,7 +16,7 @@ macro_rules! unwrap_safe {
             Err(e) => {
                 #[cfg(all(test, feature="std"))]
                 {
-                    algebra_core::println!(
+                    println!(
                         "error: {} \n        at {:?}",
                         stringify!($exp),
                         file!().to_string() + ":" + &line!().to_string()

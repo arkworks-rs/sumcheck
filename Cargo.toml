@@ -20,3 +20,7 @@ blake2 = { version = "0.9", default-features = false }
 [dev-dependencies]
 ff-fft = { git = "https://github.com/scipr-lab/zexe/", default-features = false} # for unit testing
 algebra = { git = "https://github.com/scipr-lab/zexe/", default-features = false, features = [ "bls12_377", "ed_on_bls12_381" ] }
+
+[features]
+default = ["std"]
+std = []
