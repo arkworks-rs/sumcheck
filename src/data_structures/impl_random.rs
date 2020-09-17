@@ -98,8 +98,25 @@ impl RngCore for Blake2s512Rng {
         self.try_fill_bytes(dest).unwrap()
     }
 
-    fn try_fill_bytes(&mut self, _dest: &mut [u8]) -> Result<(), Error> {
-        todo!()
+    fn try_fill_bytes(&mut self, dest: &mut [u8]) -> Result<(), Error> {
+        let mut digest = self.current_digest.clone();
+        let mut output = digest.finalize();
+        let output_size = Blake2s::output_size();
+        let mut ptr = 0;
+        let mut digest_ptr = 0;
+        while ptr < dest.len() {
+            dest[ptr] = output[digest_ptr];
+            ptr += 1usize;
+            digest_ptr += 1;
+            if digest_ptr == output_size {
+                self.current_digest.update(output);
+                digest = self.current_digest.clone();
+                output = digest.finalize();
+                digest_ptr = 0;
+            }
+        }
+        self.current_digest.update(output);
+        Ok(())
     }
 }
 
