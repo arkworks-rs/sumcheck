@@ -133,10 +133,10 @@ impl<F: Field> Protocol for MLLibraProver<F> {
     }
 }
 
-#[cfg(all(test, feature="std"))]
+#[cfg(test)]
 mod tests {
     use algebra::{test_rng, UniformRand};
-
+    use algebra_core::Vec;
     use crate::data_structures::protocol::tests::{test_communication, test_protocol_completeness};
     use crate::data_structures::test_field::TestField;
     use crate::data_structures::{AsDummyFeedable, MLExtensionArray};

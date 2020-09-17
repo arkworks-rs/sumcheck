@@ -120,7 +120,7 @@ impl<F: Field> MLSumcheckSubclaim<F> for T13Subclaim<F> {
     }
 }
 
-#[cfg(all(test, feature="std"))]
+#[cfg(test)]
 mod tests {
     use crate::data_structures::test_field::TestField;
     use crate::ml_sumcheck::t13::fs::T13Sumcheck;

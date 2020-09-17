@@ -153,7 +153,7 @@ impl<F: Field> GKRRoundSubClaim<F> for XZZPS19SubClaim<F> {
     }
 }
 
-#[cfg(all(test, feature="std"))]
+#[cfg(test)]
 mod tests {
     use algebra::{test_rng, UniformRand};
 
@@ -162,7 +162,7 @@ mod tests {
     use crate::data_structures::MLExtensionRefArray;
     use crate::gkr_round_sumcheck::tests::test_gkr_func_proc_completeness;
     use crate::gkr_round_sumcheck::xzzps19::XZZPS19Sumcheck;
-
+    use algebra_core::Vec;
     type F = TestField;
 
     #[test]
