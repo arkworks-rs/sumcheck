@@ -14,7 +14,7 @@ path = "src/lib.rs"
 [dependencies]
 algebra-core = { git = "https://github.com/scipr-lab/zexe/", default-features = false, features = [ "derive" ] }
 rand_core = { version = "0.5", default-features = false }
-rand = "0.7.3"
+rand = {version = "0.7.3", default-features = false}
 blake2 = { version = "0.9", default-features = false }
 
 [dev-dependencies]
@@ -23,4 +23,4 @@ algebra = { git = "https://github.com/scipr-lab/zexe/", default-features = false
 
 [features]
 default = ["std"]
-std = ["algebra-core/std"]
+std = ["algebra-core/std", "rand/std", "rand_core/std", "blake2/std"]
