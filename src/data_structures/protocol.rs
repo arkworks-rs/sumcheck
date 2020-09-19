@@ -68,7 +68,7 @@ pub(crate) trait VerifierProtocol: Protocol {
 
 #[cfg(test)]
 pub(crate) mod tests {
-    #[cfg(feature="std")]
+    #[cfg(feature = "std")]
     use std::time::{Duration, Instant};
 
     use crate::data_structures::protocol::{Message, Protocol, VerifierProtocol, VerifierState};
@@ -195,7 +195,7 @@ pub(crate) mod tests {
     /// * `bob` - protocol that responds `prover` and acts as a verifier
     /// * `max_rounds_allowed` - max rounds allowed
     /// * *return*: `((t_alice_get, t_alice_push), (t_bob_get, t_bob_push))`
-    #[cfg(feature="std")]
+    #[cfg(feature = "std")]
     pub(crate) fn test_protocol_benchmark<P, V>(
         mut alice: P,
         mut bob: V,

@@ -222,9 +222,7 @@ where
     fn setup(gkr: &'a Self::GKRFunc, g: &[F]) -> Result<Self, Self::Error> {
         let dim = unwrap_safe!(gkr.get_l());
         if g.len() == 0 {
-            return Err(Self::Error::InvalidArgumentError(
-                Some("g is empty".into())
-            ));
+            return Err(Self::Error::InvalidArgumentError(Some("g is empty".into())));
         }
         if g.len() != dim {
             return Err(Self::Error::InvalidArgumentError(Some(format!(

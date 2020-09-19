@@ -21,7 +21,7 @@ impl<F: Field> MLLibraProver<F> {
         let num_multiplicands = poly.len();
         if num_multiplicands < 1 {
             return Err(crate::Error::InvalidArgumentError(Some(
-                "num_multiplicands < 1".into()
+                "num_multiplicands < 1".into(),
             )));
         }
         let mut tables = Vec::with_capacity(num_multiplicands);
@@ -136,14 +136,14 @@ impl<F: Field> Protocol for MLLibraProver<F> {
 
 #[cfg(test)]
 mod tests {
-    use algebra::{test_rng, UniformRand};
-    #[cfg(not(feature = "std"))]
-    use alloc::vec::Vec;
     use crate::data_structures::protocol::tests::{test_communication, test_protocol_completeness};
     use crate::data_structures::test_field::TestField;
     use crate::data_structures::{AsDummyFeedable, MLExtensionArray};
     use crate::ml_sumcheck::t13::prover::MLLibraProver;
     use crate::ml_sumcheck::t13::MLLibraVerifier;
+    use algebra::{test_rng, UniformRand};
+    #[cfg(not(feature = "std"))]
+    use alloc::vec::Vec;
 
     type F = TestField;
 

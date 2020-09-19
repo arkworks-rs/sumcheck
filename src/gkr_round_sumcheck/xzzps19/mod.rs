@@ -20,16 +20,13 @@ mod verifier;
 
 #[cfg(test)]
 pub mod tests {
-    #[cfg(feature="std")]
+    #[cfg(feature = "std")]
     use std::time::Instant;
 
     use algebra::{test_rng, UniformRand};
 
     use crate::data_structures::ml_extension::{GKRFunction, MLExtension};
-    use crate::data_structures::protocol::tests::{
-        test_communication,
-        test_protocol_completeness,
-    };
+    use crate::data_structures::protocol::tests::{test_communication, test_protocol_completeness};
     use crate::data_structures::random::FeedableRNG;
     use crate::data_structures::test_field::TestField;
     use crate::data_structures::{
@@ -74,9 +71,13 @@ pub mod tests {
             use crate::data_structures::GKRAsLink;
             use algebra::UniformRand;
             f1 = random_sparse_poly_fast(NV * 3, &mut rng);
-            f2_arr = (0..(1 << NV)).map(|_| (F::rand(&mut rng))).collect::<Vec<_>>();
+            f2_arr = (0..(1 << NV))
+                .map(|_| (F::rand(&mut rng)))
+                .collect::<Vec<_>>();
             f2 = D::from_slice(&f2_arr).unwrap();
-            f3_arr = (0..(1 << NV)).map(|_| (F::rand(&mut rng))).collect::<Vec<_>>();
+            f3_arr = (0..(1 << NV))
+                .map(|_| (F::rand(&mut rng)))
+                .collect::<Vec<_>>();
             f3 = D::from_slice(&f3_arr).unwrap();
             gkr = GKRAsLink::new(&f1, &f2, &f3).unwrap();
         }
@@ -109,7 +110,7 @@ pub mod tests {
     }
 
     #[test]
-    #[cfg(feature="std")]
+    #[cfg(feature = "std")]
     fn benchmark() {
         println!("Runtime analysis for XZZPS19 GKRFunc sumcheck protocol");
         timeit!(benchmark_for(7));
@@ -125,7 +126,7 @@ pub mod tests {
         timeit!(benchmark_for(17));
     }
 
-    #[cfg(feature="std")]
+    #[cfg(feature = "std")]
     fn benchmark_for(dim: usize) {
         use crate::data_structures::protocol::tests::test_protocol_benchmark;
         let mut rng = test_rng();

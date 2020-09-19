@@ -89,12 +89,12 @@ pub trait MLSumcheckSubclaim<F>: Clone + CanonicalSerialize + CanonicalDeseriali
 
 #[cfg(test)]
 pub mod tests {
+    use crate::data_structures::ml_extension::MLExtension;
+    use crate::data_structures::MLExtensionArray;
+    use crate::ml_sumcheck::{MLSumcheck, MLSumcheckSubclaim};
     use algebra::{test_rng, Field};
     #[cfg(not(feature = "std"))]
     use alloc::vec::Vec;
-    use crate::data_structures::MLExtensionArray;
-    use crate::ml_sumcheck::{MLSumcheck, MLSumcheckSubclaim};
-    use crate::data_structures::ml_extension::MLExtension;
 
     pub fn test_ml_proc_completeness<F: Field, S: MLSumcheck<F>>() {
         const NV: usize = 9;

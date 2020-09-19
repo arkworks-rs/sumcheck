@@ -5,9 +5,9 @@ use core::fmt::Display;
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
 
+use crate::error::Error;
 /// multilinear extensions
 use algebra_core::Field;
-use crate::error::Error;
 
 /// Multilinear Extension
 ///
@@ -86,9 +86,9 @@ where
 
 #[cfg(test)]
 pub mod tests {
+    use crate::data_structures::ml_extension::{MLExtension, SparseMLExtension};
     use algebra::{test_rng, Field};
     use algebra_core::vec::Vec;
-    use crate::data_structures::ml_extension::{MLExtension, SparseMLExtension};
 
     /// utility: evaluate multilinear extension (in form of data array) at a random point in Field
     fn evaluate_data_array<F: Field>(data: &[F], point: &[F]) -> F {

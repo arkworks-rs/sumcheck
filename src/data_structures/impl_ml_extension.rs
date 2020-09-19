@@ -1,15 +1,15 @@
 use core::marker::PhantomData;
-#[cfg(feature="std")]
+#[cfg(feature = "std")]
 use std::collections::HashMap;
 
-#[cfg(not(feature="std"))]
+use algebra_core::log2;
+use algebra_core::Field;
+#[cfg(not(feature = "std"))]
+use alloc::collections::BTreeMap;
+#[cfg(not(feature = "std"))]
 use alloc::string::String;
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
-#[cfg(not(feature="std"))]
-use alloc::collections::BTreeMap;
-use algebra_core::Field;
-use algebra_core::log2;
 
 use crate::data_structures::ml_extension::{GKRFunction, MLExtension, SparseMLExtension};
 
@@ -20,10 +20,10 @@ type SparseMap<F> = BTreeMap<usize, F>;
 
 /// This GKR is simply a reference to address of underlying MLExtensions.
 pub struct GKRAsLink<'a, F, S, D>
-    where
-        F: Field,
-        S: SparseMLExtension<F>,
-        D: MLExtension<F>,
+where
+    F: Field,
+    S: SparseMLExtension<F>,
+    D: MLExtension<F>,
 {
     f1: &'a S,
     f2: &'a D,
@@ -32,10 +32,10 @@ pub struct GKRAsLink<'a, F, S, D>
 }
 
 impl<'a, F, S, D> GKRAsLink<'a, F, S, D>
-    where
-        F: Field,
-        S: SparseMLExtension<F>,
-        D: MLExtension<F>,
+where
+    F: Field,
+    S: SparseMLExtension<F>,
+    D: MLExtension<F>,
 {
     /// create a new GKR that references f1, f2, f3
     pub fn new(f1: &'a S, f2: &'a D, f3: &'a D) -> Result<Self, crate::Error> {
@@ -43,10 +43,9 @@ impl<'a, F, S, D> GKRAsLink<'a, F, S, D>
         let nv2 = unwrap_safe!(f2.num_variables());
         let nv3 = unwrap_safe!(f3.num_variables());
         if nv2 != nv3 || nv1 != 3 * nv2 || nv1 != 3 * nv3 {
-            return Err(crate::Error::InvalidArgumentError(Some(algebra_core::format!(
-                "Numbers of variables mismatch. {}, {}, {}",
-                nv1, nv2, nv3
-            ))));
+            return Err(crate::Error::InvalidArgumentError(Some(
+                algebra_core::format!("Numbers of variables mismatch. {}, {}, {}", nv1, nv2, nv3),
+            )));
         }
         Ok(GKRAsLink {
             f1,
@@ -58,10 +57,10 @@ impl<'a, F, S, D> GKRAsLink<'a, F, S, D>
 }
 
 impl<'a, F, S, D> GKRFunction<F, S, D> for GKRAsLink<'a, F, S, D>
-    where
-        F: Field,
-        S: SparseMLExtension<F>,
-        D: MLExtension<F>,
+where
+    F: Field,
+    S: SparseMLExtension<F>,
+    D: MLExtension<F>,
 {
     type Error = crate::Error;
 
@@ -239,16 +238,20 @@ impl<F: Field> SparseMLExtensionMap<F> {
         let mut store = SparseMap::new();
         for (arg, v) in data {
             if *arg >= (1 << num_variables) {
-                return Err(crate::Error::InvalidArgumentError(Some(algebra_core::format!(
-                    "Binary Argument {} is too large.",
-                    arg
-                ))));
+                return Err(crate::Error::InvalidArgumentError(Some(
+                    algebra_core::format!("Binary Argument {} is too large.", arg),
+                )));
             }
             if let Some(pv) = store.insert(*arg, *v) {
-                return Err(crate::Error::InvalidArgumentError(Some(algebra_core::format!(
-                    "Duplicate argument ({}, {}) and ({}, {})",
-                    arg, pv, arg, v
-                ))));
+                return Err(crate::Error::InvalidArgumentError(Some(
+                    algebra_core::format!(
+                        "Duplicate argument ({}, {}) and ({}, {})",
+                        arg,
+                        pv,
+                        arg,
+                        v
+                    ),
+                )));
             }
         }
         Ok(Self {
@@ -284,11 +287,9 @@ impl<F: Field> MLExtension<F> for SparseMLExtensionMap<F> {
     fn eval_at(&self, point: &[F]) -> Result<F, Self::Error> {
         let nv = self.num_variables;
         if point.len() != nv {
-            return Err(Self::Error::InvalidArgumentError(Some(algebra_core::format!(
-                "Size of point mismatch. {} != {}",
-                point.len(),
-                nv
-            ))));
+            return Err(Self::Error::InvalidArgumentError(Some(
+                algebra_core::format!("Size of point mismatch. {} != {}", point.len(), nv),
+            )));
         }
 
         let mut dp0 = self.store.clone();
@@ -326,13 +327,12 @@ impl<F: Field> MLExtension<F> for SparseMLExtensionMap<F> {
     }
 }
 
-
 #[cfg(test)]
 pub mod tests {
     #[cfg(feature = "std")]
     use std::collections::HashMap;
 
-    use algebra::{Field, test_rng, UniformRand};
+    use algebra::{test_rng, Field, UniformRand};
     #[cfg(not(feature = "std"))]
     use alloc::collections::BTreeMap;
     #[cfg(not(feature = "std"))]

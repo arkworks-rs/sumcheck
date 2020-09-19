@@ -1,5 +1,4 @@
 #[allow(unused_imports)]
-
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
 
@@ -8,7 +7,6 @@ use blake2::{Blake2s, Digest};
 use rand_core::{Error, RngCore};
 
 use crate::data_structures::random::{FeedableRNG, RnFg};
-
 
 /// Convert any RngCore to Feedable RNG (feed is no-op)
 pub struct AsDummyFeedable<R: RngCore> {

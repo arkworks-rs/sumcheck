@@ -10,7 +10,6 @@
 //! so that the sumcheck protocol does not need to copy the data.
 //!
 
-
 pub use impl_random::{AsDummyFeedable, Blake2s512Rng};
 
 /// traits of data representations of multilinear extensions
@@ -24,7 +23,6 @@ pub mod random;
 
 /// implementation of multilinear extensions. This implementation is only available when
 /// the standard library is on.
-
 mod impl_ml_extension;
 
 /// some test helpers
@@ -32,10 +30,8 @@ mod impl_ml_extension;
 pub use impl_ml_extension::tests;
 
 pub use impl_ml_extension::{
-    SparseMLExtensionMap, GKRAsLink, MLExtensionArray, MLExtensionRefArray
+    GKRAsLink, MLExtensionArray, MLExtensionRefArray, SparseMLExtensionMap,
 };
-
-
 
 /// implementation of random
 mod impl_random;
