@@ -10,6 +10,10 @@
 #![deny(renamed_and_removed_lints, stable_features, unused_allocation)]
 #![deny(unused_comparisons, bare_trait_objects, unused_must_use, const_err)]
 
+#[cfg(not(feature = "std"))]
+#[macro_use]
+extern crate alloc;
+
 pub use error::Error;
 
 /// macros

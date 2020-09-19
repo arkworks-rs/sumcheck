@@ -1,5 +1,6 @@
 use core::marker::PhantomData;
-use algebra_core::vec::Vec;
+#[cfg(not(feature = "std"))]
+use alloc::vec::Vec;
 use algebra_core::Field;
 use algebra_core::{CanonicalDeserialize, CanonicalSerialize, Read, SerializationError, Write};
 

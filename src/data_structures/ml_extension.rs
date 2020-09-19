@@ -1,9 +1,12 @@
 #![macro_use]
 
-use algebra_core::alloc::fmt::Display;
+use core::fmt::Display;
+
+#[cfg(not(feature = "std"))]
+use alloc::vec::Vec;
+
 /// multilinear extensions
 use algebra_core::Field;
-use algebra_core::vec::Vec;
 use crate::error::Error;
 
 /// Multilinear Extension

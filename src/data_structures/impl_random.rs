@@ -1,6 +1,8 @@
 #[allow(unused_imports)]
 
-use algebra_core::vec::Vec;
+#[cfg(not(feature = "std"))]
+use alloc::vec::Vec;
+
 use algebra_core::{Field, ToBytes};
 use blake2::{Blake2s, Digest};
 use rand_core::{Error, RngCore};

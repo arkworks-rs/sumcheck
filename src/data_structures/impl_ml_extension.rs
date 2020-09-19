@@ -2,16 +2,19 @@ use core::marker::PhantomData;
 #[cfg(feature="std")]
 use std::collections::HashMap;
 
-use algebra_core::{String, Vec};
 #[cfg(not(feature="std"))]
-use algebra_core::BTreeMap;
+use alloc::string::String;
+#[cfg(not(feature = "std"))]
+use alloc::vec::Vec;
+#[cfg(not(feature="std"))]
+use alloc::collections::BTreeMap;
 use algebra_core::Field;
 use algebra_core::log2;
 
 use crate::data_structures::ml_extension::{GKRFunction, MLExtension, SparseMLExtension};
 
 #[cfg(feature = "std")]
-type SparseMap<F: Field> = HashMap<usize, F>;
+type SparseMap<F> = HashMap<usize, F>;
 #[cfg(not(feature = "std"))]
 type SparseMap<F> = BTreeMap<usize, F>;
 
@@ -331,8 +334,9 @@ pub mod tests {
 
     use algebra::{Field, test_rng, UniformRand};
     #[cfg(not(feature = "std"))]
-    use algebra_core::BTreeMap;
-    use algebra_core::Vec;
+    use alloc::collections::BTreeMap;
+    #[cfg(not(feature = "std"))]
+    use alloc::vec::Vec;
     use rand::Rng;
     use rand_core::RngCore;
 
@@ -345,7 +349,7 @@ pub mod tests {
     use crate::data_structures::test_field::TestField;
 
     #[cfg(feature = "std")]
-    pub type SparseMap<F: Field> = HashMap<usize, F>;
+    pub type SparseMap<F> = HashMap<usize, F>;
     #[cfg(not(feature = "std"))]
     pub type SparseMap<F> = BTreeMap<usize, F>;
 

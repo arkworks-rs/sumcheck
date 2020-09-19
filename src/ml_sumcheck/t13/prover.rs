@@ -3,7 +3,8 @@ use algebra_core::Field;
 use crate::data_structures::ml_extension::MLExtension;
 use crate::data_structures::protocol::Protocol;
 use crate::ml_sumcheck::t13::msg::{MLLibraPMsg, MLLibraVMsg};
-use algebra_core::vec::Vec;
+#[cfg(not(feature = "std"))]
+use alloc::vec::Vec;
 pub(crate) struct MLLibraProver<F: Field> {
     generated_messages: Vec<MLLibraPMsg<F>>,
     randomness: Vec<F>,
@@ -136,7 +137,8 @@ impl<F: Field> Protocol for MLLibraProver<F> {
 #[cfg(test)]
 mod tests {
     use algebra::{test_rng, UniformRand};
-    use algebra_core::Vec;
+    #[cfg(not(feature = "std"))]
+    use alloc::vec::Vec;
     use crate::data_structures::protocol::tests::{test_communication, test_protocol_completeness};
     use crate::data_structures::test_field::TestField;
     use crate::data_structures::{AsDummyFeedable, MLExtensionArray};

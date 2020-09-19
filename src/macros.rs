@@ -22,7 +22,7 @@ macro_rules! unwrap_safe {
                         file!().to_string() + ":" + &line!().to_string()
                     );
                 }
-                return Err(crate::Error::CausedBy(algebra_core::format!("{}", e)));
+                return Err(crate::Error::CausedBy(format!("{}", e)));
             }
         }
     }};
@@ -33,7 +33,7 @@ macro_rules! extract_safe {
     ($exp: expr) => {
         unwrap_safe!(
             $exp.ok_or(crate::Error::InternalDataStructureCorruption(Some(
-                algebra_core::format!("{} is None", stringify!($exp))
+                format!("{} is None", stringify!($exp))
             )))
         )
     };
@@ -44,7 +44,7 @@ macro_rules! assert_safe {
     ($exp: expr) => {{
         if !($exp) {
             return Err(crate::Error::InternalDataStructureCorruption(Some(
-                algebra_core::format!("Assertion Failed: {} is false", stringify!($exp)),
+                format!("Assertion Failed: {} is false", stringify!($exp)),
             )));
         }
     }};

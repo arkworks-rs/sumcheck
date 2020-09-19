@@ -3,7 +3,8 @@ use algebra_core::Field;
 use crate::data_structures::protocol::{Protocol, VerifierProtocol, VerifierState};
 use crate::data_structures::random::{FeedableRNG, RnFg};
 use crate::ml_sumcheck::t13::msg::{MLLibraPMsg, MLLibraVMsg};
-use algebra_core::vec::Vec;
+#[cfg(not(feature = "std"))]
+use alloc::vec::Vec;
 pub(crate) struct MLLibraVerifier<F: Field, R: RnFg<F> + FeedableRNG> {
     rng: R,
     can_push: bool,
@@ -97,7 +98,7 @@ impl<F: Field, R: RnFg<F> + FeedableRNG> Protocol for MLLibraVerifier<F, R> {
     fn get_message(&self, round: u32) -> Result<Self::OutBoundMessage, Self::Error> {
         // current round's message has not come out at this point, because `push_message` has not been called.
         if round >= self.round {
-            Err(Self::Error::InvalidOperationError(Some(algebra_core::format!(
+            Err(Self::Error::InvalidOperationError(Some(format!(
                 "Only Message earlier than round {} is sent. Requested message at round {}. ",
                 self.round, round
             ))))
@@ -172,7 +173,8 @@ mod tests {
 
     use crate::data_structures::test_field::TestField;
     use crate::ml_sumcheck::t13::verifier::interpolate_deg_n_poly;
-    use algebra_core::vec::Vec;
+    #[cfg(not(feature = "std"))]
+    use alloc::vec::Vec;
     //noinspection RsBorrowChecker
     #[test]
     fn test_interpolate() {

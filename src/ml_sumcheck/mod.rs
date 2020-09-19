@@ -90,7 +90,8 @@ pub trait MLSumcheckSubclaim<F>: Clone + CanonicalSerialize + CanonicalDeseriali
 #[cfg(test)]
 pub mod tests {
     use algebra::{test_rng, Field};
-    use algebra_core::Vec;
+    #[cfg(not(feature = "std"))]
+    use alloc::vec::Vec;
     use crate::data_structures::MLExtensionArray;
     use crate::ml_sumcheck::{MLSumcheck, MLSumcheckSubclaim};
     use crate::data_structures::ml_extension::MLExtension;

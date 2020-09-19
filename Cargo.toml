@@ -23,4 +23,4 @@ algebra = { git = "https://github.com/scipr-lab/zexe/", default-features = false
 
 [features]
 default = ["std"]
-std = []
+std = ["algebra-core/std"]

@@ -38,7 +38,8 @@ pub mod tests {
     use crate::gkr_round_sumcheck::xzzps19::prover::XZZPS19Prover;
     use crate::gkr_round_sumcheck::xzzps19::verifier::XZZPS19Verifier;
     use crate::gkr_round_sumcheck::{GKRFuncVerifierSubclaim, Prover, Verifier as _};
-    use algebra_core::Vec;
+    #[cfg(not(feature = "std"))]
+    use alloc::vec::Vec;
     type F = TestField;
     type S = SparseMLExtensionMap<F>;
     type D<'a> = MLExtensionRefArray<'a, F>;
@@ -62,7 +63,23 @@ pub mod tests {
     fn completeness_test() {
         const NV: usize = 9;
         let mut rng = test_rng();
-        random_gkr!(&mut rng, NV, gkr);
+        let f1: S;
+        let f2_arr;
+        let f2;
+        let f3_arr;
+        let f3;
+        let gkr;
+        {
+            use crate::data_structures::tests::random_sparse_poly_fast;
+            use crate::data_structures::GKRAsLink;
+            use algebra::UniformRand;
+            f1 = random_sparse_poly_fast(NV * 3, &mut rng);
+            f2_arr = (0..(1 << NV)).map(|_| (F::rand(&mut rng))).collect::<Vec<_>>();
+            f2 = D::from_slice(&f2_arr).unwrap();
+            f3_arr = (0..(1 << NV)).map(|_| (F::rand(&mut rng))).collect::<Vec<_>>();
+            f3 = D::from_slice(&f3_arr).unwrap();
+            gkr = GKRAsLink::new(&f1, &f2, &f3).unwrap();
+        }
         let g = fill_vec!(NV, F::rand(&mut rng));
         let mut prover = XZZPS19Prover::setup(&gkr, &g).unwrap();
         let asserted_sum = prover.get_sum();
