@@ -1,6 +1,6 @@
+use algebra_core::{Field, ToBytes};
 #[allow(unused_imports)]
 use ark_std::vec::Vec;
-use algebra_core::{Field, ToBytes};
 use blake2::{Blake2s, Digest};
 use rand_core::{Error, RngCore};
 

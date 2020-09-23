@@ -3,19 +3,19 @@ use core::marker::PhantomData;
 use algebra_core::log2;
 use algebra_core::Field;
 
-use ark_std::vec::Vec;
-use ark_std::string::String;
-use ark_std::collections::BTreeMap;
 use crate::data_structures::ml_extension::{GKRFunction, MLExtension, SparseMLExtension};
+use ark_std::collections::BTreeMap;
+use ark_std::string::String;
+use ark_std::vec::Vec;
 
 type SparseMap<F> = BTreeMap<usize, F>; // now: unified map
 
 /// This GKR is simply a reference to address of underlying MLExtensions.
 pub struct GKRAsLink<'a, F, S, D>
-where
-    F: Field,
-    S: SparseMLExtension<F>,
-    D: MLExtension<F>,
+    where
+        F: Field,
+        S: SparseMLExtension<F>,
+        D: MLExtension<F>,
 {
     f1: &'a S,
     f2: &'a D,
