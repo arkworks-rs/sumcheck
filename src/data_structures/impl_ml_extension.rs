@@ -12,10 +12,10 @@ type SparseMap<F> = BTreeMap<usize, F>; // now: unified map
 
 /// This GKR is simply a reference to address of underlying MLExtensions.
 pub struct GKRAsLink<'a, F, S, D>
-    where
-        F: Field,
-        S: SparseMLExtension<F>,
-        D: MLExtension<F>,
+where
+    F: Field,
+    S: SparseMLExtension<F>,
+    D: MLExtension<F>,
 {
     f1: &'a S,
     f2: &'a D,
