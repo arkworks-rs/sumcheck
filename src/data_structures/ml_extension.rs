@@ -1,9 +1,8 @@
 #![macro_use]
 
-use core::fmt::Display;
+use ark_std::vec::Vec;
 
-#[cfg(not(feature = "std"))]
-use alloc::vec::Vec;
+use core::fmt::Display;
 
 use crate::error::Error;
 /// multilinear extensions

@@ -2,10 +2,10 @@
 //!
 //! More details can be found in the documentation of [`GKRRoundSumcheck`](trait.GKRRoundSumcheck.html).
 
+use ark_std::vec::Vec;
+
 use algebra_core::{CanonicalDeserialize, CanonicalSerialize, Field};
 
-#[cfg(not(feature = "std"))]
-use alloc::vec::Vec;
 pub(crate) use prover::Prover;
 pub(crate) use verifier::{GKRFuncVerifierSubclaim, Verifier};
 

@@ -5,8 +5,8 @@ use crate::data_structures::protocol::{Protocol, VerifierProtocol, VerifierState
 use crate::data_structures::random::{FeedableRNG, RnFg};
 use crate::gkr_round_sumcheck::xzzps19::msg::{XZZPS19PMsg, XZZPS19VMsg};
 use crate::gkr_round_sumcheck::{GKRFuncVerifierSubclaim, Verifier as GKRRoundVerifier};
-#[cfg(not(feature = "std"))]
-use alloc::vec::Vec;
+
+use ark_std::vec::Vec;
 /// Verifier for GKR Protocol.
 pub(crate) struct XZZPS19Verifier<F: Field, R: RnFg<F> + FeedableRNG> {
     /// Random generator

@@ -3,8 +3,8 @@ use algebra_core::Field;
 use crate::data_structures::ml_extension::MLExtension;
 use crate::data_structures::protocol::Protocol;
 use crate::ml_sumcheck::t13::msg::{MLLibraPMsg, MLLibraVMsg};
-#[cfg(not(feature = "std"))]
-use alloc::vec::Vec;
+
+use ark_std::vec::Vec;
 pub(crate) struct MLLibraProver<F: Field> {
     generated_messages: Vec<MLLibraPMsg<F>>,
     randomness: Vec<F>,
@@ -142,8 +142,8 @@ mod tests {
     use crate::ml_sumcheck::t13::prover::MLLibraProver;
     use crate::ml_sumcheck::t13::MLLibraVerifier;
     use algebra::{test_rng, UniformRand};
-    #[cfg(not(feature = "std"))]
-    use alloc::vec::Vec;
+
+    use ark_std::vec::Vec;
 
     type F = TestField;
 

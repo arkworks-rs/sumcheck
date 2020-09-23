@@ -1,7 +1,7 @@
 use algebra_core::Field;
 use algebra_core::{CanonicalDeserialize, CanonicalSerialize, Read, SerializationError, Write};
-#[cfg(not(feature = "std"))]
-use alloc::vec::Vec;
+
+use ark_std::vec::Vec;
 use core::marker::PhantomData;
 
 use crate::data_structures::ml_extension::MLExtension;

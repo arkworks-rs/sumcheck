@@ -10,18 +10,18 @@
 #![deny(renamed_and_removed_lints, stable_features, unused_allocation)]
 #![deny(unused_comparisons, bare_trait_objects, unused_must_use, const_err)]
 
-#[cfg(not(feature = "std"))]
-#[macro_use]
-extern crate alloc;
-
 pub use error::Error;
 
-/// macros
+/// use ark_std for std
 #[macro_use]
-mod macros;
+extern crate ark_std;
 
 /// error for this crate
 mod error;
+
+/// local macros
+#[macro_use]
+mod macros;
 
 pub mod gkr_round_sumcheck;
 

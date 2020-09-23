@@ -13,8 +13,7 @@ use crate::gkr_round_sumcheck::{
     GKRFuncVerifierSubclaim, GKRRoundClaim, GKRRoundProof, GKRRoundSubClaim, GKRRoundSumcheck,
     Prover, Verifier,
 };
-#[cfg(not(feature = "std"))]
-use alloc::vec::Vec;
+use ark_std::vec::Vec;
 /// Linear GKRFunction Sumcheck Protocol introduced by Xie et.al
 pub struct XZZPS19Sumcheck<F: Field, S: SparseMLExtension<F>, D: MLExtension<F>> {
     _marker: PhantomData<(F, S, D)>,
@@ -163,8 +162,7 @@ mod tests {
     use crate::data_structures::MLExtensionRefArray;
     use crate::gkr_round_sumcheck::tests::test_gkr_func_proc_completeness;
     use crate::gkr_round_sumcheck::xzzps19::XZZPS19Sumcheck;
-    #[cfg(not(feature = "std"))]
-    use alloc::vec::Vec;
+    use ark_std::vec::Vec;
     type F = TestField;
 
     #[test]

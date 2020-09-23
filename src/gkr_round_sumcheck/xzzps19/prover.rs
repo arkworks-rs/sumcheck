@@ -6,7 +6,7 @@ use crate::data_structures::GKRAsLink;
 use crate::gkr_round_sumcheck::xzzps19::msg::{XZZPS19PMsg, XZZPS19VMsg};
 use crate::gkr_round_sumcheck::Prover;
 #[cfg(not(feature = "std"))]
-use alloc::vec::Vec;
+use ark_std::vec::Vec;
 /// XZZPS19 implementation of GKR sumcheck prover
 pub(crate) struct XZZPS19Prover<'a, F, S, D>
 where

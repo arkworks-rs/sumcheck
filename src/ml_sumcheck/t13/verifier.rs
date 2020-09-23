@@ -3,8 +3,8 @@ use algebra_core::Field;
 use crate::data_structures::protocol::{Protocol, VerifierProtocol, VerifierState};
 use crate::data_structures::random::{FeedableRNG, RnFg};
 use crate::ml_sumcheck::t13::msg::{MLLibraPMsg, MLLibraVMsg};
-#[cfg(not(feature = "std"))]
-use alloc::vec::Vec;
+
+use ark_std::vec::Vec;
 pub(crate) struct MLLibraVerifier<F: Field, R: RnFg<F> + FeedableRNG> {
     rng: R,
     can_push: bool,
@@ -173,8 +173,8 @@ mod tests {
 
     use crate::data_structures::test_field::TestField;
     use crate::ml_sumcheck::t13::verifier::interpolate_deg_n_poly;
-    #[cfg(not(feature = "std"))]
-    use alloc::vec::Vec;
+
+    use ark_std::vec::Vec;
     //noinspection RsBorrowChecker
     #[test]
     fn test_interpolate() {

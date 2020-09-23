@@ -1,22 +1,14 @@
 use core::marker::PhantomData;
-#[cfg(feature = "std")]
-use std::collections::HashMap;
 
 use algebra_core::log2;
 use algebra_core::Field;
-#[cfg(not(feature = "std"))]
-use alloc::collections::BTreeMap;
-#[cfg(not(feature = "std"))]
-use alloc::string::String;
-#[cfg(not(feature = "std"))]
-use alloc::vec::Vec;
 
+use ark_std::vec::Vec;
+use ark_std::string::String;
+use ark_std::collections::BTreeMap;
 use crate::data_structures::ml_extension::{GKRFunction, MLExtension, SparseMLExtension};
 
-#[cfg(feature = "std")]
-type SparseMap<F> = HashMap<usize, F>;
-#[cfg(not(feature = "std"))]
-type SparseMap<F> = BTreeMap<usize, F>;
+type SparseMap<F> = BTreeMap<usize, F>; // now: unified map
 
 /// This GKR is simply a reference to address of underlying MLExtensions.
 pub struct GKRAsLink<'a, F, S, D>
@@ -329,14 +321,8 @@ impl<F: Field> MLExtension<F> for SparseMLExtensionMap<F> {
 
 #[cfg(test)]
 pub mod tests {
-    #[cfg(feature = "std")]
-    use std::collections::HashMap;
 
     use algebra::{test_rng, Field, UniformRand};
-    #[cfg(not(feature = "std"))]
-    use alloc::collections::BTreeMap;
-    #[cfg(not(feature = "std"))]
-    use alloc::vec::Vec;
     use rand::Rng;
     use rand_core::RngCore;
 
@@ -347,10 +333,8 @@ pub mod tests {
         test_basic_extension_methods, test_sparse_extension_methods,
     };
     use crate::data_structures::test_field::TestField;
-
-    #[cfg(feature = "std")]
-    pub type SparseMap<F> = HashMap<usize, F>;
-    #[cfg(not(feature = "std"))]
+    use ark_std::collections::BTreeMap;
+    use ark_std::vec::Vec;
     pub type SparseMap<F> = BTreeMap<usize, F>;
 
     #[test]

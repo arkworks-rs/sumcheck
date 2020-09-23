@@ -35,8 +35,8 @@ pub mod tests {
     use crate::gkr_round_sumcheck::xzzps19::prover::XZZPS19Prover;
     use crate::gkr_round_sumcheck::xzzps19::verifier::XZZPS19Verifier;
     use crate::gkr_round_sumcheck::{GKRFuncVerifierSubclaim, Prover, Verifier as _};
-    #[cfg(not(feature = "std"))]
-    use alloc::vec::Vec;
+
+    use ark_std::vec::Vec;
     type F = TestField;
     type S = SparseMLExtensionMap<F>;
     type D<'a> = MLExtensionRefArray<'a, F>;
