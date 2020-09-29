@@ -4,9 +4,9 @@ use algebra_core::log2;
 use algebra_core::Field;
 
 use crate::data_structures::ml_extension::{GKRFunction, MLExtension, SparseMLExtension};
-use hashbrown::HashMap;
 use ark_std::string::String;
 use ark_std::vec::Vec;
+use hashbrown::HashMap;
 
 type SparseMap<F> = HashMap<usize, F>; // now: unified map
 
