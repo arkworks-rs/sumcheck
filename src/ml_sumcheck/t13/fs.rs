@@ -1,7 +1,8 @@
-use std::marker::PhantomData;
-
 use algebra_core::Field;
 use algebra_core::{CanonicalDeserialize, CanonicalSerialize, Read, SerializationError, Write};
+
+use ark_std::vec::Vec;
+use core::marker::PhantomData;
 
 use crate::data_structures::ml_extension::MLExtension;
 use crate::data_structures::protocol::Protocol;

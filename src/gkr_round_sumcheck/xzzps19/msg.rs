@@ -1,3 +1,5 @@
+#[cfg(feature = "std")]
+use algebra_core::io::ErrorKind;
 use algebra_core::io::{Error as IOError, Read, Result as IOResult, Write};
 use algebra_core::{CanonicalDeserialize, CanonicalSerialize, Field, SerializationError, ToBytes};
 
@@ -33,10 +35,21 @@ impl<F: Field> CanonicalDeserialize for XZZPS19PMsg<F> {
 }
 
 impl<F: Field> ToBytes for XZZPS19PMsg<F> {
+    #[cfg(not(feature = "std"))]
     fn write<W: Write>(&self, writer: W) -> IOResult<()> {
         match self.serialize(writer) {
             Ok(()) => Ok(()),
             Err(_e) => Err(IOError),
+        }
+    }
+    #[cfg(feature = "std")]
+    fn write<W: Write>(&self, writer: W) -> IOResult<()> {
+        match self.serialize(writer) {
+            Ok(()) => Ok(()),
+            Err(_e) => Err(IOError::new(
+                ErrorKind::InvalidData,
+                "Cannot serialize message. ",
+            )),
         }
     }
 }
@@ -72,10 +85,21 @@ impl<F: Field> CanonicalDeserialize for XZZPS19VMsg<F> {
 }
 
 impl<F: Field> ToBytes for XZZPS19VMsg<F> {
+    #[cfg(not(feature = "std"))]
     fn write<W: Write>(&self, writer: W) -> IOResult<()> {
         match self.serialize(writer) {
             Ok(()) => Ok(()),
             Err(_e) => Err(IOError),
+        }
+    }
+    #[cfg(feature = "std")]
+    fn write<W: Write>(&self, writer: W) -> IOResult<()> {
+        match self.serialize(writer) {
+            Ok(()) => Ok(()),
+            Err(_e) => Err(IOError::new(
+                ErrorKind::InvalidData,
+                "Cannot serialize message. ",
+            )),
         }
     }
 }

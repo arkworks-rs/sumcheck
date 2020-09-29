@@ -5,7 +5,8 @@ use crate::data_structures::protocol::Protocol;
 use crate::data_structures::GKRAsLink;
 use crate::gkr_round_sumcheck::xzzps19::msg::{XZZPS19PMsg, XZZPS19VMsg};
 use crate::gkr_round_sumcheck::Prover;
-
+#[cfg(not(feature = "std"))]
+use ark_std::vec::Vec;
 /// XZZPS19 implementation of GKR sumcheck prover
 pub(crate) struct XZZPS19Prover<'a, F, S, D>
 where
@@ -221,9 +222,7 @@ where
     fn setup(gkr: &'a Self::GKRFunc, g: &[F]) -> Result<Self, Self::Error> {
         let dim = unwrap_safe!(gkr.get_l());
         if g.len() == 0 {
-            return Err(Self::Error::InvalidArgumentError(Some(String::from(
-                "g is empty",
-            ))));
+            return Err(Self::Error::InvalidArgumentError(Some("g is empty".into())));
         }
         if g.len() != dim {
             return Err(Self::Error::InvalidArgumentError(Some(format!(

@@ -14,7 +14,7 @@ macro_rules! unwrap_safe {
         match $exp {
             Ok(ans) => ans,
             Err(e) => {
-                #[cfg(test)]
+                #[cfg(all(test, feature = "std"))]
                 {
                     println!(
                         "error: {} \n        at {:?}",
@@ -52,7 +52,7 @@ macro_rules! assert_safe {
 
 /// utility for benchmark: time the function
 #[allow(unused_macros)]
-#[cfg(test)]
+#[cfg(all(test, feature = "std"))]
 macro_rules! timeit {
     ($exp:expr) => {{
         use std::time::Instant;
@@ -82,7 +82,7 @@ macro_rules! timeit {
 
 /// only output timeit information in testing
 #[allow(unused_macros)]
-#[cfg(not(test))]
+#[cfg(any(not(test), not(feature = "std")))]
 macro_rules! timeit {
     ($exp:expr) => {
         $exp

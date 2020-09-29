@@ -1,4 +1,5 @@
 #![forbid(unsafe_code)]
+#![cfg_attr(not(feature = "std"), no_std)]
 //! A crate for sum-check protocol of GKR functions
 #![deny(unused_import_braces, unused_qualifications, trivial_casts)]
 #![deny(trivial_numeric_casts, private_in_public, variant_size_differences)]
@@ -11,12 +12,16 @@
 
 pub use error::Error;
 
-/// macros
+/// use ark_std for std
 #[macro_use]
-mod macros;
+extern crate ark_std;
 
 /// error for this crate
 mod error;
+
+/// local macros
+#[macro_use]
+mod macros;
 
 pub mod gkr_round_sumcheck;
 

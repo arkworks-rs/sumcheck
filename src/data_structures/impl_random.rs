@@ -1,6 +1,6 @@
-use std::io::Write;
-
 use algebra_core::{Field, ToBytes};
+#[allow(unused_imports)]
+use ark_std::vec::Vec;
 use blake2::{Blake2s, Digest};
 use rand_core::{Error, RngCore};
 
@@ -92,32 +92,28 @@ impl RngCore for Blake2s512Rng {
         u64::from_le_bytes(temp)
     }
 
-    fn fill_bytes(&mut self, mut dest: &mut [u8]) {
-        let output_len = dest.len();
-        let mut ptr = 0usize;
-        while ptr < output_len {
-            let digest = self.current_digest.clone();
-            let output = digest.finalize();
-            let n = dest.write(&output).unwrap();
-            ptr += n;
-            self.current_digest.update(&output);
-        }
+    fn fill_bytes(&mut self, dest: &mut [u8]) {
+        self.try_fill_bytes(dest).unwrap()
     }
 
-    fn try_fill_bytes(&mut self, mut dest: &mut [u8]) -> Result<(), Error> {
-        let output_len = dest.len();
-        let mut ptr = 0usize;
-        while ptr < output_len {
-            let digest = self.current_digest.clone();
-            let output = digest.finalize();
-            let n = if let Ok(n) = dest.write(&output) {
-                n
-            } else {
-                return Err(Error::new("Cannot write".to_string()));
-            };
-            ptr += n;
-            self.current_digest.update(&output);
+    fn try_fill_bytes(&mut self, dest: &mut [u8]) -> Result<(), Error> {
+        let mut digest = self.current_digest.clone();
+        let mut output = digest.finalize();
+        let output_size = Blake2s::output_size();
+        let mut ptr = 0;
+        let mut digest_ptr = 0;
+        while ptr < dest.len() {
+            dest[ptr] = output[digest_ptr];
+            ptr += 1usize;
+            digest_ptr += 1;
+            if digest_ptr == output_size {
+                self.current_digest.update(output);
+                digest = self.current_digest.clone();
+                output = digest.finalize();
+                digest_ptr = 0;
+            }
         }
+        self.current_digest.update(output);
         Ok(())
     }
 }

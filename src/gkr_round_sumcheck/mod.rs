@@ -2,6 +2,8 @@
 //!
 //! More details can be found in the documentation of [`GKRRoundSumcheck`](trait.GKRRoundSumcheck.html).
 
+use ark_std::vec::Vec;
+
 use algebra_core::{CanonicalDeserialize, CanonicalSerialize, Field};
 
 pub(crate) use prover::Prover;
@@ -139,7 +141,7 @@ pub mod tests {
 
         if !state {
             return Err(crate::Error::Reject(Some(
-                "Fail to verify subclaim. ".to_string(),
+                "Fail to verify subclaim. ".into(),
             )));
         };
         Ok(())

@@ -1,10 +1,12 @@
 #![macro_use]
 
-use algebra_core::alloc::fmt::Display;
-/// multilinear extensions
-use algebra_core::Field;
+use ark_std::vec::Vec;
+
+use core::fmt::Display;
 
 use crate::error::Error;
+/// multilinear extensions
+use algebra_core::Field;
 
 /// Multilinear Extension
 ///
@@ -83,9 +85,9 @@ where
 
 #[cfg(test)]
 pub mod tests {
-    use algebra::{test_rng, Field};
-
     use crate::data_structures::ml_extension::{MLExtension, SparseMLExtension};
+    use algebra::{test_rng, Field};
+    use algebra_core::vec::Vec;
 
     /// utility: evaluate multilinear extension (in form of data array) at a random point in Field
     fn evaluate_data_array<F: Field>(data: &[F], point: &[F]) -> F {
