@@ -2,11 +2,11 @@ use core::marker::PhantomData;
 
 use algebra_core::log2;
 use algebra_core::Field;
-
-use crate::data_structures::ml_extension::{GKRFunction, MLExtension, SparseMLExtension};
 use ark_std::string::String;
 use ark_std::vec::Vec;
 use hashbrown::HashMap;
+
+use crate::data_structures::ml_extension::{GKRFunction, MLExtension, SparseMLExtension};
 
 type SparseMap<F> = HashMap<usize, F>; // now: unified map
 
@@ -104,6 +104,7 @@ fn eval_dense<F: Field>(poly: &[F], nv: usize, at: &[F]) -> Result<F, crate::Err
 
 impl<F: Field> MLExtensionArray<F> {
     /// Generate the MLExtension from slice in array form. Copy all the data into the MLExtension.
+    /// This constructor takes O(n) time.
     ///
     /// For example, suppose we have a polynomial P of 4 variables. If P(1,1,0,1)=7, then in
     /// array form P[`0b1011`]=7 (i.e. P[11]=7)
@@ -120,6 +121,25 @@ impl<F: Field> MLExtensionArray<F> {
     /// assert_eq!(*(poly.get(0b1011).unwrap()), mle.eval_at(&vec![F::one(),F::one(),F::zero(),F::one()]).unwrap())
     /// ```
     pub fn from_slice(data: &[F]) -> Result<Self, crate::Error> {
+        Self::from_vec(data.to_vec())
+    }
+
+    /// Generate the MLExtension from vector in array form. Obtain the ownership of the vector without
+    /// copying the data. This constructor takes O(1) time.
+    ///
+    /// ```
+    /// # use algebra::{UniformRand, Field, One, Zero, test_rng};
+    /// # use linear_sumcheck::data_structures::MLExtensionArray;
+    /// # use linear_sumcheck::data_structures::ml_extension::MLExtension;
+    /// # type F = algebra::bls12_377::Fr;
+    /// // create a degree-4 polynomial.
+    /// # let mut rng = test_rng();
+    /// let poly: Vec<_> = (0..(1<<4)).map(|_|F::rand(&mut rng)).collect();
+    /// let poly_copy = poly.to_vec();
+    /// let mle = MLExtensionArray::from_vec(poly).unwrap();  // this step require ownership of poly
+    /// assert_eq!(*(poly_copy.get(0b1011).unwrap()), mle.eval_at(&vec![F::one(),F::one(),F::zero(),F::one()]).unwrap())
+    /// ```
+    pub fn from_vec(data: Vec<F>) -> Result<Self, crate::Error> {
         let len = data.len();
         if !len.is_power_of_two() {
             return Err(crate::Error::InvalidArgumentError(Some(String::from(
@@ -127,7 +147,6 @@ impl<F: Field> MLExtensionArray<F> {
             ))));
         }
         let num_variables = log2(len) as usize;
-        let data = data.to_vec();
         Ok(Self {
             num_variables,
             store: data,
@@ -321,8 +340,9 @@ impl<F: Field> MLExtension<F> for SparseMLExtensionMap<F> {
 
 #[cfg(test)]
 pub mod tests {
-
     use algebra::{test_rng, Field, UniformRand};
+    use ark_std::collections::BTreeMap;
+    use ark_std::vec::Vec;
     use rand::Rng;
     use rand_core::RngCore;
 
@@ -333,8 +353,7 @@ pub mod tests {
         test_basic_extension_methods, test_sparse_extension_methods,
     };
     use crate::data_structures::test_field::TestField;
-    use ark_std::collections::BTreeMap;
-    use ark_std::vec::Vec;
+
     pub type SparseMap<F> = BTreeMap<usize, F>;
 
     #[test]
