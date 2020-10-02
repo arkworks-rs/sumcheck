@@ -85,21 +85,23 @@ pub struct MLExtensionArray<F: Field> {
 /// * `nv`: number of variables
 /// * `at`: the point we want to evaluate
 fn eval_dense<F: Field>(poly: &[F], nv: usize, at: &[F]) -> Result<F, crate::Error> {
-    let mut a = poly.to_vec();
-    if at.len() != nv {
-        return Err(crate::Error::InvalidArgumentError(Some(String::from(
-            "Argument size mismatch. ",
-        ))));
-    }
+    Ok(partial_eval_dense(poly, nv, at)?[0])
+}
 
-    for i in 1..nv + 1 {
+fn partial_eval_dense<F: Field>(poly: &[F], nv: usize, at: &[F]) -> Result<Vec<F>, crate::Error> {
+    if at.len() > nv {
+        return Err(crate::Error::InvalidArgumentError(Some("dimension of point is greater than nv".into())));
+    }
+    let mut a = poly.to_vec();
+    let dim = at.len();
+    for i in 1..dim + 1 {
         let r = at[i - 1];
         for b in 0usize..(1 << (nv - i)) {
             a[b] = a[b << 1] * (F::one() - r) + a[(b << 1) + 1] * r
         }
     }
 
-    Ok(a[0])
+    Ok((&a[0..(1 << (nv - dim))]).to_vec())
 }
 
 impl<F: Field> MLExtensionArray<F> {
@@ -177,6 +179,11 @@ impl<F: Field> MLExtension<F> for MLExtensionArray<F> {
         eval_dense(&self.store, self.num_variables, point)
     }
 
+    fn eval_partial_at(&self, point: &[F]) -> Result<Self, Self::Error> {
+        // partial_eval_dense(&self.store, self.num_variables, point)
+        todo!()
+    }
+
     fn table(&self) -> Result<Vec<F>, Self::Error> {
         Ok(self.store.to_vec())
     }
@@ -228,6 +235,11 @@ impl<'a, F: Field> MLExtension<F> for MLExtensionRefArray<'a, F> {
     fn eval_at(&self, point: &[F]) -> Result<F, Self::Error> {
         eval_dense(self.store, self.num_variables, point)
     }
+
+    fn eval_partial_at(&self, point: &[F]) -> Result<Self, Self::Error> {
+        unimplemented!("Use MLExtensionArray instead")
+    }
+
 
     fn table(&self) -> Result<Vec<F>, Self::Error> {
         Ok(self.store.to_vec())
@@ -322,6 +334,11 @@ impl<F: Field> MLExtension<F> for SparseMLExtensionMap<F> {
         Ok(*(dp0.entry(0usize).or_insert(F::zero())))
     }
 
+    fn eval_partial_at(&self, point: &[F]) -> Result<Self, Self::Error> {
+        todo!()
+    }
+
+
     fn table(&self) -> Result<Vec<F>, Self::Error> {
         let mut table = Vec::with_capacity(1 << self.num_variables);
         for _ in 0..(1 << self.num_variables) {
@@ -367,7 +384,7 @@ pub mod tests {
             // generate random array
             let data = fill_vec!(1 << NUM_VARS, F::rand(&mut rng));
             let poly = MLExtensionArray::from_slice(&data).unwrap();
-            test_basic_extension_methods(&poly, &data);
+            test_basic_extension_methods(&poly, &data, true);
         }
     }
 
@@ -382,7 +399,7 @@ pub mod tests {
             // generate random array
             let data = fill_vec!(1 << NUM_VARS, F::rand(&mut rng));
             let poly = MLExtensionRefArray::from_slice(&data).unwrap();
-            test_basic_extension_methods(&poly, &data);
+            test_basic_extension_methods(&poly, &data, false);
         }
     }
 
@@ -400,7 +417,7 @@ pub mod tests {
         for _ in 0..DENSE_ITER {
             let (poly, table): (SparseMLExtensionMap<F>, Vec<F>) =
                 random_sparse_poly(NUM_VARS, &mut rng);
-            test_basic_extension_methods(&poly, &table);
+            test_basic_extension_methods(&poly, &table, false); //todo
         }
 
         // test sparse extension method

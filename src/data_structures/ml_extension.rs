@@ -43,6 +43,17 @@ where
     /// Evaluate the polynomial at a point in Field
     fn eval_at(&self, point: &[F]) -> Result<F, Self::Error>;
 
+    /// Reduce the number of variables of the polynomial by partially evaluating the polynomial
+    /// starting from left.
+    ///
+    /// For example, Given P(x1, x2, x3, x4) and (r1, r2), this function returns
+    /// P'(x3,x4) such that P'(x3, x4) = P(r1, r2, x3, x4)
+    ///
+    /// * point: the partial point we want to evaluate from the left
+    /// ## panics
+    /// This function will panic when the current implementation does not support partial evaluation.
+    fn eval_partial_at(&self, point: &[F]) -> Result<Self, Self::Error>;
+
     /// Get the copy of the values of all evaluations. Index: binary argument, value: F
     fn table(&self) -> Result<Vec<F>, Self::Error>;
 }
@@ -110,10 +121,10 @@ pub mod tests {
     /// Test if the multilinear extension works as desired.
     /// * `poly`: The polynomial to be tested.
     /// * `bookkeeping_table`: Values evaluated on {0,1}^n. Expect to be the same as `poly.table()`.
-    pub fn test_basic_extension_methods<F, P>(poly: &P, bookkeeping_table: &[F])
-    where
-        F: Field,
-        P: MLExtension<F>,
+    pub fn test_basic_extension_methods<F, P>(poly: &P, bookkeeping_table: &[F], test_partial: bool)
+        where
+            F: Field,
+            P: MLExtension<F>,
     {
         let data = bookkeeping_table;
         assert_eq!(
@@ -141,6 +152,21 @@ pub mod tests {
                 poly.eval_at(&point).unwrap(),
                 evaluate_data_array(data, &point)
             );
+        }
+
+        if !test_partial {
+            return
+        }
+        // partial_eval correctness
+        for _ in 0..100 {
+            let point = fill_vec!(poly.num_variables().unwrap(), F::rand(&mut rng));
+            let nv = poly.num_variables().unwrap();
+            let half = nv / 2;
+            let partial_poly = poly.eval_partial_at(&point[0..half]).unwrap();
+            let expected = partial_poly.eval_at(&point[half..]).unwrap();
+            let actual = poly.eval_at(&point).unwrap();
+            assert_eq!(expected,
+                       actual)
         }
     }
 
