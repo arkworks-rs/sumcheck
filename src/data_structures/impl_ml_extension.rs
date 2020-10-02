@@ -180,8 +180,10 @@ impl<F: Field> MLExtension<F> for MLExtensionArray<F> {
     }
 
     fn eval_partial_at(&self, point: &[F]) -> Result<Self, Self::Error> {
-        // partial_eval_dense(&self.store, self.num_variables, point)
-        todo!()
+        Ok(
+            Self::from_vec(
+                partial_eval_dense(&self.store, self.num_variables, point)
+                    ?)?)
     }
 
     fn table(&self) -> Result<Vec<F>, Self::Error> {
