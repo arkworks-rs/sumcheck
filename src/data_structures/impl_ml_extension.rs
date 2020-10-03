@@ -49,10 +49,10 @@ where
 }
 
 impl<'a, F, S, D> GKRFunction<F, S, D> for GKRAsLink<'a, F, S, D>
-    where
-        F: Field,
-        S: SparseMLExtension<F>,
-        D: MLExtension<F>,
+where
+    F: Field,
+    S: SparseMLExtension<F>,
+    D: MLExtension<F>,
 {
     type Error = crate::Error;
 

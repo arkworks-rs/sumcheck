@@ -122,9 +122,9 @@ pub mod tests {
     /// * `poly`: The polynomial to be tested.
     /// * `bookkeeping_table`: Values evaluated on {0,1}^n. Expect to be the same as `poly.table()`.
     pub fn test_basic_extension_methods<F, P>(poly: &P, bookkeeping_table: &[F], test_partial: bool)
-        where
-            F: Field,
-            P: MLExtension<F>,
+    where
+        F: Field,
+        P: MLExtension<F>,
     {
         let data = bookkeeping_table;
         assert_eq!(
