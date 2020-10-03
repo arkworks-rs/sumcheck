@@ -24,10 +24,10 @@ where
 }
 
 impl<'a, F, S, D> GKRAsLink<'a, F, S, D>
-    where
-        F: Field,
-        S: SparseMLExtension<F>,
-        D: MLExtension<F>,
+where
+    F: Field,
+    S: SparseMLExtension<F>,
+    D: MLExtension<F>,
 {
     /// create a new GKR that references f1, f2, f3
     pub fn new(f1: &'a S, f2: &'a D, f3: &'a D) -> Result<Self, crate::Error> {
