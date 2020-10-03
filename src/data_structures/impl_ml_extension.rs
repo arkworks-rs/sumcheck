@@ -12,10 +12,10 @@ type SparseMap<F> = HashMap<usize, F>; // now: unified map
 
 /// This GKR is simply a reference to address of underlying MLExtensions.
 pub struct GKRAsLink<'a, F, S, D>
-where
-    F: Field,
-    S: SparseMLExtension<F>,
-    D: MLExtension<F>,
+    where
+        F: Field,
+        S: SparseMLExtension<F>,
+        D: MLExtension<F>,
 {
     f1: &'a S,
     f2: &'a D,
@@ -24,10 +24,10 @@ where
 }
 
 impl<'a, F, S, D> GKRAsLink<'a, F, S, D>
-where
-    F: Field,
-    S: SparseMLExtension<F>,
-    D: MLExtension<F>,
+    where
+        F: Field,
+        S: SparseMLExtension<F>,
+        D: MLExtension<F>,
 {
     /// create a new GKR that references f1, f2, f3
     pub fn new(f1: &'a S, f2: &'a D, f3: &'a D) -> Result<Self, crate::Error> {
@@ -49,10 +49,10 @@ where
 }
 
 impl<'a, F, S, D> GKRFunction<F, S, D> for GKRAsLink<'a, F, S, D>
-where
-    F: Field,
-    S: SparseMLExtension<F>,
-    D: MLExtension<F>,
+    where
+        F: Field,
+        S: SparseMLExtension<F>,
+        D: MLExtension<F>,
 {
     type Error = crate::Error;
 
@@ -238,7 +238,7 @@ impl<'a, F: Field> MLExtension<F> for MLExtensionRefArray<'a, F> {
         eval_dense(self.store, self.num_variables, point)
     }
 
-    fn eval_partial_at(&self, point: &[F]) -> Result<Self, Self::Error> {
+    fn eval_partial_at(&self, _point: &[F]) -> Result<Self, Self::Error> {
         unimplemented!("Use MLExtensionArray instead")
     }
 
@@ -284,6 +284,31 @@ impl<F: Field> SparseMLExtensionMap<F> {
             num_variables,
         })
     }
+
+    fn _partial_eval(&self, point: &[F]) -> Result<HashMap<usize, F>, crate::Error> {
+        let nv = self.num_variables;
+        if nv < point.len() {
+            return Err(crate::Error::InvalidArgumentError(Some("dimension of point is greater than nv".into())));
+        }
+        let dim = point.len();
+        let mut dp0 = self.store.clone();
+        let mut dp1 = SparseMap::new();
+        for i in 0..dim {
+            let r = point[i];
+            for (k, v) in dp0.iter() {
+                let entry = dp1.entry(*k >> 1).or_insert(F::zero());
+                if k & 1 == 0 {
+                    *entry += *v * (F::one() - r);
+                } else {
+                    *entry += *v * r;
+                }
+            }
+            dp0 = dp1;
+            dp1 = SparseMap::new();
+        }
+
+        Ok(dp0)
+    }
 }
 
 impl<F: Field> SparseMLExtension<F> for SparseMLExtensionMap<F> {
@@ -310,34 +335,17 @@ impl<F: Field> MLExtension<F> for SparseMLExtensionMap<F> {
 
     /// runtime: O(n*log(n))
     fn eval_at(&self, point: &[F]) -> Result<F, Self::Error> {
-        let nv = self.num_variables;
-        if point.len() != nv {
-            return Err(Self::Error::InvalidArgumentError(Some(
-                algebra_core::format!("Size of point mismatch. {} != {}", point.len(), nv),
-            )));
-        }
+        let mut dp = self._partial_eval(point)?;
 
-        let mut dp0 = self.store.clone();
-        let mut dp1 = SparseMap::new();
-        for i in 0..nv {
-            let r = point[i];
-            for (k, v) in dp0.iter() {
-                let entry = dp1.entry(*k >> 1).or_insert(F::zero());
-                if k & 1 == 0 {
-                    *entry += *v * (F::one() - r);
-                } else {
-                    *entry += *v * r;
-                }
-            }
-            dp0 = dp1;
-            dp1 = SparseMap::new();
-        }
-
-        Ok(*(dp0.entry(0usize).or_insert(F::zero())))
+        Ok(*(dp.entry(0usize).or_insert(F::zero())))
     }
 
     fn eval_partial_at(&self, point: &[F]) -> Result<Self, Self::Error> {
-        todo!()
+        let partial_map = self._partial_eval(point)?;
+        Ok(Self {
+            store: partial_map,
+            num_variables: self.num_variables - point.len(),
+        })
     }
 
 
@@ -419,7 +427,7 @@ pub mod tests {
         for _ in 0..DENSE_ITER {
             let (poly, table): (SparseMLExtensionMap<F>, Vec<F>) =
                 random_sparse_poly(NUM_VARS, &mut rng);
-            test_basic_extension_methods(&poly, &table, false); //todo
+            test_basic_extension_methods(&poly, &table, true);
         }
 
         // test sparse extension method
