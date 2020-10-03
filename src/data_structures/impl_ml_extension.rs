@@ -12,10 +12,10 @@ type SparseMap<F> = HashMap<usize, F>; // now: unified map
 
 /// This GKR is simply a reference to address of underlying MLExtensions.
 pub struct GKRAsLink<'a, F, S, D>
-    where
-        F: Field,
-        S: SparseMLExtension<F>,
-        D: MLExtension<F>,
+where
+    F: Field,
+    S: SparseMLExtension<F>,
+    D: MLExtension<F>,
 {
     f1: &'a S,
     f2: &'a D,
@@ -90,7 +90,9 @@ fn eval_dense<F: Field>(poly: &[F], nv: usize, at: &[F]) -> Result<F, crate::Err
 
 fn partial_eval_dense<F: Field>(poly: &[F], nv: usize, at: &[F]) -> Result<Vec<F>, crate::Error> {
     if at.len() > nv {
-        return Err(crate::Error::InvalidArgumentError(Some("dimension of point is greater than nv".into())));
+        return Err(crate::Error::InvalidArgumentError(Some(
+            "dimension of point is greater than nv".into(),
+        )));
     }
     let mut a = poly.to_vec();
     let dim = at.len();
@@ -180,10 +182,11 @@ impl<F: Field> MLExtension<F> for MLExtensionArray<F> {
     }
 
     fn eval_partial_at(&self, point: &[F]) -> Result<Self, Self::Error> {
-        Ok(
-            Self::from_vec(
-                partial_eval_dense(&self.store, self.num_variables, point)
-                    ?)?)
+        Ok(Self::from_vec(partial_eval_dense(
+            &self.store,
+            self.num_variables,
+            point,
+        )?)?)
     }
 
     fn table(&self) -> Result<Vec<F>, Self::Error> {
@@ -242,7 +245,6 @@ impl<'a, F: Field> MLExtension<F> for MLExtensionRefArray<'a, F> {
         unimplemented!("Use MLExtensionArray instead")
     }
 
-
     fn table(&self) -> Result<Vec<F>, Self::Error> {
         Ok(self.store.to_vec())
     }
@@ -288,7 +290,9 @@ impl<F: Field> SparseMLExtensionMap<F> {
     fn _partial_eval(&self, point: &[F]) -> Result<HashMap<usize, F>, crate::Error> {
         let nv = self.num_variables;
         if nv < point.len() {
-            return Err(crate::Error::InvalidArgumentError(Some("dimension of point is greater than nv".into())));
+            return Err(crate::Error::InvalidArgumentError(Some(
+                "dimension of point is greater than nv".into(),
+            )));
         }
         let dim = point.len();
         let mut dp0 = self.store.clone();
@@ -347,7 +351,6 @@ impl<F: Field> MLExtension<F> for SparseMLExtensionMap<F> {
             num_variables: self.num_variables - point.len(),
         })
     }
-
 
     fn table(&self) -> Result<Vec<F>, Self::Error> {
         let mut table = Vec::with_capacity(1 << self.num_variables);

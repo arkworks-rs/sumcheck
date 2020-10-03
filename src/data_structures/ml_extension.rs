@@ -155,7 +155,7 @@ pub mod tests {
         }
 
         if !test_partial {
-            return
+            return;
         }
         // partial_eval correctness
         for _ in 0..100 {
@@ -165,8 +165,7 @@ pub mod tests {
             let partial_poly = poly.eval_partial_at(&point[0..half]).unwrap();
             let expected = partial_poly.eval_at(&point[half..]).unwrap();
             let actual = poly.eval_at(&point).unwrap();
-            assert_eq!(expected,
-                       actual)
+            assert_eq!(expected, actual)
         }
     }
 
