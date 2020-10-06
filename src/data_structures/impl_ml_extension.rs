@@ -357,7 +357,7 @@ impl<F: Field> MLExtension<F> for SparseMLExtensionMap<F> {
         }
     }
 
-    /// runtime: O(n) where n is the size of matrix
+    /// runtime: O(nlogN): n is number of non-zero entries and N is size of matrix
     fn eval_at(&self, point: &[F]) -> Result<F, Self::Error> {
         let mut dp = self._partial_eval(point)?;
 
