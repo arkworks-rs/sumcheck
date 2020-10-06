@@ -287,31 +287,51 @@ impl<F: Field> SparseMLExtensionMap<F> {
         })
     }
 
-    fn _partial_eval(&self, point: &[F]) -> Result<HashMap<usize, F>, crate::Error> {
+    /// precompute I(g,z) on {0,1}^dim
+    fn precompute(g: &[F]) -> Vec<F> {
+        let dim = g.len();
+        let mut dp = Vec::with_capacity(1 << dim);
+        dp.resize(1 << dim, F::zero());
+        dp[0] = F::one() - g[0];
+        dp[1] = g[0];
+        for i in 1..dim {
+            let dp_prev = (&dp[0..(1 << i)]).to_vec();
+            for b in 0..(1 << i) {
+                dp[b] = dp_prev[b] * (F::one() - g[i]);
+                dp[b + (1 << i)] = dp_prev[b] * g[i];
+            }
+        }
+
+        dp
+    }
+
+    /// the partial evaluation method is inspired by XZZPS19: Page 16
+    fn _partial_eval(&self, mut point: &[F]) -> Result<HashMap<usize, F>, crate::Error> {
         let nv = self.num_variables;
         if nv < point.len() {
             return Err(crate::Error::InvalidArgumentError(Some(
                 "dimension of point is greater than nv".into(),
             )));
         }
-        let dim = point.len();
-        let mut dp0 = self.store.clone();
-        let mut dp1 = SparseMap::new();
-        for i in 0..dim {
-            let r = point[i];
-            for (k, v) in dp0.iter() {
-                let entry = dp1.entry(*k >> 1).or_insert(F::zero());
-                if k & 1 == 0 {
-                    *entry += *v * (F::one() - r);
-                } else {
-                    *entry += *v * r;
-                }
+        // batch evaluation
+        let mut last = self.store.clone();
+        while !point.is_empty() {
+            let focus_length = if point.len() > 8 { 8 } else { point.len() };
+            let focus = &point[..focus_length];
+            point = &point[focus_length..];
+            let pre = Self::precompute(focus);
+            let dim = focus.len();
+            let mut result = SparseMap::new();
+            for src_entry in last.iter() {
+                let old_idx = *src_entry.0;
+                let gz = pre[old_idx & ((1 << dim) - 1)];
+                let new_idx = old_idx >> dim;
+                let dst_entry = result.entry(new_idx).or_insert(F::zero());
+                *dst_entry += gz * src_entry.1;
             }
-            dp0 = dp1;
-            dp1 = SparseMap::new();
+            last = result;
         }
-
-        Ok(dp0)
+        Ok(last)
     }
 }
 
@@ -337,7 +357,7 @@ impl<F: Field> MLExtension<F> for SparseMLExtensionMap<F> {
         }
     }
 
-    /// runtime: O(n*log(n))
+    /// runtime: O(nlogN): n is number of non-zero entries and N is size of matrix
     fn eval_at(&self, point: &[F]) -> Result<F, Self::Error> {
         let mut dp = self._partial_eval(point)?;
 
@@ -422,7 +442,7 @@ pub mod tests {
     fn test_sparse_ml_functionality() {
         const DENSE_ITER: i32 = 3;
         const SPARSE_ITER: i32 = 7;
-        const NUM_VARS: usize = 8;
+        const NUM_VARS: usize = 10;
         let mut rng = test_rng();
         type F = TestField;
 
