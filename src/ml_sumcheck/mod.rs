@@ -17,20 +17,25 @@ pub mod t13;
 ///
 /// ### Example Usage
 /// ```
-/// use linear_sumcheck::ml_sumcheck::t13::{T13Sumcheck, T13Subclaim}; // an implementation of MLSumcheck
-/// use algebra::{test_rng, UniformRand};
-/// use linear_sumcheck::ml_sumcheck::{MLSumcheck, MLSumcheckSubclaim};
-/// use linear_sumcheck::data_structures::MLExtensionArray;
-/// use linear_sumcheck::data_structures::ml_extension::MLExtension;
-/// type F = algebra::bls12_377::Fr;  // specify the field. any valid field should work here.
-/// // create a degree-7 multilinear polynomial with 5 multiplicands
-/// let mut rng = test_rng();
+/// # use linear_sumcheck::ml_sumcheck::t13::{T13Sumcheck, T13Subclaim}; // an implementation of MLSumcheck
+/// # use algebra::{test_rng, UniformRand};
+/// # use linear_sumcheck::ml_sumcheck::{MLSumcheck, MLSumcheckSubclaim};
+/// # use linear_sumcheck::data_structures::MLExtensionArray;
+/// # use linear_sumcheck::data_structures::ml_extension::MLExtension;
+/// # type F = algebra::bls12_377::Fr;  // specify the field. any valid field should work here.
+/// # let mut rng = test_rng();
+/// // create a 7-variate multilinear polynomial with 5 multiplicands
 /// let poly: Vec<_> = (0..5).map(|_|{
 ///     let arr: Vec<_> = (0..(1<<7)).map(|_|F::rand(&mut rng)).collect();
 ///     MLExtensionArray::from_slice(&arr).unwrap()
 /// }).collect();
+/// // create a 7-variate multilinear polynomial with 3 multiplicands
+/// let poly2: Vec<_> = (0..3).map(|_|{
+///     let arr: Vec<_> = (0..(1<<7)).map(|_|F::rand(&mut rng)).collect();
+///     MLExtensionArray::from_slice(&arr).unwrap()
+/// }).collect();
 /// // generate claim and proof
-/// let (claim, proof) = T13Sumcheck::generate_claim_and_proof(&[&poly]).unwrap();
+/// let (claim, proof) = T13Sumcheck::generate_claim_and_proof(&[&poly,&poly2]).unwrap();
 ///
 /// // verify proof
 /// let subclaim: T13Subclaim<F>= T13Sumcheck::verify_proof(&claim, &proof).unwrap();
@@ -73,7 +78,7 @@ pub trait MLSumcheckClaim<F>: Clone + CanonicalSerialize + CanonicalDeserialize 
     fn asserted_sum(&self) -> F;
     /// number of variables of polynomial
     fn num_variables(&self) -> u32;
-    /// number of multiplicands of polynomial
+    /// maximum number of multiplicands of polynomial
     fn num_multiplicands(&self) -> u32;
 }
 
