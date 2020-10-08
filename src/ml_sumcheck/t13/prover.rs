@@ -5,10 +5,12 @@ use crate::data_structures::protocol::Protocol;
 use crate::ml_sumcheck::t13::msg::{MLLibraPMsg, MLLibraVMsg};
 
 use ark_std::vec::Vec;
+use ark_std::cmp::max;
+
 pub(crate) struct MLLibraProver<F: Field> {
     generated_messages: Vec<MLLibraPMsg<F>>,
     randomness: Vec<F>,
-    tables: Vec<Vec<F>>,
+    tables: Vec<Vec<Vec<F>>>, // sum of product of MLE
     nv: usize,
     num_multiplicands: usize,
     round: usize,
@@ -16,32 +18,39 @@ pub(crate) struct MLLibraProver<F: Field> {
 }
 
 impl<F: Field> MLLibraProver<F> {
-    pub(crate) fn setup<P: MLExtension<F>>(poly: &[P]) -> Result<Self, crate::Error> {
-        let nv: usize = unwrap_safe!(extract_safe!(poly.get(0)).num_variables());
-        let num_multiplicands = poly.len();
-        if num_multiplicands < 1 {
+    pub(crate) fn setup<P: MLExtension<F>>(poly: &[&[P]]) -> Result<Self, crate::Error> {
+        let nv: usize = unwrap_safe!(extract_safe!(extract_safe!(poly.get(0)).get(0)).num_variables());
+        let num_terms = poly.len();
+        if num_terms < 1 {
             return Err(crate::Error::InvalidArgumentError(Some(
                 "num_multiplicands < 1".into(),
             )));
         }
-        let mut tables = Vec::with_capacity(num_multiplicands);
+        let mut add_table = Vec::with_capacity(num_terms);
 
-        for single_poly in poly {
-            if unwrap_safe!(single_poly.num_variables()) != nv {
-                return Err(crate::Error::InvalidArgumentError(Some(
-                    "polynomials should be same number of variables".into(),
-                )));
+        let mut max_multiplicands = 0;
+        for product_poly in poly {
+            let num_multiplicands = product_poly.len();
+            max_multiplicands = max(max_multiplicands, num_multiplicands);
+            let mut mul_table = Vec::with_capacity(num_multiplicands);
+            for single_poly in product_poly.iter() {
+                if unwrap_safe!(single_poly.num_variables()) != nv {
+                    return Err(crate::Error::InvalidArgumentError(Some(
+                        "polynomials should be same number of variables".into(),
+                    )));
+                }
+
+                mul_table.push(unwrap_safe!(single_poly.table()));
             }
-
-            tables.push(unwrap_safe!(single_poly.table()));
+            add_table.push(mul_table);
         }
 
         let mut ans = Self {
             generated_messages: Vec::with_capacity(nv),
             randomness: Vec::with_capacity(nv),
-            tables,
+            tables: add_table,
             nv,
-            num_multiplicands,
+            num_multiplicands: max_multiplicands,
             round: 1,
             cached_sum: F::zero(), // filled afterwards
         };
@@ -59,12 +68,16 @@ impl<F: Field> MLLibraProver<F> {
     /// `i`: current round (round i: get -> <u>push</u> )
     fn fix_arg(&mut self, i: usize) {
         let r = self.randomness[i - 1];
-        for j in 0..self.num_multiplicands {
-            for b in 0..1 << (self.nv - i) {
-                self.tables[j][b] =
-                    self.tables[j][b << 1] * (F::one() - r) + self.tables[j][(b << 1) + 1] * r;
+        for pmf in &mut self.tables{
+            let num_multiplicands = pmf.len();
+            for j in 0..num_multiplicands {
+                for b in 0..1 << (self.nv - i) {
+                    pmf[j][b] =
+                        pmf[j][b << 1] * (F::one() - r) + pmf[j][(b << 1) + 1] * r;
+                }
             }
         }
+
     }
 
     /// generate the latest sum and push the latest message
@@ -76,14 +89,18 @@ impl<F: Field> MLLibraProver<F> {
         for b in 0..1 << (self.nv - i) {
             let mut t_as_field = F::zero();
             for t in 0..self.num_multiplicands + 1 {
-                let mut product = F::one();
-                for j in 0..self.num_multiplicands {
-                    let table = &self.tables[j]; // j's range is checked in init
-                    product *=
-                        table[b << 1] * (F::one() - t_as_field) + table[(b << 1) + 1] * t_as_field;
+                for pmf in &self.tables {
+                    let num_multiplicands = pmf.len();
+                    let mut product = F::one();
+                    for j in 0..num_multiplicands {
+                        let table = &pmf[j]; // j's range is checked in init
+                        product *=
+                            table[b << 1] * (F::one() - t_as_field) + table[(b << 1) + 1] * t_as_field;
+                    }
+                    products_sum[t] += product;
                 }
-                products_sum[t] += product;
                 t_as_field += F::one();
+
             }
         }
 
@@ -157,7 +174,7 @@ mod tests {
         let poly: Vec<_> = (0..NM)
             .map(|_| MLExtensionArray::from_slice(&fill_vec!(1 << NV, F::rand(&mut rng))).unwrap())
             .collect();
-        let prover = MLLibraProver::setup(&poly).unwrap();
+        let prover = MLLibraProver::setup(&[&poly]).unwrap();
         let verifier = MLLibraVerifier::setup(
             NV as u32,
             prover.cached_sum,
@@ -175,7 +192,7 @@ mod tests {
         let poly: Vec<_> = (0..NM)
             .map(|_| MLExtensionArray::from_slice(&fill_vec!(1 << NV, F::rand(&mut rng))).unwrap())
             .collect();
-        let mut prover = MLLibraProver::setup(&poly).unwrap();
+        let mut prover = MLLibraProver::setup(&[&poly]).unwrap();
         let mut verifier = MLLibraVerifier::setup(
             NV as u32,
             prover.cached_sum,

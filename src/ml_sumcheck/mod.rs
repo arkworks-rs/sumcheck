@@ -30,7 +30,7 @@ pub mod t13;
 ///     MLExtensionArray::from_slice(&arr).unwrap()
 /// }).collect();
 /// // generate claim and proof
-/// let (claim, proof) = T13Sumcheck::generate_claim_and_proof(&poly).unwrap();
+/// let (claim, proof) = T13Sumcheck::generate_claim_and_proof(&[&poly]).unwrap();
 ///
 /// // verify proof
 /// let subclaim: T13Subclaim<F>= T13Sumcheck::verify_proof(&claim, &proof).unwrap();
@@ -53,9 +53,10 @@ where
     type SubClaim: MLSumcheckSubclaim<F>;
 
     /// Calculate the sum of the polynomial and generate the proof.
-    /// * `poly`: product of multilinear functions represented by an iterator of multilinear function
+    /// * `poly`: array of product of multilinear functions represented by an iterator of multilinear function.
+    /// the polynomial we want to prove is those products added together.
     fn generate_claim_and_proof<P: MLExtension<F>>(
-        poly: &[P],
+        poly: &[&[P]],
     ) -> Result<(Self::Claim, Self::Proof), Self::Error>;
 
     /// verify if proof correctly proves the claim. Return error if the proof is trivially wrong, or the claim or proof does not
@@ -102,7 +103,7 @@ pub mod tests {
         let poly: Vec<_> = (0..NM)
             .map(|_| MLExtensionArray::from_slice(&fill_vec!(1 << NV, F::rand(&mut rng))).unwrap())
             .collect();
-        let (claim, proof) = S::generate_claim_and_proof(&poly).unwrap();
+        let (claim, proof) = S::generate_claim_and_proof(&[&poly]).unwrap();
         let subclaim = S::verify_proof(&claim, &proof).unwrap();
 
         // verify subclaim
