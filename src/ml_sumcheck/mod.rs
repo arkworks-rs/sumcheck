@@ -99,23 +99,31 @@ pub mod tests {
     pub fn test_ml_proc_completeness<F: Field, S: MLSumcheck<F>>() {
         const NV: usize = 9;
         const NM: usize = 5;
+        const NM2: usize = 3;
         let mut rng = test_rng();
         let poly: Vec<_> = (0..NM)
             .map(|_| MLExtensionArray::from_slice(&fill_vec!(1 << NV, F::rand(&mut rng))).unwrap())
             .collect();
-        let (claim, proof) = S::generate_claim_and_proof(&[&poly]).unwrap();
+        let poly2: Vec<_> = (0..NM2)
+            .map(|_| MLExtensionArray::from_slice(&fill_vec!(1 << NV, F::rand(&mut rng))).unwrap())
+            .collect();
+        let (claim, proof) = S::generate_claim_and_proof(&[&poly, &poly2]).unwrap();
         let subclaim = S::verify_proof(&claim, &proof).unwrap();
 
         // verify subclaim
-        let expected_evs = poly
-            .iter()
-            .map(|p| p.eval_at(&subclaim.evaluation_point()))
+        let expected_evs = eval_pmf(&poly, &subclaim.evaluation_point())
+            + eval_pmf(&poly2, &subclaim.evaluation_point());
+        assert_eq!(subclaim.expected_evaluations(), expected_evs);
+    }
+
+    fn eval_pmf<F: Field>(pmf: &[MLExtensionArray<F>], at: &[F]) -> F {
+        pmf.iter()
+            .map(|p| p.eval_at(at))
             .scan(F::one(), |state, x| {
                 *state *= x.unwrap();
                 Some(*state)
             })
             .last()
-            .unwrap();
-        assert_eq!(subclaim.expected_evaluations(), expected_evs);
+            .unwrap()
     }
 }

@@ -4,8 +4,8 @@ use crate::data_structures::ml_extension::MLExtension;
 use crate::data_structures::protocol::Protocol;
 use crate::ml_sumcheck::t13::msg::{MLLibraPMsg, MLLibraVMsg};
 
-use ark_std::vec::Vec;
 use ark_std::cmp::max;
+use ark_std::vec::Vec;
 
 pub(crate) struct MLLibraProver<F: Field> {
     generated_messages: Vec<MLLibraPMsg<F>>,
@@ -19,7 +19,8 @@ pub(crate) struct MLLibraProver<F: Field> {
 
 impl<F: Field> MLLibraProver<F> {
     pub(crate) fn setup<P: MLExtension<F>>(poly: &[&[P]]) -> Result<Self, crate::Error> {
-        let nv: usize = unwrap_safe!(extract_safe!(extract_safe!(poly.get(0)).get(0)).num_variables());
+        let nv: usize =
+            unwrap_safe!(extract_safe!(extract_safe!(poly.get(0)).get(0)).num_variables());
         let num_terms = poly.len();
         if num_terms < 1 {
             return Err(crate::Error::InvalidArgumentError(Some(
@@ -68,16 +69,14 @@ impl<F: Field> MLLibraProver<F> {
     /// `i`: current round (round i: get -> <u>push</u> )
     fn fix_arg(&mut self, i: usize) {
         let r = self.randomness[i - 1];
-        for pmf in &mut self.tables{
+        for pmf in &mut self.tables {
             let num_multiplicands = pmf.len();
             for j in 0..num_multiplicands {
                 for b in 0..1 << (self.nv - i) {
-                    pmf[j][b] =
-                        pmf[j][b << 1] * (F::one() - r) + pmf[j][(b << 1) + 1] * r;
+                    pmf[j][b] = pmf[j][b << 1] * (F::one() - r) + pmf[j][(b << 1) + 1] * r;
                 }
             }
         }
-
     }
 
     /// generate the latest sum and push the latest message
@@ -94,13 +93,12 @@ impl<F: Field> MLLibraProver<F> {
                     let mut product = F::one();
                     for j in 0..num_multiplicands {
                         let table = &pmf[j]; // j's range is checked in init
-                        product *=
-                            table[b << 1] * (F::one() - t_as_field) + table[(b << 1) + 1] * t_as_field;
+                        product *= table[b << 1] * (F::one() - t_as_field)
+                            + table[(b << 1) + 1] * t_as_field;
                     }
                     products_sum[t] += product;
                 }
                 t_as_field += F::one();
-
             }
         }
 
@@ -188,11 +186,15 @@ mod tests {
     fn test_completeness() {
         const NV: usize = 7;
         const NM: usize = 5;
+        const NM2: usize = 3;
         let mut rng = test_rng();
-        let poly: Vec<_> = (0..NM)
+        let poly1: Vec<_> = (0..NM)
             .map(|_| MLExtensionArray::from_slice(&fill_vec!(1 << NV, F::rand(&mut rng))).unwrap())
             .collect();
-        let mut prover = MLLibraProver::setup(&[&poly]).unwrap();
+        let poly2: Vec<_> = (0..NM2)
+            .map(|_| MLExtensionArray::from_slice(&fill_vec!(1 << NV, F::rand(&mut rng))).unwrap())
+            .collect();
+        let mut prover = MLLibraProver::setup(&[&poly1, &poly2]).unwrap();
         let mut verifier = MLLibraVerifier::setup(
             NV as u32,
             prover.cached_sum,
