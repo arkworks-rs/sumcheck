@@ -1,4 +1,4 @@
-use algebra_core::{Error, Field, ToBytes, CanonicalSerialize};
+use algebra_core::{CanonicalSerialize, Error, Field, ToBytes};
 use rand_core::RngCore;
 
 /// Random Field Element Generator

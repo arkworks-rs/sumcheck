@@ -1,4 +1,4 @@
-use algebra_core::{Field, ToBytes, CanonicalSerialize};
+use algebra_core::{CanonicalSerialize, Field, ToBytes};
 #[allow(unused_imports)]
 use ark_std::vec::Vec;
 use blake2::{Blake2s, Digest};
