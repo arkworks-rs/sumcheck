@@ -13,6 +13,10 @@ pub enum Error {
     InternalDataStructureCorruption(Option<String>),
     /// protocol rejects this proof
     Reject(Option<String>),
+    /// IO Error
+    IOError,
+    /// Serialization Error
+    SerializationError,
     /// Other caused by other operations
     CausedBy(String),
 }
@@ -28,3 +32,15 @@ impl fmt::Display for Error {
 }
 
 impl algebra_core::Error for Error {}
+
+impl From<ark_std::io::Error> for Error {
+    fn from(_: ark_std::io::Error) -> Self {
+        Self::IOError
+    }
+}
+
+impl From<algebra_core::SerializationError> for Error {
+    fn from(_: algebra_core::SerializationError) -> Self{
+        Self::SerializationError
+    }
+}
