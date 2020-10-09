@@ -74,6 +74,7 @@ where
 }
 
 /// An implementation of multilinear extension, storing the data of underlying array.
+#[derive(Clone)]
 pub struct MLExtensionArray<F: Field> {
     store: Vec<F>,
     num_variables: usize,
