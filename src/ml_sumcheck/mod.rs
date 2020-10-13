@@ -2,10 +2,10 @@
 //!
 //! More details can be found in the documentation of [`MLSumcheck`](trait.MLSumcheck.html)
 
-use algebra_core::{CanonicalDeserialize, CanonicalSerialize, Field};
-
 use crate::data_structures::ml_extension::MLExtension;
-use algebra_core::vec::Vec;
+use ark_ff::Field;
+use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
+use ark_std::vec::Vec;
 pub mod t13;
 
 /// ### Sumcheck protocol for products of multilinear functions
@@ -18,11 +18,11 @@ pub mod t13;
 /// ### Example Usage
 /// ```
 /// # use linear_sumcheck::ml_sumcheck::t13::{T13Sumcheck, T13Subclaim}; // an implementation of MLSumcheck
-/// # use algebra::{test_rng, UniformRand};
+/// # use ark_ff::{test_rng, UniformRand};
 /// # use linear_sumcheck::ml_sumcheck::{MLSumcheck, MLSumcheckSubclaim};
 /// # use linear_sumcheck::data_structures::MLExtensionArray;
 /// # use linear_sumcheck::data_structures::ml_extension::MLExtension;
-/// # type F = algebra::bls12_377::Fr;  // specify the field. any valid field should work here.
+/// # type F = ark_test_curves::bls12_381::Fr;  // specify the field. any valid field should work here.
 /// # let mut rng = test_rng();
 /// // create a 7-variate multilinear polynomial with 5 multiplicands
 /// let poly: Vec<_> = (0..5).map(|_|{
@@ -53,7 +53,7 @@ where
     /// proof of the claim
     type Proof: Clone + CanonicalSerialize + CanonicalDeserialize;
     /// error type
-    type Error: algebra_core::Error + From<crate::Error>;
+    type Error: ark_std::error::Error + From<crate::Error>;
     /// subclaim outputted: if the claim is true, the subclaim should be true
     type SubClaim: MLSumcheckSubclaim<F>;
 
@@ -98,7 +98,8 @@ pub mod tests {
     use crate::data_structures::ml_extension::MLExtension;
     use crate::data_structures::MLExtensionArray;
     use crate::ml_sumcheck::{MLSumcheck, MLSumcheckSubclaim};
-    use algebra::{test_rng, Field};
+    use ark_ff::test_rng;
+    use ark_ff::Field;
     use ark_std::vec::Vec;
 
     pub fn test_ml_proc_completeness<F: Field, S: MLSumcheck<F>>() {

@@ -23,7 +23,7 @@ pub mod tests {
     #[cfg(feature = "std")]
     use std::time::Instant;
 
-    use algebra::{test_rng, UniformRand};
+    use ark_ff::{test_rng, UniformRand};
 
     use crate::data_structures::ml_extension::{GKRFunction, MLExtension};
     use crate::data_structures::protocol::tests::{test_communication, test_protocol_completeness};
@@ -69,7 +69,7 @@ pub mod tests {
         {
             use crate::data_structures::tests::random_sparse_poly_fast;
             use crate::data_structures::GKRAsLink;
-            use algebra::UniformRand;
+            use ark_ff::UniformRand;
             f1 = random_sparse_poly_fast(NV * 3, &mut rng);
             f2_arr = (0..(1 << NV))
                 .map(|_| (F::rand(&mut rng)))

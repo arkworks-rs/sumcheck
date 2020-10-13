@@ -1,9 +1,9 @@
-use core::fmt;
+use ark_std::fmt;
 
-use algebra_core::String;
+use ark_std::string::String;
 use core::fmt::Formatter;
 /// Error type for this crate
-#[derive(Debug)]
+#[derive(fmt::Debug)]
 pub enum Error {
     /// This operation is meaningless or not allowed in current state.
     InvalidOperationError(Option<String>),
@@ -31,7 +31,7 @@ impl fmt::Display for Error {
     }
 }
 
-impl algebra_core::Error for Error {}
+impl ark_std::error::Error for Error {}
 
 impl From<ark_std::io::Error> for Error {
     fn from(_: ark_std::io::Error) -> Self {
@@ -39,15 +39,8 @@ impl From<ark_std::io::Error> for Error {
     }
 }
 
-#[cfg(not(feature = "std"))]
-impl From<algebra_core::io::Error> for Error {
-    fn from(_: algebra_core::io::Error) -> Self {
-        Self::IOError
-    }
-}
-
-impl From<algebra_core::SerializationError> for Error {
-    fn from(_: algebra_core::SerializationError) -> Self {
+impl From<ark_serialize::SerializationError> for Error {
+    fn from(_: ark_serialize::SerializationError) -> Self {
         Self::SerializationError
     }
 }

@@ -1,8 +1,8 @@
-use core::fmt::{Debug, Display};
-
-use algebra_core::{CanonicalDeserialize, CanonicalSerialize, ToBytes};
+use ark_std::fmt::{Debug, Display};
 
 use crate::error::Error;
+use ark_ff::ToBytes;
+use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
 
 /// Message trait
 pub(crate) trait Message:
@@ -20,7 +20,7 @@ pub(crate) trait Protocol: Sized {
     /// Message sent **from** this protocol to others.
     type OutBoundMessage: Message;
     /// Type of error
-    type Error: algebra_core::Error + From<Error> + Display;
+    type Error: ark_std::error::Error + From<Error> + Display;
 
     /// Get current round.
     /// If the protocol is not active (e.g. in accepted or rejected status), `current_round`
@@ -72,7 +72,7 @@ pub(crate) mod tests {
     use std::time::{Duration, Instant};
 
     use crate::data_structures::protocol::{Message, Protocol, VerifierProtocol, VerifierState};
-    use algebra_core::Vec;
+    use ark_std::vec::Vec;
     /// Make sure the protocol is not broken, and make sure the protocol halts eventually.
     ///
     /// * `alice` - protocol that sends message first

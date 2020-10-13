@@ -1,4 +1,5 @@
-use algebra_core::{CanonicalSerialize, Error, Field, ToBytes};
+use ark_ff::{Field, ToBytes};
+use ark_serialize::CanonicalSerialize;
 use rand_core::RngCore;
 
 /// Random Field Element Generator
@@ -14,7 +15,7 @@ pub trait RnFg<F: Field>: Sized + RngCore {
 /// Same sequence of `feed` and `get` call should yield same result!
 pub trait FeedableRNG: RngCore {
     /// Error type
-    type Error: Error + From<crate::Error>;
+    type Error: ark_std::error::Error + From<crate::Error>;
     /// Setup should not have any parameter.
     fn setup() -> Self;
 
@@ -28,14 +29,14 @@ pub trait FeedableRNG: RngCore {
 
 #[cfg(test)]
 pub mod tests {
-    use algebra::io::{Result as IOResult, Write};
-    use algebra::test_rng;
-    use algebra::{Field, ToBytes};
+    use ark_ff::test_rng;
+    use ark_ff::{Field, ToBytes};
+    use ark_std::io::{Result as IOResult, Write};
     use rand::Rng;
     use rand_core::RngCore;
 
     use crate::data_structures::random::{FeedableRNG, RnFg};
-    use algebra_core::vec::Vec;
+    use ark_std::vec::Vec;
     /// Special type of input used for test.
     pub struct TestMessage {
         data: Vec<u8>,

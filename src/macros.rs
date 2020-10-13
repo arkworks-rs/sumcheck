@@ -22,7 +22,7 @@ macro_rules! unwrap_safe {
                         file!().to_string() + ":" + &line!().to_string()
                     );
                 }
-                return Err(crate::Error::CausedBy(format!("{}", e)));
+                return Err(crate::Error::CausedBy(ark_std::format!("{}", e)));
             }
         }
     }};
@@ -104,7 +104,7 @@ macro_rules! random_gkr {
         {
             use crate::data_structures::tests::random_sparse_poly_fast;
             use crate::data_structures::GKRAsLink;
-            use algebra::UniformRand;
+            use ark_ff::UniformRand;
             f1 = random_sparse_poly_fast($nv * 3, $rng);
             f2_arr = fill_vec!(1 << $nv, F::rand($rng));
             f2 = D::from_slice(&f2_arr).unwrap();
