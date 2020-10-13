@@ -1,7 +1,8 @@
 use core::marker::PhantomData;
 
-use algebra_core::io::{Read, Write};
-use algebra_core::{CanonicalDeserialize, CanonicalSerialize, Field, SerializationError};
+use ark_std::io::{Read, Write};
+use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, SerializationError};
+use ark_ff::Field;
 
 use crate::data_structures::ml_extension::{MLExtension, SparseMLExtension};
 use crate::data_structures::protocol::Protocol;
@@ -155,7 +156,7 @@ impl<F: Field> GKRRoundSubClaim<F> for XZZPS19SubClaim<F> {
 
 #[cfg(test)]
 mod tests {
-    use algebra::{test_rng, UniformRand};
+    use ark_ff::{test_rng, UniformRand};
 
     use crate::data_structures::test_field::TestField;
     use crate::data_structures::tests::random_sparse_poly_fast;

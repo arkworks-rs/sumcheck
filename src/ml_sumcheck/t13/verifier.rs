@@ -1,4 +1,4 @@
-use algebra_core::Field;
+use ark_ff::Field;
 
 use crate::data_structures::protocol::{Protocol, VerifierProtocol, VerifierState};
 use crate::data_structures::random::{FeedableRNG, RnFg};
@@ -167,8 +167,8 @@ fn interpolate_deg_n_poly<F: Field>(p_i: &[F], eval_at: F) -> F {
 
 #[cfg(test)]
 mod tests {
-    use algebra::{test_rng, One, Zero};
-    use ff_fft::DensePolynomial;
+    use ark_ff::{test_rng, One, Zero};
+    use ark_poly::DensePolynomial;
     use rand::Rng;
 
     use crate::data_structures::test_field::TestField;

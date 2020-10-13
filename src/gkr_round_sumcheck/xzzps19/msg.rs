@@ -1,11 +1,11 @@
 #[cfg(feature = "std")]
-use algebra_core::io::ErrorKind;
-use algebra_core::io::{Error as IOError, Read, Result as IOResult, Write};
-use algebra_core::{CanonicalDeserialize, CanonicalSerialize, Field, SerializationError, ToBytes};
-
+use ark_std::io::ErrorKind;
+use ark_std::io::{Error as IOError, Read, Result as IOResult, Write};
+use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, SerializationError};
+use ark_ff::{Field, ToBytes};
 use crate::data_structures::protocol::Message;
-
-#[derive(Debug, Eq, PartialEq, Clone)]
+use ark_std::fmt;
+#[derive(fmt::Debug, Eq, PartialEq, Clone)]
 /// Message used for prover, received by verifier.
 pub(crate) struct XZZPS19PMsg<F: Field>(pub(crate) F, pub(crate) F, pub(crate) F);
 
@@ -55,7 +55,7 @@ impl<F: Field> ToBytes for XZZPS19PMsg<F> {
 }
 
 /// Message sent from verifier to prover
-#[derive(Debug, Eq, PartialEq, Clone)]
+#[derive(fmt::Debug, Eq, PartialEq, Clone)]
 pub(crate) struct XZZPS19VMsg<F: Field> {
     /// The fixed argument x
     ///
@@ -106,7 +106,7 @@ impl<F: Field> ToBytes for XZZPS19VMsg<F> {
 
 #[cfg(test)]
 mod tests {
-    use algebra::{test_rng, UniformRand};
+    use ark_ff::{test_rng, UniformRand};
 
     use crate::data_structures::protocol::tests::test_message_serialization;
     use crate::data_structures::test_field::TestField as TF;

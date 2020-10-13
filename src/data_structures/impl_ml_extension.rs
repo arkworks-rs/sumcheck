@@ -1,7 +1,7 @@
 use core::marker::PhantomData;
 
-use algebra_core::log2;
-use algebra_core::Field;
+use ark_std::log2;
+use ark_ff::Field;
 use ark_std::string::String;
 use ark_std::vec::Vec;
 use hashbrown::HashMap;
@@ -36,7 +36,7 @@ where
         let nv3 = unwrap_safe!(f3.num_variables());
         if nv2 != nv3 || nv1 != 3 * nv2 || nv1 != 3 * nv3 {
             return Err(crate::Error::InvalidArgumentError(Some(
-                algebra_core::format!("Numbers of variables mismatch. {}, {}, {}", nv1, nv2, nv3),
+                format!("Numbers of variables mismatch. {}, {}, {}", nv1, nv2, nv3),
             )));
         }
         Ok(GKRAsLink {
@@ -115,10 +115,10 @@ impl<F: Field> MLExtensionArray<F> {
     /// array form P[`0b1011`]=7 (i.e. P[11]=7)
     ///
     /// ```
-    /// # use algebra::{UniformRand, Field, One, Zero, test_rng};
+    /// # use ark_ff::{UniformRand, Field, One, Zero, test_rng};
     /// # use linear_sumcheck::data_structures::MLExtensionArray;
     /// # use linear_sumcheck::data_structures::ml_extension::MLExtension;
-    /// # type F = algebra::bls12_377::Fr;
+    /// # type F = ark_test_curves::bls12_381::Fr;
     /// // create a degree-4 polynomial.
     /// # let mut rng = test_rng();
     /// let poly: Vec<_> = (0..(1<<4)).map(|_|F::rand(&mut rng)).collect();
@@ -133,10 +133,10 @@ impl<F: Field> MLExtensionArray<F> {
     /// copying the data. This constructor takes O(1) time.
     ///
     /// ```
-    /// # use algebra::{UniformRand, Field, One, Zero, test_rng};
+    /// # use ark_ff::{UniformRand, Field, One, Zero, test_rng};
     /// # use linear_sumcheck::data_structures::MLExtensionArray;
     /// # use linear_sumcheck::data_structures::ml_extension::MLExtension;
-    /// # type F = algebra::bls12_377::Fr;
+    /// # type F = ark_test_curves::bls12_381::Fr;
     /// // create a degree-4 polynomial.
     /// # let mut rng = test_rng();
     /// let poly: Vec<_> = (0..(1<<4)).map(|_|F::rand(&mut rng)).collect();
@@ -274,12 +274,12 @@ impl<F: Field> SparseMLExtensionMap<F> {
         for (arg, v) in data {
             if *arg >= (1 << num_variables) {
                 return Err(crate::Error::InvalidArgumentError(Some(
-                    algebra_core::format!("Binary Argument {} is too large.", arg),
+                    format!("Binary Argument {} is too large.", arg),
                 )));
             }
             if let Some(pv) = store.insert(*arg, *v) {
                 return Err(crate::Error::InvalidArgumentError(Some(
-                    algebra_core::format!(
+                    format!(
                         "Duplicate argument ({}, {}) and ({}, {})",
                         arg,
                         pv,
@@ -398,7 +398,7 @@ impl<F: Field> MLExtension<F> for SparseMLExtensionMap<F> {
 
 #[cfg(test)]
 pub mod tests {
-    use algebra::{test_rng, Field, UniformRand};
+    use ark_ff::{test_rng, UniformRand, Field};
     use ark_std::collections::BTreeMap;
     use ark_std::vec::Vec;
     use rand::Rng;
@@ -412,7 +412,7 @@ pub mod tests {
     };
     use crate::data_structures::ml_extension::MLExtension;
     use crate::data_structures::test_field::TestField;
-    use algebra_core::prelude::Zero;
+    use ark_ff::prelude::Zero;
     pub type SparseMap<F> = BTreeMap<usize, F>;
 
     #[test]

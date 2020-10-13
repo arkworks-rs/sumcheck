@@ -1,6 +1,6 @@
 /// interactive protocol for GKR function
-use algebra_core::{CanonicalDeserialize, CanonicalSerialize, Field};
-
+use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
+use ark_ff::Field;
 use crate::data_structures::protocol::VerifierProtocol;
 use crate::data_structures::random::RnFg;
 

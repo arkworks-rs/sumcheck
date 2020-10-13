@@ -6,7 +6,7 @@ use core::fmt::Display;
 
 use crate::error::Error;
 /// multilinear extensions
-use algebra_core::Field;
+use ark_ff::Field;
 
 /// Multilinear Extension
 ///
@@ -25,7 +25,7 @@ where
     type BinaryArg: From<usize> + Into<usize> + Copy;
 
     /// Error Type
-    type Error: algebra_core::Error + From<Error> + Display;
+    type Error: ark_std::error::Error + From<Error> + Display;
 
     /// Number of variables (L)
     ///
@@ -78,7 +78,7 @@ where
     D: MLExtension<F>,
 {
     /// Error Type
-    type Error: algebra_core::Error + From<Error> + Display;
+    type Error: From<Error> + Display;
 
     /// Get f1
     fn get_f1(&self) -> &S;
@@ -97,8 +97,9 @@ where
 #[cfg(test)]
 pub mod tests {
     use crate::data_structures::ml_extension::{MLExtension, SparseMLExtension};
-    use algebra::{test_rng, Field};
-    use algebra_core::vec::Vec;
+    use ark_ff::test_rng;
+    use ark_std::vec::Vec;
+    use ark_ff::Field;
 
     /// utility: evaluate multilinear extension (in form of data array) at a random point in Field
     fn evaluate_data_array<F: Field>(data: &[F], point: &[F]) -> F {

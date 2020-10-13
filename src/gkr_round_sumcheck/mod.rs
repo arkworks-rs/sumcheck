@@ -4,8 +4,8 @@
 
 use ark_std::vec::Vec;
 
-use algebra_core::{CanonicalDeserialize, CanonicalSerialize, Field};
-
+use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
+use ark_ff::Field;
 pub(crate) use prover::Prover;
 pub(crate) use verifier::{GKRFuncVerifierSubclaim, Verifier};
 
@@ -40,7 +40,7 @@ where
     /// The proof of the claim that can be verified offline.
     type Proof: GKRRoundProof;
     /// type of Error
-    type Error: algebra_core::Error + From<crate::Error>;
+    type Error: ark_std::error::Error + From<crate::Error>;
     /// The output of the function `verify_proof`. If the claim is true, then the subclaim must be true.
     type SubClaim: GKRRoundSubClaim<F>;
     /// Given the GKR function and fixed point `g`, calculate the sum and generate a claim of the sum.
@@ -118,7 +118,7 @@ pub trait GKRRoundSubClaim<F: Field>: Clone + CanonicalSerialize + CanonicalDese
 
 #[cfg(test)]
 pub mod tests {
-    use algebra::Field;
+    use ark_ff::Field;
 
     use crate::data_structures::ml_extension::{MLExtension, SparseMLExtension};
     use crate::gkr_round_sumcheck::GKRRoundSumcheck;

@@ -1,5 +1,10 @@
-use algebra_core::io::{Read, Write};
-use algebra_core::{CanonicalDeserialize, CanonicalSerialize, Field, SerializationError};
+use ark_std::io::{Read, Write};
+use ark_serialize::{
+    CanonicalDeserialize,
+    CanonicalSerialize,
+    SerializationError
+};
+use ark_ff::Field;
 
 use crate::data_structures::protocol::{Protocol, VerifierProtocol, VerifierState};
 use crate::data_structures::random::{FeedableRNG, RnFg};
@@ -221,8 +226,8 @@ impl<F: Field> CanonicalDeserialize for XZZPS19Subclaim<F> {
 
 #[cfg(test)]
 mod tests {
-    use algebra::{test_rng, One, Zero};
-    use ff_fft::DensePolynomial;
+    use ark_ff::{test_rng, One, Zero};
+    use ark_poly::DensePolynomial;
     use rand::Rng;
 
     use crate::data_structures::test_field::TestField;

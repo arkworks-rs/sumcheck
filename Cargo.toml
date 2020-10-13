@@ -12,7 +12,8 @@ path = "src/lib.rs"
 
 
 [dependencies]
-algebra-core = { git = "https://github.com/scipr-lab/zexe/", default-features = false, features = [ "derive" ] }
+ark-ff = { git = "https://github.com/arkworks-rs/algebra", default-features = false }
+ark-serialize = { git = "https://github.com/arkworks-rs/algebra", default-features = false , features = ["derive"]}
 rand_core = { version = "0.5", default-features = false }
 rand = {version = "0.7.3", default-features = false}
 blake2 = { version = "0.9", default-features = false }
@@ -20,9 +21,9 @@ ark-std = { git = "https://github.com/arkworks-rs/utils/", default-features = fa
 hashbrown = { version = "0.9.1" }
 
 [dev-dependencies]
-ff-fft = { git = "https://github.com/scipr-lab/zexe/", default-features = false} # for unit testing
-algebra = { git = "https://github.com/scipr-lab/zexe/", default-features = false, features = [ "bls12_377", "ed_on_bls12_381" ] }
+ark-poly = { git = "https://github.com/arkworks-rs/algebra", default-features = false} # for unit testing
+ark-test-curves = { git = "https://github.com/arkworks-rs/algebra", default-features = false, features=["bls12_381_scalar_field", "bls12_381_curve"]}
 
 [features]
 default = ["std"]
-std = ["algebra-core/std", "rand/std", "rand_core/std", "blake2/std", "ark-std/std"]
+std = ["ark-ff/std", "ark-serialize/std","rand/std", "rand_core/std", "blake2/std", "ark-std/std", "ark-poly/std"]

@@ -1,4 +1,4 @@
-use algebra_core::Field;
+use ark_ff::Field;
 
 use crate::data_structures::ml_extension::MLExtension;
 use crate::data_structures::protocol::Protocol;
@@ -156,7 +156,7 @@ mod tests {
     use crate::data_structures::{AsDummyFeedable, MLExtensionArray};
     use crate::ml_sumcheck::t13::prover::MLLibraProver;
     use crate::ml_sumcheck::t13::MLLibraVerifier;
-    use algebra::{test_rng, UniformRand};
+    use ark_ff::{test_rng, UniformRand};
 
     use ark_std::vec::Vec;
 
