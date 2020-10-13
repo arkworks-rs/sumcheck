@@ -1,10 +1,6 @@
-use ark_std::io::{Read, Write};
-use ark_serialize::{
-    CanonicalDeserialize,
-    CanonicalSerialize,
-    SerializationError
-};
 use ark_ff::Field;
+use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, SerializationError};
+use ark_std::io::{Read, Write};
 
 use crate::data_structures::protocol::{Protocol, VerifierProtocol, VerifierState};
 use crate::data_structures::random::{FeedableRNG, RnFg};

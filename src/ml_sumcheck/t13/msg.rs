@@ -1,6 +1,6 @@
-use ark_std::io::Result as IOResult;
-use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, Read, SerializationError, Write};
 use ark_ff::{Field, ToBytes};
+use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, Read, SerializationError, Write};
+use ark_std::io::Result as IOResult;
 
 use crate::data_structures::protocol::Message;
 

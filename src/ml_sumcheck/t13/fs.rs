@@ -1,5 +1,5 @@
 use ark_ff::Field;
-use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, SerializationError, Read, Write};
+use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, Read, SerializationError, Write};
 
 use ark_std::vec::Vec;
 use core::marker::PhantomData;

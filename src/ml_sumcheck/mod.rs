@@ -2,9 +2,9 @@
 //!
 //! More details can be found in the documentation of [`MLSumcheck`](trait.MLSumcheck.html)
 
-use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
-use ark_ff::Field;
 use crate::data_structures::ml_extension::MLExtension;
+use ark_ff::Field;
+use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
 use ark_std::vec::Vec;
 pub mod t13;
 

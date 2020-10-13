@@ -4,8 +4,8 @@
 
 use ark_std::vec::Vec;
 
-use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
 use ark_ff::Field;
+use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
 pub(crate) use prover::Prover;
 pub(crate) use verifier::{GKRFuncVerifierSubclaim, Verifier};
 

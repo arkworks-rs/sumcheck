@@ -1,7 +1,7 @@
 use core::marker::PhantomData;
 
-use ark_std::log2;
 use ark_ff::Field;
+use ark_std::log2;
 use ark_std::string::String;
 use ark_std::vec::Vec;
 use hashbrown::HashMap;
@@ -35,9 +35,10 @@ where
         let nv2 = unwrap_safe!(f2.num_variables());
         let nv3 = unwrap_safe!(f3.num_variables());
         if nv2 != nv3 || nv1 != 3 * nv2 || nv1 != 3 * nv3 {
-            return Err(crate::Error::InvalidArgumentError(Some(
-                format!("Numbers of variables mismatch. {}, {}, {}", nv1, nv2, nv3),
-            )));
+            return Err(crate::Error::InvalidArgumentError(Some(format!(
+                "Numbers of variables mismatch. {}, {}, {}",
+                nv1, nv2, nv3
+            ))));
         }
         Ok(GKRAsLink {
             f1,
@@ -273,20 +274,16 @@ impl<F: Field> SparseMLExtensionMap<F> {
         let mut store = SparseMap::new();
         for (arg, v) in data {
             if *arg >= (1 << num_variables) {
-                return Err(crate::Error::InvalidArgumentError(Some(
-                    format!("Binary Argument {} is too large.", arg),
-                )));
+                return Err(crate::Error::InvalidArgumentError(Some(format!(
+                    "Binary Argument {} is too large.",
+                    arg
+                ))));
             }
             if let Some(pv) = store.insert(*arg, *v) {
-                return Err(crate::Error::InvalidArgumentError(Some(
-                    format!(
-                        "Duplicate argument ({}, {}) and ({}, {})",
-                        arg,
-                        pv,
-                        arg,
-                        v
-                    ),
-                )));
+                return Err(crate::Error::InvalidArgumentError(Some(format!(
+                    "Duplicate argument ({}, {}) and ({}, {})",
+                    arg, pv, arg, v
+                ))));
             }
         }
         Ok(Self {
@@ -398,7 +395,7 @@ impl<F: Field> MLExtension<F> for SparseMLExtensionMap<F> {
 
 #[cfg(test)]
 pub mod tests {
-    use ark_ff::{test_rng, UniformRand, Field};
+    use ark_ff::{test_rng, Field, UniformRand};
     use ark_std::collections::BTreeMap;
     use ark_std::vec::Vec;
     use rand::Rng;

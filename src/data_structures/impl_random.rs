@@ -1,5 +1,5 @@
-use ark_serialize::CanonicalSerialize;
 use ark_ff::{Field, ToBytes};
+use ark_serialize::CanonicalSerialize;
 
 #[allow(unused_imports)]
 use ark_std::vec::Vec;

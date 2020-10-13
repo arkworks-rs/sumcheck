@@ -1,8 +1,8 @@
 use ark_std::fmt::{Debug, Display};
 
-use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
-use ark_ff::ToBytes;
 use crate::error::Error;
+use ark_ff::ToBytes;
+use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
 
 /// Message trait
 pub(crate) trait Message:

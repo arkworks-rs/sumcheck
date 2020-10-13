@@ -1,10 +1,10 @@
+use crate::data_structures::protocol::Message;
+use ark_ff::{Field, ToBytes};
+use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, SerializationError};
+use ark_std::fmt;
 #[cfg(feature = "std")]
 use ark_std::io::ErrorKind;
 use ark_std::io::{Error as IOError, Read, Result as IOResult, Write};
-use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, SerializationError};
-use ark_ff::{Field, ToBytes};
-use crate::data_structures::protocol::Message;
-use ark_std::fmt;
 #[derive(fmt::Debug, Eq, PartialEq, Clone)]
 /// Message used for prover, received by verifier.
 pub(crate) struct XZZPS19PMsg<F: Field>(pub(crate) F, pub(crate) F, pub(crate) F);

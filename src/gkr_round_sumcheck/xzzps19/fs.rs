@@ -1,8 +1,8 @@
 use core::marker::PhantomData;
 
-use ark_std::io::{Read, Write};
-use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, SerializationError};
 use ark_ff::Field;
+use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, SerializationError};
+use ark_std::io::{Read, Write};
 
 use crate::data_structures::ml_extension::{MLExtension, SparseMLExtension};
 use crate::data_structures::protocol::Protocol;

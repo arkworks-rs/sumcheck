@@ -1,8 +1,8 @@
-/// interactive protocol for GKR function
-use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
-use ark_ff::Field;
 use crate::data_structures::protocol::VerifierProtocol;
 use crate::data_structures::random::RnFg;
+use ark_ff::Field;
+/// interactive protocol for GKR function
+use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
 
 /// The sub-claim as output of the verifier.
 /// The sub-claim contains a point, and an expected value that `P(point)` should evaluate t0, where
