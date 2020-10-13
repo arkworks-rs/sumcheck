@@ -1,4 +1,4 @@
-use algebra_core::{Error, Field, ToBytes};
+use algebra_core::{CanonicalSerialize, Error, Field, ToBytes};
 use rand_core::RngCore;
 
 /// Random Field Element Generator
@@ -19,7 +19,11 @@ pub trait FeedableRNG: RngCore {
     fn setup() -> Self;
 
     /// The feed message provide randomness for the generator, given the message.
+    /// (This function will be eventually replaced by `feed_randomness`)
     fn feed<M: ToBytes>(&mut self, msg: &M) -> Result<(), Self::Error>;
+
+    /// Provide randomness for the generator, given the message.
+    fn feed_randomness<M: CanonicalSerialize>(&mut self, msg: &M) -> Result<(), Self::Error>;
 }
 
 #[cfg(test)]

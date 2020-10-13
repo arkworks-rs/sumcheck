@@ -24,20 +24,19 @@ impl<F: Field> MLSumcheck<F> for T13Sumcheck<F> {
     type SubClaim = T13Subclaim<F>;
 
     fn generate_claim_and_proof<P: MLExtension<F>>(
-        poly: &[P],
+        poly: &[&[P]],
     ) -> Result<(Self::Claim, Self::Proof), Self::Error> {
-        let mut prover = unwrap_safe!(MLLibraProver::setup(poly));
-        let mut messages = Vec::with_capacity(unwrap_safe!(poly[0].num_variables()));
+        let mut prover = MLLibraProver::setup(poly)?;
+        let mut messages = Vec::with_capacity(unwrap_safe!(poly[0][0].num_variables()));
         let mut rng = Blake2s512Rng::setup();
         while prover.is_active() {
-            let msg = prover.get_latest_message();
-            let msg = unwrap_safe!(msg);
+            let msg = prover.get_latest_message()?;
             messages.push(msg.clone());
-            unwrap_safe!(rng.feed(&msg));
+            rng.feed(&msg)?;
             let v_msg = MLLibraVMsg {
                 x: rng.random_field(),
             };
-            unwrap_safe!(prover.push_message(&v_msg));
+            prover.push_message(&v_msg)?;
         }
 
         let gen_sum: F = {
@@ -46,7 +45,7 @@ impl<F: Field> MLSumcheck<F> for T13Sumcheck<F> {
         };
 
         let claim = Self::Claim {
-            num_variables: poly[0].num_variables().unwrap() as u32,
+            num_variables: poly[0][0].num_variables().unwrap() as u32,
             num_multiplicands: poly.len() as u32,
             sum: gen_sum,
         };

@@ -74,6 +74,7 @@ where
 }
 
 /// An implementation of multilinear extension, storing the data of underlying array.
+#[derive(Clone)]
 pub struct MLExtensionArray<F: Field> {
     store: Vec<F>,
     num_variables: usize,
@@ -155,6 +156,13 @@ impl<F: Field> MLExtensionArray<F> {
             num_variables,
             store: data,
         })
+    }
+
+    /// negate the polynomial
+    pub fn negate(&self) -> Result<Self, crate::Error> {
+        Ok(Self::from_vec(
+            self.store.iter().map(|&v| v.neg()).collect(),
+        )?)
     }
 }
 
@@ -402,8 +410,9 @@ pub mod tests {
     use crate::data_structures::ml_extension::tests::{
         test_basic_extension_methods, test_sparse_extension_methods,
     };
+    use crate::data_structures::ml_extension::MLExtension;
     use crate::data_structures::test_field::TestField;
-
+    use algebra_core::prelude::Zero;
     pub type SparseMap<F> = BTreeMap<usize, F>;
 
     #[test]
@@ -418,6 +427,16 @@ pub mod tests {
             let data = fill_vec!(1 << NUM_VARS, F::rand(&mut rng));
             let poly = MLExtensionArray::from_slice(&data).unwrap();
             test_basic_extension_methods(&poly, &data, true);
+
+            // test negate
+            let data = fill_vec!(1 << NUM_VARS, F::rand(&mut rng));
+            let poly = MLExtensionArray::from_slice(&data).unwrap();
+            let poly2 = poly.negate().unwrap();
+            let point = fill_vec!(NUM_VARS, F::rand(&mut rng));
+            assert_eq!(
+                poly.eval_at(&point).unwrap() + poly2.eval_at(&point).unwrap(),
+                F::zero()
+            )
         }
     }
 

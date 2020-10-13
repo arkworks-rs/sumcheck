@@ -17,20 +17,25 @@ pub mod t13;
 ///
 /// ### Example Usage
 /// ```
-/// use linear_sumcheck::ml_sumcheck::t13::{T13Sumcheck, T13Subclaim}; // an implementation of MLSumcheck
-/// use algebra::{test_rng, UniformRand};
-/// use linear_sumcheck::ml_sumcheck::{MLSumcheck, MLSumcheckSubclaim};
-/// use linear_sumcheck::data_structures::MLExtensionArray;
-/// use linear_sumcheck::data_structures::ml_extension::MLExtension;
-/// type F = algebra::bls12_377::Fr;  // specify the field. any valid field should work here.
-/// // create a degree-7 multilinear polynomial with 5 multiplicands
-/// let mut rng = test_rng();
+/// # use linear_sumcheck::ml_sumcheck::t13::{T13Sumcheck, T13Subclaim}; // an implementation of MLSumcheck
+/// # use algebra::{test_rng, UniformRand};
+/// # use linear_sumcheck::ml_sumcheck::{MLSumcheck, MLSumcheckSubclaim};
+/// # use linear_sumcheck::data_structures::MLExtensionArray;
+/// # use linear_sumcheck::data_structures::ml_extension::MLExtension;
+/// # type F = algebra::bls12_377::Fr;  // specify the field. any valid field should work here.
+/// # let mut rng = test_rng();
+/// // create a 7-variate multilinear polynomial with 5 multiplicands
 /// let poly: Vec<_> = (0..5).map(|_|{
 ///     let arr: Vec<_> = (0..(1<<7)).map(|_|F::rand(&mut rng)).collect();
 ///     MLExtensionArray::from_slice(&arr).unwrap()
 /// }).collect();
+/// // create a 7-variate multilinear polynomial with 3 multiplicands
+/// let poly2: Vec<_> = (0..3).map(|_|{
+///     let arr: Vec<_> = (0..(1<<7)).map(|_|F::rand(&mut rng)).collect();
+///     MLExtensionArray::from_slice(&arr).unwrap()
+/// }).collect();
 /// // generate claim and proof
-/// let (claim, proof) = T13Sumcheck::generate_claim_and_proof(&poly).unwrap();
+/// let (claim, proof) = T13Sumcheck::generate_claim_and_proof(&[&poly,&poly2]).unwrap();
 ///
 /// // verify proof
 /// let subclaim: T13Subclaim<F>= T13Sumcheck::verify_proof(&claim, &proof).unwrap();
@@ -53,9 +58,10 @@ where
     type SubClaim: MLSumcheckSubclaim<F>;
 
     /// Calculate the sum of the polynomial and generate the proof.
-    /// * `poly`: product of multilinear functions represented by an iterator of multilinear function
+    /// * `poly`: array of product of multilinear functions represented by an iterator of multilinear function.
+    /// the polynomial we want to prove is those products added together.
     fn generate_claim_and_proof<P: MLExtension<F>>(
-        poly: &[P],
+        poly: &[&[P]],
     ) -> Result<(Self::Claim, Self::Proof), Self::Error>;
 
     /// verify if proof correctly proves the claim. Return error if the proof is trivially wrong, or the claim or proof does not
@@ -72,7 +78,7 @@ pub trait MLSumcheckClaim<F>: Clone + CanonicalSerialize + CanonicalDeserialize 
     fn asserted_sum(&self) -> F;
     /// number of variables of polynomial
     fn num_variables(&self) -> u32;
-    /// number of multiplicands of polynomial
+    /// maximum number of multiplicands of polynomial
     fn num_multiplicands(&self) -> u32;
 }
 
@@ -98,23 +104,31 @@ pub mod tests {
     pub fn test_ml_proc_completeness<F: Field, S: MLSumcheck<F>>() {
         const NV: usize = 9;
         const NM: usize = 5;
+        const NM2: usize = 3;
         let mut rng = test_rng();
         let poly: Vec<_> = (0..NM)
             .map(|_| MLExtensionArray::from_slice(&fill_vec!(1 << NV, F::rand(&mut rng))).unwrap())
             .collect();
-        let (claim, proof) = S::generate_claim_and_proof(&poly).unwrap();
+        let poly2: Vec<_> = (0..NM2)
+            .map(|_| MLExtensionArray::from_slice(&fill_vec!(1 << NV, F::rand(&mut rng))).unwrap())
+            .collect();
+        let (claim, proof) = S::generate_claim_and_proof(&[&poly, &poly2]).unwrap();
         let subclaim = S::verify_proof(&claim, &proof).unwrap();
 
         // verify subclaim
-        let expected_evs = poly
-            .iter()
-            .map(|p| p.eval_at(&subclaim.evaluation_point()))
+        let expected_evs = eval_pmf(&poly, &subclaim.evaluation_point())
+            + eval_pmf(&poly2, &subclaim.evaluation_point());
+        assert_eq!(subclaim.expected_evaluations(), expected_evs);
+    }
+
+    fn eval_pmf<F: Field>(pmf: &[MLExtensionArray<F>], at: &[F]) -> F {
+        pmf.iter()
+            .map(|p| p.eval_at(at))
             .scan(F::one(), |state, x| {
                 *state *= x.unwrap();
                 Some(*state)
             })
             .last()
-            .unwrap();
-        assert_eq!(subclaim.expected_evaluations(), expected_evs);
+            .unwrap()
     }
 }

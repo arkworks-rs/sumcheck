@@ -1,4 +1,4 @@
-use algebra_core::{Field, ToBytes};
+use algebra_core::{CanonicalSerialize, Field, ToBytes};
 #[allow(unused_imports)]
 use ark_std::vec::Vec;
 use blake2::{Blake2s, Digest};
@@ -54,6 +54,11 @@ impl<R: RngCore> FeedableRNG for AsDummyFeedable<R> {
     fn feed<M: ToBytes>(&mut self, _msg: &M) -> Result<(), Self::Error> {
         Ok(())
     }
+
+    /// no-op
+    fn feed_randomness<M: CanonicalSerialize>(&mut self, _msg: &M) -> Result<(), Self::Error> {
+        Ok(())
+    }
 }
 
 /// 512-bits digest hash pseudorandom generator
@@ -73,7 +78,14 @@ impl FeedableRNG for Blake2s512Rng {
 
     fn feed<M: ToBytes>(&mut self, msg: &M) -> Result<(), Self::Error> {
         let mut buf = Vec::new();
-        unwrap_safe!(msg.write(&mut buf));
+        msg.write(&mut buf)?;
+        self.current_digest.update(&buf);
+        Ok(())
+    }
+
+    fn feed_randomness<M: CanonicalSerialize>(&mut self, msg: &M) -> Result<(), Self::Error> {
+        let mut buf = Vec::new();
+        msg.serialize(&mut buf)?;
         self.current_digest.update(&buf);
         Ok(())
     }
