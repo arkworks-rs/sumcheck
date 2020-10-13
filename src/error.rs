@@ -39,13 +39,6 @@ impl From<ark_std::io::Error> for Error {
     }
 }
 
-#[cfg(not(feature = "std"))]
-impl From<algebra_core::io::Error> for Error {
-    fn from(_: algebra_core::io::Error) -> Self {
-        Self::IOError
-    }
-}
-
 impl From<ark_serialize::SerializationError> for Error {
     fn from(_: ark_serialize::SerializationError) -> Self {
         Self::SerializationError
