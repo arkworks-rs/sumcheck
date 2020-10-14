@@ -9,7 +9,7 @@ use crate::data_structures::protocol::Protocol;
 use crate::data_structures::random::{FeedableRNG, RnFg};
 use crate::data_structures::Blake2s512Rng;
 use crate::ml_sumcheck::t13::msg::{MLLibraPMsg, MLLibraVMsg};
-use crate::ml_sumcheck::t13::{MLLibraProver, MLLibraVerifier};
+use crate::ml_sumcheck::t13::{interpolate_deg_n_poly, MLLibraProver, MLLibraVerifier};
 use crate::ml_sumcheck::{MLSumcheck, MLSumcheckClaim, MLSumcheckSubclaim};
 
 /// `thaler13` implementation of sumcheck protocol of product of multilinear functions
@@ -24,11 +24,15 @@ impl<F: Field> MLSumcheck<F> for T13Sumcheck<F> {
     type SubClaim = T13Subclaim<F>;
 
     fn generate_claim_and_proof<P: MLExtension<F>>(
+        iv: &impl CanonicalSerialize,
         poly: &[&[P]],
-    ) -> Result<(Self::Claim, Self::Proof), Self::Error> {
+    ) -> Result<(Self::Claim, Self::Proof, Self::SubClaim), Self::Error> {
         let mut prover = MLLibraProver::setup(poly)?;
         let mut messages = Vec::with_capacity(unwrap_safe!(poly[0][0].num_variables()));
         let mut rng = Blake2s512Rng::setup();
+        let mut fixed_arguments = Vec::new();
+        let mut round = 0;
+        rng.feed_randomness(iv)?;
         while prover.is_active() {
             let msg = prover.get_latest_message()?;
             messages.push(msg.clone());
@@ -37,6 +41,8 @@ impl<F: Field> MLSumcheck<F> for T13Sumcheck<F> {
                 x: rng.random_field(),
             };
             prover.push_message(&v_msg)?;
+            fixed_arguments.push(v_msg.x);
+            round += 1;
         }
 
         let gen_sum: F = {
@@ -52,15 +58,28 @@ impl<F: Field> MLSumcheck<F> for T13Sumcheck<F> {
         let proof = Self::Proof {
             prover_messages: messages,
         };
-        Ok((claim, proof))
+        let expected_evaluation = {
+            let evaluations = prover.get_message(round)?.evaluations;
+            interpolate_deg_n_poly(&evaluations, fixed_arguments[(round - 1) as usize])
+        };
+        Ok((
+            claim,
+            proof,
+            T13Subclaim {
+                fixed_arguments,
+                evaluation: expected_evaluation,
+            },
+        ))
     }
 
     fn verify_proof(
+        iv: &impl CanonicalSerialize,
         claim: &Self::Claim,
         proof: &Self::Proof,
     ) -> Result<Self::SubClaim, Self::Error> {
-        let verifier =
-            MLLibraVerifier::setup(claim.num_variables, claim.sum, Blake2s512Rng::setup());
+        let mut rng = Blake2s512Rng::setup();
+        rng.feed_randomness(iv)?;
+        let verifier = MLLibraVerifier::setup(claim.num_variables, claim.sum, rng);
         let mut verifier: MLLibraVerifier<_, _> = unwrap_safe!(verifier);
         for msg in &proof.prover_messages {
             unwrap_safe!(verifier.push_message(msg));
@@ -106,8 +125,11 @@ pub struct T13Proof<F: Field> {
 #[derive(CanonicalSerialize, CanonicalDeserialize, Clone)]
 /// Subclaim of T13 Verifier
 pub struct T13Subclaim<F: Field> {
-    fixed_arguments: Vec<F>,
-    evaluation: F,
+    /// the randomness provided by the random oracle in the Fiat-Shamir Transform
+    /// i.e. a point in the polynomial
+    pub fixed_arguments: Vec<F>,
+    /// the desired evaluation of polynomial at this point.
+    pub evaluation: F,
 }
 
 impl<F: Field> MLSumcheckSubclaim<F> for T13Subclaim<F> {

@@ -146,7 +146,7 @@ impl<F: Field, R: RnFg<F> + FeedableRNG> Protocol for MLLibraVerifier<F, R> {
     }
 }
 
-fn interpolate_deg_n_poly<F: Field>(p_i: &[F], eval_at: F) -> F {
+pub(crate) fn interpolate_deg_n_poly<F: Field>(p_i: &[F], eval_at: F) -> F {
     let mut result = F::zero();
     let mut i = F::zero();
     for term in p_i.iter() {
