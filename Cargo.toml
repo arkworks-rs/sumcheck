@@ -21,9 +21,9 @@ ark-std = { git = "https://github.com/arkworks-rs/utils/", default-features = fa
 hashbrown = { version = "0.9.1" }
 
 [dev-dependencies]
-ark-poly = { git = "https://github.com/arkworks-rs/algebra", default-features = false} # for unit testing
+ark-poly = { git = "https://github.com/arkworks-rs/algebra"} # for unit testing
 ark-test-curves = { git = "https://github.com/arkworks-rs/algebra", default-features = false, features=["bls12_381_scalar_field", "bls12_381_curve"]}
 
 [features]
 default = ["std"]
-std = ["ark-ff/std", "ark-serialize/std","rand/std", "rand_core/std", "blake2/std", "ark-std/std", "ark-poly/std"]
+std = ["ark-ff/std", "ark-serialize/std","rand/std", "rand_core/std", "blake2/std", "ark-std/std"]
