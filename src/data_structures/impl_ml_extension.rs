@@ -165,6 +165,20 @@ impl<F: Field> MLExtensionArray<F> {
             self.store.iter().map(|&v| v.neg()).collect(),
         )?)
     }
+
+    /// multiply the polynomial by a constant
+    pub fn multiply(&self, by: F) -> Result<Self, crate::Error> {
+        Ok(Self::from_vec(
+            self.store.iter().map(|&v| v * by).collect(),
+        )?)
+    }
+
+    /// add the polynomial by a constant
+    pub fn add(&self, with: F) -> Result<Self, crate::Error> {
+        Ok(Self::from_vec(
+            self.store.iter().map(|&v| v + with).collect(),
+        )?)
+    }
 }
 
 impl<F: Field> MLExtension<F> for MLExtensionArray<F> {
@@ -412,6 +426,7 @@ pub mod tests {
     use ark_ff::prelude::Zero;
     pub type SparseMap<F> = BTreeMap<usize, F>;
 
+    //noinspection RsBorrowChecker
     #[test]
     /// Test multilinear extension works.
     fn test_dense_ml_functionality() {
@@ -433,6 +448,22 @@ pub mod tests {
             assert_eq!(
                 poly.eval_at(&point).unwrap() + poly2.eval_at(&point).unwrap(),
                 F::zero()
+            );
+
+            // test linear operation
+            let data = fill_vec!(1 << NUM_VARS, F::rand(&mut rng));
+            let poly = MLExtensionArray::from_slice(&data).unwrap();
+            let point = fill_vec!(NUM_VARS, F::rand(&mut rng));
+            let multiply_factor = F::rand(&mut rng);
+            let add_value = F::rand(&mut rng);
+            assert_eq!(
+                poly.multiply(multiply_factor)
+                    .unwrap()
+                    .add(add_value)
+                    .unwrap()
+                    .eval_at(&point)
+                    .unwrap(),
+                poly.eval_at(&point).unwrap() * multiply_factor + add_value
             )
         }
     }
