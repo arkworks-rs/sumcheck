@@ -16,7 +16,8 @@ pub struct Index<F: Field> {
     pub num_variables: usize,
     /// sum of product of multilinear extensions
     pub add_table: Vec<Vec<Vec<F>>>,
-    #[doc(hidden)] _marker: PhantomData<F>,
+    #[doc(hidden)]
+    _marker: PhantomData<F>,
 }
 
 #[derive(CanonicalSerialize)]
@@ -38,10 +39,11 @@ impl<F: Field> Index<F> {
     }
 }
 
-
 impl<F: Field> AHPForMLSumcheck<F> {
     /// index the polynomial
-    pub fn index<P: MLExtension<F>>(polynomial: &ArithmeticCombination<F, P>) -> Result<Index<F>, crate::Error> {
+    pub fn index<P: MLExtension<F>>(
+        polynomial: &ArithmeticCombination<F, P>,
+    ) -> Result<Index<F>, crate::Error> {
         let num_variables = polynomial.num_variables;
         let max_multiplicands = polynomial.max_multiplicands;
         let mut add_table = Vec::new();
@@ -64,13 +66,11 @@ impl<F: Field> AHPForMLSumcheck<F> {
             }
             add_table.push(mul_table);
         }
-        Ok(
-            Index {
-                num_variables,
-                max_multiplicands,
-                add_table,
-                _marker: PhantomData,
-            }
-        )
+        Ok(Index {
+            num_variables,
+            max_multiplicands,
+            add_table,
+            _marker: PhantomData,
+        })
     }
 }

@@ -7,8 +7,8 @@ use core::fmt::Display;
 use crate::error::Error;
 /// multilinear extensions
 use ark_ff::Field;
-use ark_std::marker::PhantomData;
 use ark_std::cmp::max;
+use ark_std::marker::PhantomData;
 
 /// Multilinear Extension
 ///
@@ -104,24 +104,29 @@ pub struct ArithmeticCombination<F: Field, P: MLExtension<F>> {
     pub num_variables: usize,
     /// vector of products of multilinear extension
     pub vector_of_products: Vec<Vec<P>>,
-    #[doc(hidden)] _marker: PhantomData<F>
+    #[doc(hidden)]
+    _marker: PhantomData<F>,
 }
 
 impl<F: Field, P: MLExtension<F>> ArithmeticCombination<F, P> {
     /// generate an empty combination
     pub fn new(num_variables: usize) -> Self {
-        ArithmeticCombination { max_multiplicands: 0,
+        ArithmeticCombination {
+            max_multiplicands: 0,
             num_variables,
             vector_of_products: Vec::new(),
-            _marker: PhantomData }
+            _marker: PhantomData,
+        }
     }
 
     /// add product to this combination
-    pub fn add_product(&mut self, product: impl Iterator<Item=P>) -> Result<(), Error> {
+    pub fn add_product(&mut self, product: impl Iterator<Item = P>) -> Result<(), Error> {
         let product: Vec<_> = product.collect();
-        for poly in product.iter(){
+        for poly in product.iter() {
             if unwrap_safe!(poly.num_variables()) != self.num_variables {
-                return Err(crate::Error::InvalidArgumentError(Some("number of variables mismatch".into())));
+                return Err(crate::Error::InvalidArgumentError(Some(
+                    "number of variables mismatch".into(),
+                )));
             }
         }
         self.max_multiplicands = max(self.max_multiplicands, product.len());
@@ -135,15 +140,15 @@ impl<F: Field, P: MLExtension<F>> ArithmeticCombination<F, P> {
         for product in self.vector_of_products.iter() {
             let mut r = F::one();
             for multiplicand in product.iter() {
-                r *= multiplicand.eval_at(point).map_err(|_|
-                    crate::Error::CausedBy("Evaluation".into()))?;
+                r *= multiplicand
+                    .eval_at(point)
+                    .map_err(|_| crate::Error::CausedBy("Evaluation".into()))?;
             }
             sum += r;
         }
         Ok(sum)
     }
 }
-
 
 #[cfg(test)]
 pub mod tests {
