@@ -5,7 +5,7 @@ use crate::ml_sumcheck::ahp::verifier::VerifierMsg;
 use crate::ml_sumcheck::ahp::AHPForMLSumcheck;
 use ark_ff::Field;
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, Read, SerializationError, Write};
-
+use ark_std::vec::Vec;
 #[derive(Clone, CanonicalSerialize, CanonicalDeserialize)]
 /// Prover Message
 pub struct ProverMsg<F: Field> {

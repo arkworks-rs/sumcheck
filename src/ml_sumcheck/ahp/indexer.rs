@@ -1,12 +1,12 @@
 //! Indexer
 
-use ark_ff::Field;
-use ark_serialize::{CanonicalSerialize, SerializationError, Write};
-use ark_std::marker::PhantomData;
-
 use crate::data_structures::ml_extension::{ArithmeticCombination, MLExtension};
 use crate::error::invalid_args;
 use crate::ml_sumcheck::ahp::AHPForMLSumcheck;
+use ark_ff::Field;
+use ark_serialize::{CanonicalSerialize, SerializationError, Write};
+use ark_std::marker::PhantomData;
+use ark_std::vec::Vec;
 
 /// Index used for MLSumcheck
 pub struct Index<F: Field> {

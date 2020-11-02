@@ -10,7 +10,7 @@ use crate::ml_sumcheck::ahp::verifier::SubClaim;
 use crate::ml_sumcheck::ahp::AHPForMLSumcheck;
 use ark_ff::Field;
 use ark_std::marker::PhantomData;
-
+use ark_std::vec::Vec;
 pub mod ahp;
 
 #[cfg(test)]
