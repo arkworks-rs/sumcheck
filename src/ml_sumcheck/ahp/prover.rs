@@ -7,11 +7,12 @@ use crate::ml_sumcheck::ahp::verifier::VerifierMsg;
 use crate::error::invalid_args;
 
 #[derive(Clone, CanonicalSerialize, CanonicalDeserialize)]
+/// Prover Message
 pub struct ProverMsg<F: Field> {
     /// evaluations on P(0), P(1), P(2), ...
     pub(crate) evaluations: Vec<F>
 }
-
+/// Prover State
 pub struct ProverState<F: Field> {
     randomness: Vec<F>,
     tables: Vec<Vec<Vec<F>>>,
@@ -23,6 +24,9 @@ pub struct ProverState<F: Field> {
 impl<F: Field> AHPForMLSumcheck<F> {
     /// initialize the prover
     pub fn prover_init(index: &Index<F>) -> ProverState<F>{
+        if index.num_variables == 0 {
+            panic!("Attempt to prove a constant.")
+        }
         ProverState{
             randomness: Vec::with_capacity(index.num_variables),
             tables: index.add_table.clone(),

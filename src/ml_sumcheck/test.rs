@@ -92,11 +92,31 @@ fn test_ahp(nv: usize, num_multiplicands_range: (usize, usize), num_products: us
 }
 
 #[test]
-fn test_small_polynomial() {
-    let nv = 8;
+fn test_trivial_polynomial() {
+    let nv = 1;
+    let num_multiplicands_range = (4, 13);
+    let num_products = 5;
+
+    test_polynomial(nv, num_multiplicands_range, num_products);
+    test_ahp(nv, num_multiplicands_range, num_products);
+}
+#[test]
+fn test_normal_polynomial() {
+    let nv = 10;
     let num_multiplicands_range = (4, 9);
     let num_products = 4;
 
     test_polynomial(nv, num_multiplicands_range, num_products);
     test_ahp(nv, num_multiplicands_range, num_products);
 }
+#[test]
+#[should_panic]
+fn zero_polynomial_should_error() {
+    let nv = 0;
+    let num_multiplicands_range = (4, 13);
+    let num_products = 5;
+
+    test_polynomial(nv, num_multiplicands_range, num_products);
+    test_ahp(nv, num_multiplicands_range, num_products);
+}
+

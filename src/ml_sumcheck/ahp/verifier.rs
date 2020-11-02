@@ -7,10 +7,13 @@ use crate::ml_sumcheck::ahp::indexer::IndexInfo;
 use crate::ml_sumcheck::ahp::prover::ProverMsg;
 
 #[derive(Clone, CanonicalSerialize, CanonicalDeserialize)]
+/// Verifier Message
 pub struct VerifierMsg<F: Field> {
+    /// randomness sampled by verifier
     pub randomness: F
 }
 
+/// Verifier State
 pub struct VerifierState<F: Field> {
     expected: F,
     convinced: bool,
@@ -18,7 +21,7 @@ pub struct VerifierState<F: Field> {
     nv: usize,
     fixed_args: Vec<F>
 }
-
+/// Subclaim when verifier is convinced
 pub struct SubClaim<F: Field> {
     /// the multi-dimensional point that this multilinear extension is evaluated to
     pub point: Vec<F>,
