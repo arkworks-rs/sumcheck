@@ -17,8 +17,14 @@ pub enum Error {
     IOError,
     /// Serialization Error
     SerializationError,
+    /// Random Generator Error
+    RNGError,
     /// Other caused by other operations
     CausedBy(String),
+}
+
+pub(crate) fn invalid_args(msg: &str) -> Error {
+    Error::InvalidArgumentError(Some(msg.into()))
 }
 
 impl fmt::Display for Error {
@@ -44,3 +50,8 @@ impl From<ark_serialize::SerializationError> for Error {
         Self::SerializationError
     }
 }
+ impl From<rand::Error> for Error {
+     fn from(_: rand::Error) -> Self {
+         Self::RNGError
+     }
+ }

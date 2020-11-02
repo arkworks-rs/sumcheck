@@ -7,6 +7,8 @@ use core::fmt::Display;
 use crate::error::Error;
 /// multilinear extensions
 use ark_ff::Field;
+use ark_std::marker::PhantomData;
+use ark_std::cmp::max;
 
 /// Multilinear Extension
 ///
@@ -93,6 +95,55 @@ where
     /// GKR Function has total of 3L variables.
     fn get_l(&self) -> Result<usize, Self::Error>;
 }
+
+/// arithmetic combination of multilinear extensions
+pub struct ArithmeticCombination<F: Field, P: MLExtension<F>> {
+    /// max number of multiplicands in each product
+    pub max_multiplicands: usize,
+    /// number of variables
+    pub num_variables: usize,
+    /// vector of products of multilinear extension
+    pub vector_of_products: Vec<Vec<P>>,
+    #[doc(hidden)] _marker: PhantomData<F>
+}
+
+impl<F: Field, P: MLExtension<F>> ArithmeticCombination<F, P> {
+    /// generate an empty combination
+    pub fn new(num_variables: usize) -> Self {
+        ArithmeticCombination { max_multiplicands: 0,
+            num_variables,
+            vector_of_products: Vec::new(),
+            _marker: PhantomData }
+    }
+
+    /// add product to this combination
+    pub fn add_product(&mut self, product: impl Iterator<Item=P>) -> Result<(), Error> {
+        let product: Vec<_> = product.collect();
+        for poly in product.iter(){
+            if unwrap_safe!(poly.num_variables()) != self.num_variables {
+                return Err(crate::Error::InvalidArgumentError(Some("number of variables mismatch".into())));
+            }
+        }
+        self.max_multiplicands = max(self.max_multiplicands, product.len());
+        self.vector_of_products.push(product);
+        Ok(())
+    }
+
+    /// evaluate this polynomial combination at a point
+    pub fn eval_at(&self, point: &[F]) -> Result<F, Error> {
+        let mut sum = F::zero();
+        for product in self.vector_of_products.iter() {
+            let mut r = F::one();
+            for multiplicand in product.iter() {
+                r *= multiplicand.eval_at(point).map_err(|_|
+                    crate::Error::CausedBy("Evaluation".into()))?;
+            }
+            sum += r;
+        }
+        Ok(sum)
+    }
+}
+
 
 #[cfg(test)]
 pub mod tests {
