@@ -7,7 +7,7 @@ pub mod indexer;
 pub mod prover;
 pub mod verifier;
 
-/// Algebraic Holographic Proof defined in [T13](https://link.springer.com/chapter/10.1007/978-3-642-40084-1_5).
+/// Algebraic Holographic Proof defined in [T13](https://eprint.iacr.org/2013/351).
 pub struct AHPForMLSumcheck<F: Field> {
     #[doc(hidden)]
     _marker: PhantomData<F>,
