@@ -73,4 +73,42 @@ impl<F: Field> AHPForMLSumcheck<F> {
             _marker: PhantomData,
         })
     }
+
+    /// consume the polynomial instance and index the polynomial
+    pub fn convert_to_index<P: MLExtension<F>>(
+        polynomial: ArithmeticCombination<F, P>,
+    ) -> Result<Index<F>, crate::Error> {
+        let num_variables = polynomial.num_variables;
+        let max_multiplicands = polynomial.max_multiplicands;
+        let mut add_table = Vec::new();
+        if polynomial.vector_of_products.len() < 1 {
+            return Err(invalid_args("Input is empty."));
+        }
+        for product in polynomial.vector_of_products.into_iter() {
+            if product.len() > max_multiplicands {
+                return Err(invalid_args("invalid max_multiplicands"));
+            }
+            let mut mul_table = Vec::with_capacity(max_multiplicands);
+            for single_poly in product.into_iter() {
+                if unwrap_safe!(single_poly.num_variables()) != num_variables {
+                    return Err(crate::Error::InvalidArgumentError(Some(
+                        "polynomials should be same number of variables".into(),
+                    )));
+                }
+
+                mul_table.push(
+                    single_poly
+                        .into_table()
+                        .map_err(|_| crate::Error::CausedBy("into table".into()))?,
+                );
+            }
+            add_table.push(mul_table);
+        }
+        Ok(Index {
+            num_variables,
+            max_multiplicands,
+            add_table,
+            _marker: PhantomData,
+        })
+    }
 }
