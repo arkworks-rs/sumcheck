@@ -14,7 +14,7 @@ pub struct ProverMsg<F: Field> {
 }
 /// Prover State
 pub struct ProverState<F: Field> {
-    randomness: Vec<F>,
+    pub randomness: Vec<F>,
     tables: Vec<Vec<Vec<F>>>,
     nv: usize,
     num_multiplicands: usize,
