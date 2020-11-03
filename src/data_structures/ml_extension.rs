@@ -56,8 +56,11 @@ where
     /// This function will panic when the current implementation does not support partial evaluation.
     fn eval_partial_at(&self, point: &[F]) -> Result<Self, Self::Error>;
 
-    /// Get the copy of the values of all evaluations. Index: binary argument, value: F
+    /// Get the copy of the values of of all evaluations over boolean hypercube. Index: binary argument, value: F
     fn table(&self) -> Result<Vec<F>, Self::Error>;
+
+    /// Consume the instance and return table of all evaluations over boolean hypercube.
+    fn into_table(self) -> Result<Vec<F>, Self::Error>;
 }
 
 /// Sparse Multilinear Extension

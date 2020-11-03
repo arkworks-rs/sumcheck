@@ -215,6 +215,10 @@ impl<F: Field> MLExtension<F> for MLExtensionArray<F> {
     fn table(&self) -> Result<Vec<F>, Self::Error> {
         Ok(self.store.to_vec())
     }
+
+    fn into_table(self) -> Result<Vec<F>, Self::Error> {
+        Ok(self.store)
+    }
 }
 
 /// MLExtension with data referenced from outer source
@@ -269,6 +273,11 @@ impl<'a, F: Field> MLExtension<F> for MLExtensionRefArray<'a, F> {
     }
 
     fn table(&self) -> Result<Vec<F>, Self::Error> {
+        Ok(self.store.to_vec())
+    }
+
+    /// Unlike one for `MLExtensionArray`, this function takes copy of the table.
+    fn into_table(self) -> Result<Vec<F>, Self::Error> {
         Ok(self.store.to_vec())
     }
 }
@@ -404,6 +413,10 @@ impl<F: Field> MLExtension<F> for SparseMLExtensionMap<F> {
         }
 
         Ok(table)
+    }
+
+    fn into_table(self) -> Result<Vec<F>, Self::Error> {
+        self.table()
     }
 }
 
