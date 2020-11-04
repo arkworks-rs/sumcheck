@@ -14,6 +14,7 @@ pub struct ProverMsg<F: Field> {
 }
 /// Prover State
 pub struct ProverState<F: Field> {
+    /// sampled randomness given by the verifier
     pub randomness: Vec<F>,
     tables: Vec<Vec<Vec<F>>>,
     nv: usize,
