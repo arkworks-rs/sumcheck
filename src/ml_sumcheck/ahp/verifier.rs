@@ -73,11 +73,10 @@ impl<F: Field> AHPForMLSumcheck<F> {
         if verifier_state.round == verifier_state.nv {
             // accept and close
             verifier_state.convinced = true;
-            Ok((None, verifier_state))
         } else {
             verifier_state.round += 1;
-            Ok((Some(VerifierMsg { randomness: r }), verifier_state))
         }
+        Ok((Some(VerifierMsg { randomness: r }), verifier_state))
     }
 
     /// get the subclaim when the verifier has convinced the sum
