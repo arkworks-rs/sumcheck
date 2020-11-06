@@ -6,8 +6,8 @@ use crate::ml_sumcheck::ahp::AHPForMLSumcheck;
 use ark_ff::Field;
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, Read, SerializationError, Write};
 use ark_std::vec::Vec;
-#[derive(Clone, CanonicalSerialize, CanonicalDeserialize)]
 /// Prover Message
+#[derive(Clone, CanonicalSerialize, CanonicalDeserialize)]
 pub struct ProverMsg<F: Field> {
     /// evaluations on P(0), P(1), P(2), ...
     pub(crate) evaluations: Vec<F>,
