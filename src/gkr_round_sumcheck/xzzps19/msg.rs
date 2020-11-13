@@ -2,9 +2,7 @@ use crate::data_structures::protocol::Message;
 use ark_ff::{Field, ToBytes};
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, SerializationError};
 use ark_std::fmt;
-#[cfg(feature = "std")]
-use ark_std::io::ErrorKind;
-use ark_std::io::{Error as IOError, Read, Result as IOResult, Write};
+use ark_std::io::{Read, Result as IOResult, Write};
 #[derive(fmt::Debug, Eq, PartialEq, Clone)]
 /// Message used for prover, received by verifier.
 pub(crate) struct XZZPS19PMsg<F: Field>(pub(crate) F, pub(crate) F, pub(crate) F);
@@ -35,21 +33,10 @@ impl<F: Field> CanonicalDeserialize for XZZPS19PMsg<F> {
 }
 
 impl<F: Field> ToBytes for XZZPS19PMsg<F> {
-    #[cfg(not(feature = "std"))]
     fn write<W: Write>(&self, writer: W) -> IOResult<()> {
         match self.serialize(writer) {
             Ok(()) => Ok(()),
-            Err(_e) => Err(IOError),
-        }
-    }
-    #[cfg(feature = "std")]
-    fn write<W: Write>(&self, writer: W) -> IOResult<()> {
-        match self.serialize(writer) {
-            Ok(()) => Ok(()),
-            Err(_e) => Err(IOError::new(
-                ErrorKind::InvalidData,
-                "Cannot serialize message. ",
-            )),
+            Err(_e) => todo!("ToBytes Traits will be removed. "),
         }
     }
 }
@@ -85,21 +72,10 @@ impl<F: Field> CanonicalDeserialize for XZZPS19VMsg<F> {
 }
 
 impl<F: Field> ToBytes for XZZPS19VMsg<F> {
-    #[cfg(not(feature = "std"))]
     fn write<W: Write>(&self, writer: W) -> IOResult<()> {
         match self.serialize(writer) {
             Ok(()) => Ok(()),
-            Err(_e) => Err(IOError),
-        }
-    }
-    #[cfg(feature = "std")]
-    fn write<W: Write>(&self, writer: W) -> IOResult<()> {
-        match self.serialize(writer) {
-            Ok(()) => Ok(()),
-            Err(_e) => Err(IOError::new(
-                ErrorKind::InvalidData,
-                "Cannot serialize message. ",
-            )),
+            Err(_e) => todo!("ToBytes Traits will be removed. "),
         }
     }
 }

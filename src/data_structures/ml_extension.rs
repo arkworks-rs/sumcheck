@@ -151,6 +151,21 @@ impl<F: Field, P: MLExtension<F>> ArithmeticCombination<F, P> {
         }
         Ok(sum)
     }
+
+    /// evaluate this polynomial combination at a binary
+    pub fn eval_binary_at(&self, point: usize) -> Result<F, Error> {
+        let mut sum = F::zero();
+        for product in self.vector_of_products.iter() {
+            let mut r = F::one();
+            for multiplicand in product.iter() {
+                r *= multiplicand
+                    .eval_binary(point.into())
+                    .map_err(|_| crate::Error::CausedBy("Evaluation".into()))?;
+            }
+            sum += r;
+        }
+        Ok(sum)
+    }
 }
 
 #[cfg(test)]
