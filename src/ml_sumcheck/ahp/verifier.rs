@@ -6,6 +6,7 @@ use ark_ff::Field;
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, Read, SerializationError, Write};
 use ark_std::vec::Vec;
 use rand_core::RngCore;
+use crate::error::invalid_args;
 #[derive(Clone, CanonicalSerialize, CanonicalDeserialize)]
 /// Verifier Message
 pub struct VerifierMsg<F: Field> {
@@ -15,11 +16,12 @@ pub struct VerifierMsg<F: Field> {
 
 /// Verifier State
 pub struct VerifierState<F: Field> {
-    expected: F,
-    convinced: bool,
     round: usize,
     nv: usize,
-    fixed_args: Vec<F>,
+    max_multiplicands: usize,
+    finished: bool,
+    lagrange_sets: Vec<Vec<F>>,
+    randomness: Vec<F>,
 }
 /// Subclaim when verifier is convinced
 pub struct SubClaim<F: Field> {
@@ -31,64 +33,89 @@ pub struct SubClaim<F: Field> {
 
 impl<F: Field> AHPForMLSumcheck<F> {
     /// initialize the verifier
-    pub fn verifier_init(index_info: &IndexInfo, asserted_sum: F) -> VerifierState<F> {
+    pub fn verifier_init(index_info: &IndexInfo) -> VerifierState<F> {
         VerifierState {
-            expected: asserted_sum,
-            convinced: false,
             round: 1,
             nv: index_info.num_variables,
-            fixed_args: Vec::with_capacity(index_info.num_variables),
+            max_multiplicands: index_info.max_multiplicands,
+            finished: false,
+            lagrange_sets: Vec::with_capacity(index_info.num_variables),
+            randomness: Vec::with_capacity(index_info.num_variables),
         }
     }
 
     /// perform verification at current round, given prover message
     pub fn verify_round<R: RngCore>(
-        prover_msg: &ProverMsg<F>,
+        prover_msg: ProverMsg<F>,
         mut verifier_state: VerifierState<F>,
         rng: &mut R,
     ) -> Result<(Option<VerifierMsg<F>>, VerifierState<F>), crate::Error> {
-        if verifier_state.convinced {
+        if verifier_state.finished {
             return Err(crate::Error::InvalidOperationError(Some(
-                "Verifier is not in active state.".into(),
+                "Verifier is already finished.".into(),
             )));
         }
+        // commented out code is part of verification, which will be performed when verifying the subclaim
 
-        let p0 = prover_msg.evaluations.get(0).ok_or_else(|| {
-            crate::Error::InvalidArgumentError(Some("invalid message length".into()))
-        })?;
+        // let p0 = prover_msg.evaluations.get(0).ok_or_else(|| {
+        //     crate::Error::InvalidArgumentError(Some("invalid message length".into()))
+        // })?;
+        //
+        // let p1 = prover_msg.evaluations.get(1).ok_or_else(|| {
+        //     crate::Error::InvalidArgumentError(Some("invalid message length".into()))
+        // })?;
 
-        let p1 = prover_msg.evaluations.get(1).ok_or_else(|| {
-            crate::Error::InvalidArgumentError(Some("invalid message length".into()))
-        })?;
+        // if *p0 + *p1 != verifier_state.expected {
+        //     return Err(crate::Error::Reject(Some("invalid sum".into())));
+        // }
 
-        if *p0 + *p1 != verifier_state.expected {
-            return Err(crate::Error::Reject(Some("invalid sum".into())));
-        }
+        let msg = Self::sample_round(rng);
+        verifier_state.randomness.push(msg.randomness);
+        verifier_state.lagrange_sets.push(prover_msg.evaluations);
 
-        let r = F::rand(rng);
-
-        verifier_state.expected = interpolate_deg_n_poly(&prover_msg.evaluations, r);
-        verifier_state.fixed_args.push(r);
+        // verifier_state.expected = interpolate_deg_n_poly(&prover_msg.evaluations, r);
+        // verifier_state.fixed_args.push(r);
 
         if verifier_state.round == verifier_state.nv {
             // accept and close
-            verifier_state.convinced = true;
+            verifier_state.finished = true;
         } else {
             verifier_state.round += 1;
         }
-        Ok((Some(VerifierMsg { randomness: r }), verifier_state))
+        Ok((Some(msg), verifier_state))
     }
 
-    /// get the subclaim when the verifier has convinced the sum
-    pub fn subclaim(verifier_state: VerifierState<F>) -> Result<SubClaim<F>, crate::Error> {
-        if !verifier_state.convinced {
+    /// verify the sumcheck phase, and generate the subclaim
+    ///
+    /// subclaim is true if and only if the asserted sum is true
+    pub fn check_and_generate_subclaim(verifier_state: VerifierState<F>,
+                                       asserted_sum: F) -> Result<SubClaim<F>, crate::Error> {
+        if !verifier_state.finished {
             return Err(crate::Error::InvalidOperationError(Some(
-                "Verifier has not convinced. ".into(),
+                "Verifier has not finished. ".into(),
             )));
         }
+
+        let mut expected = asserted_sum;
+        if verifier_state.lagrange_sets.len() != verifier_state.nv {
+            return Err(invalid_args("insufficient rounds"))
+        }
+        for i in 0..verifier_state.nv {
+            let evaluations = &verifier_state.lagrange_sets[i];
+            if evaluations.len() != verifier_state.max_multiplicands + 1 {
+                return Err(invalid_args("incorrect number of evaluations"))
+            }
+            let p0 = evaluations[0];
+            let p1 = evaluations[1];
+            if p0 + p1 != expected {
+                return Err(crate::Error::Reject(Some("broken midway".into())))
+            }
+            expected = interpolate_deg_n_poly(evaluations, verifier_state.randomness[i]);
+        }
+
         return Ok(SubClaim {
-            point: verifier_state.fixed_args,
-            expected_evaluation: verifier_state.expected,
+            point: verifier_state.randomness,
+            expected_evaluation: expected,
         });
     }
 
@@ -97,7 +124,7 @@ impl<F: Field> AHPForMLSumcheck<F> {
     /// Given the same calling context, `random_oracle_round` output exactly the same message as
     /// `verify_round`
     #[inline]
-    pub fn random_oracle_round<R: RngCore>(rng: &mut R) -> VerifierMsg<F> {
+    pub fn sample_round<R: RngCore>(rng: &mut R) -> VerifierMsg<F> {
         VerifierMsg {
             randomness: F::rand(rng),
         }
