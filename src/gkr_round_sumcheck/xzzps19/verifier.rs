@@ -223,12 +223,14 @@ impl<F: Field> CanonicalDeserialize for XZZPS19Subclaim<F> {
 #[cfg(test)]
 mod tests {
     use ark_ff::{test_rng, One, Zero};
-    use ark_poly::DensePolynomial;
+    use ark_poly::polynomial::UVPolynomial;
+    use ark_poly::univariate::DensePolynomial;
     use rand::Rng;
 
     use crate::data_structures::test_field::TestField;
 
     use super::interpolate_deg2_poly;
+    use ark_poly::Polynomial;
 
     //noinspection RsBorrowChecker
     #[test]
@@ -241,11 +243,11 @@ mod tests {
             let poly = DensePolynomial::<F>::rand(2, &mut rng);
             let eval_at: TestField = rng.gen();
 
-            let p0 = poly.evaluate(F::zero());
-            let p1 = poly.evaluate(F::one());
-            let p2 = poly.evaluate(F::one() + F::one());
+            let p0 = poly.evaluate(&F::zero());
+            let p1 = poly.evaluate(&F::one());
+            let p2 = poly.evaluate(&(F::one() + F::one()));
 
-            let expected = poly.evaluate(eval_at);
+            let expected = poly.evaluate(&eval_at);
             let actual = interpolate_deg2_poly(p0, p1, p2, eval_at);
             assert_eq!(actual, expected);
         }
