@@ -49,7 +49,7 @@ impl<F: Field> MLSumcheck<F> {
             prover_state = result.1;
             fs_rng.feed_randomness(&result.0)?;
             prover_msgs.push(result.0);
-            verifier_msg = Some(AHPForMLSumcheck::random_oracle_round(&mut fs_rng));
+            verifier_msg = Some(AHPForMLSumcheck::sample_round(&mut fs_rng));
         }
 
         Ok(prover_msgs)
@@ -63,15 +63,18 @@ impl<F: Field> MLSumcheck<F> {
     ) -> Result<SubClaim<F>, crate::Error> {
         let mut fs_rng = Blake2s512Rng::setup();
         fs_rng.feed_randomness(index_vk)?;
-
-        let mut verifier_state = AHPForMLSumcheck::verifier_init(index_vk, claimed_sum);
+        let mut verifier_state = AHPForMLSumcheck::verifier_init(index_vk);
         for i in 0..index_vk.num_variables {
             let prover_msg = proof.get(i).ok_or(invalid_args("proof is incomplete"))?;
             fs_rng.feed_randomness(prover_msg)?;
-            let result = AHPForMLSumcheck::verify_round(prover_msg, verifier_state, &mut fs_rng)?;
+            let result =
+                AHPForMLSumcheck::verify_round((*prover_msg).clone(), verifier_state, &mut fs_rng)?;
             verifier_state = result.1;
         }
 
-        Ok(AHPForMLSumcheck::subclaim(verifier_state)?)
+        Ok(AHPForMLSumcheck::check_and_generate_subclaim(
+            verifier_state,
+            claimed_sum,
+        )?)
     }
 }
