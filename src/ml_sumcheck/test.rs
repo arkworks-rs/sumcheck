@@ -80,19 +80,20 @@ fn test_ahp(nv: usize, num_multiplicands_range: (usize, usize), num_products: us
         random_combination::<F, _>(nv, num_multiplicands_range, num_products, &mut rng);
     let index = AHPForMLSumcheck::index(&comb).expect("fail to index");
     let mut prover_state = AHPForMLSumcheck::prover_init(&index);
-    let mut verifier_state = AHPForMLSumcheck::verifier_init(&index.info(), asserted_sum);
+    let mut verifier_state = AHPForMLSumcheck::verifier_init(&index.info());
     let mut verifier_msg = None;
     for _ in 0..index.num_variables {
         let result =
             AHPForMLSumcheck::prove_round(prover_state, &verifier_msg).expect("fail to prove");
         prover_state = result.1;
         let (verifier_msg2, verifier_state2) =
-            AHPForMLSumcheck::verify_round(&result.0, verifier_state, &mut rng)
+            AHPForMLSumcheck::verify_round(result.0, verifier_state, &mut rng)
                 .expect("fail to verify round");
         verifier_msg = verifier_msg2;
         verifier_state = verifier_state2;
     }
-    let subclaim = AHPForMLSumcheck::subclaim(verifier_state).expect("fail to generate subclaim");
+    let subclaim = AHPForMLSumcheck::check_and_generate_subclaim(verifier_state, asserted_sum)
+        .expect("fail to generate subclaim");
     assert!(
         comb.eval_at(&subclaim.point).expect("fail to evaluate") == subclaim.expected_evaluation,
         "wrong subclaim"

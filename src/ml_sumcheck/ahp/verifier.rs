@@ -1,4 +1,5 @@
 //! Verifier
+use crate::error::invalid_args;
 use crate::ml_sumcheck::ahp::indexer::IndexInfo;
 use crate::ml_sumcheck::ahp::prover::ProverMsg;
 use crate::ml_sumcheck::ahp::AHPForMLSumcheck;
@@ -6,7 +7,6 @@ use ark_ff::Field;
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, Read, SerializationError, Write};
 use ark_std::vec::Vec;
 use rand_core::RngCore;
-use crate::error::invalid_args;
 #[derive(Clone, CanonicalSerialize, CanonicalDeserialize)]
 /// Verifier Message
 pub struct VerifierMsg<F: Field> {
@@ -88,8 +88,10 @@ impl<F: Field> AHPForMLSumcheck<F> {
     /// verify the sumcheck phase, and generate the subclaim
     ///
     /// subclaim is true if and only if the asserted sum is true
-    pub fn check_and_generate_subclaim(verifier_state: VerifierState<F>,
-                                       asserted_sum: F) -> Result<SubClaim<F>, crate::Error> {
+    pub fn check_and_generate_subclaim(
+        verifier_state: VerifierState<F>,
+        asserted_sum: F,
+    ) -> Result<SubClaim<F>, crate::Error> {
         if !verifier_state.finished {
             return Err(crate::Error::InvalidOperationError(Some(
                 "Verifier has not finished. ".into(),
@@ -98,17 +100,17 @@ impl<F: Field> AHPForMLSumcheck<F> {
 
         let mut expected = asserted_sum;
         if verifier_state.lagrange_sets.len() != verifier_state.nv {
-            return Err(invalid_args("insufficient rounds"))
+            return Err(invalid_args("insufficient rounds"));
         }
         for i in 0..verifier_state.nv {
             let evaluations = &verifier_state.lagrange_sets[i];
             if evaluations.len() != verifier_state.max_multiplicands + 1 {
-                return Err(invalid_args("incorrect number of evaluations"))
+                return Err(invalid_args("incorrect number of evaluations"));
             }
             let p0 = evaluations[0];
             let p1 = evaluations[1];
             if p0 + p1 != expected {
-                return Err(crate::Error::Reject(Some("broken midway".into())))
+                return Err(crate::Error::Reject(Some("broken midway".into())));
             }
             expected = interpolate_deg_n_poly(evaluations, verifier_state.randomness[i]);
         }
