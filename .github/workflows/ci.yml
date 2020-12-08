@@ -86,13 +86,6 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-          target: thumbv6m-none-eabi
-          override: true
-
-      - name: Install Rust ARM64 (${{ matrix.rust }})
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
           target: aarch64-unknown-none
           override: true
 
@@ -107,12 +100,19 @@ jobs:
       - name: linear-sumcheck
         run: |
           cd linear-sumcheck
-          cargo build -p linear-sumcheck --no-default-features --target thumbv6m-none-eabi
-          cargo check --examples -p linear-sumcheck --no-default-features --target thumbv6m-none-eabi
+          cargo build -p linear-sumcheck --no-default-features --target aarch64-unknown-none
+          cargo check --examples -p linear-sumcheck --no-default-features --target aarch64-unknown-none
           cd ..
       - name: r1cs-argument
         run: |
           cd r1cs-argument
-          cargo build -p r1cs-argument --no-default-features --target thumbv6m-none-eabi
-          cargo check --examples -p r1cs-argument --no-default-features --target thumbv6m-none-eabi
+          cargo build -p r1cs-argument --no-default-features --target aarch64-unknown-none
+          cargo check --examples -p r1cs-argument --no-default-features --target aarch64-unknown-none
           cd ..
+      - name: ml-commitment
+        run: |
+          cd ml-commitment
+          cargo build -p ml-commitment --no-default-features --target aarch64-unknown-none
+          cargo check --examples -p ml-commitment --no-default-features --target aarch64-unknown-none
+          cd ..
+          
