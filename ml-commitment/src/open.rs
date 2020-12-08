@@ -1,7 +1,7 @@
 //! functions used for opening the polynomial
 use crate::data_structures::PublicParameter;
-use crate::MLPolyCommit;
 use crate::error::SResult;
+use crate::MLPolyCommit;
 use ark_ec::msm::VariableBaseMSM;
 use ark_ec::{PairingEngine, ProjectiveCurve};
 use ark_ff::{One, PrimeField, Zero};

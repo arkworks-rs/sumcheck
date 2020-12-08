@@ -1,7 +1,7 @@
 //! Commit function for the commitment scheme
 use crate::data_structures::PublicParameter;
-use crate::MLPolyCommit;
 use crate::error::SResult;
+use crate::MLPolyCommit;
 use ark_ec::msm::VariableBaseMSM;
 use ark_ec::{PairingEngine, ProjectiveCurve};
 use ark_ff::PrimeField;
@@ -50,9 +50,9 @@ impl<E: PairingEngine> MLPolyCommit<E> {
 mod test {
     use crate::commit::Commitment;
     use crate::data_structures::PublicParameter;
-    use crate::MLPolyCommit;
     use crate::error::SResult;
     use crate::test_utils::TestCurve;
+    use crate::MLPolyCommit;
     use ark_ec::{AffineCurve, PairingEngine, ProjectiveCurve};
     use ark_ff::{test_rng, UniformRand};
     use linear_sumcheck::data_structures::ml_extension::MLExtension;

@@ -10,7 +10,7 @@ pub enum Error {
     /// serialization error
     SerializationError(ark_serialize::SerializationError),
     /// others
-    MLExtensionError(linear_sumcheck::Error)
+    MLExtensionError(linear_sumcheck::Error),
 }
 
 /// result used for this crate

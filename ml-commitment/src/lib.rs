@@ -25,15 +25,15 @@ pub mod open;
 pub mod setup;
 pub mod verify;
 
+pub mod error;
 #[cfg(test)]
 pub mod test_utils;
-pub mod error;
 
 #[cfg(test)]
 pub use test_utils::*;
 
-pub use error::*;
 use ark_ec::PairingEngine;
+pub use error::*;
 
 /// Commitment scheme for multilinear function in evaluation form.
 pub struct MLPolyCommit<E: PairingEngine> {

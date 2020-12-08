@@ -1,16 +1,16 @@
 //! Setup for the commitment scheme
 use crate::data_structures::{PublicParameter, VerifierParameter};
-use crate::MLPolyCommit;
 use crate::error::{invalid_arg, SResult};
+use crate::MLPolyCommit;
 use ark_ec::msm::FixedBaseMSM;
 use ark_ec::{AffineCurve, PairingEngine, ProjectiveCurve};
 use ark_ff::{Field, PrimeField, UniformRand};
 use ark_std::collections::LinkedList;
 use ark_std::iter::FromIterator;
 use ark_std::vec::Vec;
-use rand::RngCore;
-use linear_sumcheck::data_structures::MLExtensionArray;
 use linear_sumcheck::data_structures::ml_extension::MLExtension;
+use linear_sumcheck::data_structures::MLExtensionArray;
+use rand::RngCore;
 // convert f(0, x1, x2, ...) to f(x1, x2, ...)
 fn remove_dummy_variable<F: Field>(poly: &[F], pad: usize) -> SResult<Vec<F>> {
     if pad == 0 {
@@ -141,15 +141,15 @@ mod tests {
     use crate::data_structures::{
         EvaluationHyperCubeOnG1, EvaluationHyperCubeOnG2, PublicParameter,
     };
-    use crate::MLPolyCommit;
     use crate::error::SResult;
+    use crate::setup::eq_extension;
     use crate::test_utils::TestCurve;
+    use crate::MLPolyCommit;
     use ark_ec::{AffineCurve, PairingEngine, ProjectiveCurve};
+    use ark_ff::fields::PrimeField;
     use ark_ff::{test_rng, UniformRand};
     use linear_sumcheck::data_structures::ml_extension::ArithmeticCombination;
     use rand::RngCore;
-    use crate::setup::eq_extension;
-    use ark_ff::fields::PrimeField;
     fn dummy_keygen<R: RngCore, E: PairingEngine>(
         nv: usize,
         rng: &mut R,

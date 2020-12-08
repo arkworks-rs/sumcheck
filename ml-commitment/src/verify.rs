@@ -1,9 +1,9 @@
 //! Verifier for commitment scheme
 use crate::commit::Commitment;
 use crate::data_structures::VerifierParameter;
+use crate::error::SResult;
 use crate::open::Proof;
 use crate::MLPolyCommit;
-use crate::error::SResult;
 use ark_ec::msm::FixedBaseMSM;
 use ark_ec::{AffineCurve, PairingEngine, ProjectiveCurve};
 use ark_ff::PrimeField;
@@ -66,8 +66,8 @@ impl<E: PairingEngine> MLPolyCommit<E> {
 
 #[cfg(test)]
 mod sanity {
-    use crate::MLPolyCommit;
     use crate::test_utils::TestCurve;
+    use crate::MLPolyCommit;
     use ark_ec::{AffineCurve, PairingEngine};
     use ark_ff::{test_rng, One};
     use ark_ff::{UniformRand, Zero};
