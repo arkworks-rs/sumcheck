@@ -1,0 +1,24 @@
+[package]
+name = "ml-commitment"
+version = "0.1.0"
+authors = ["Tom Shen <tomshen@berkeley.edu>"]
+edition = "2018"
+
+[dependencies]
+ark-ff = { git = "https://github.com/arkworks-rs/algebra", default-features = false}
+ark-ec = { git = "https://github.com/arkworks-rs/algebra", default-features = false}
+ark-std = { git = "https://github.com/arkworks-rs/utils/", default-features = false }
+ark-serialize = {git = "https://github.com/arkworks-rs/algebra", default-features = false}
+linear-sumcheck = {path = "../linear-sumcheck", default-features = false}
+bench-utils = {git = "https://github.com/arkworks-rs/utils", default-features = false}
+
+hashbrown = {version = "0.9.1"}
+rand = {version =  "0.7.3", default-features = false}
+
+[dev-dependencies]
+ark-bls12-381 = { git = "https://github.com/arkworks-rs/curves", default-features = false, features = [ "curve" ] }
+
+[features]
+default = ["std"]
+std = ["ark-ff/std","ark-std/std","linear-sumcheck/std", "rand/std", "ark-serialize/std", "ark-ec/std"]
+print-trace  = ["bench-utils/print-trace"]
