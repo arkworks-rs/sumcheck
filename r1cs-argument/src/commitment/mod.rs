@@ -58,6 +58,7 @@ mod commit_bench{
     }
 
     #[test]
+    #[ignore]
     fn commit_open_verify_bench() {
         let mut file = {
             let result = File::open("benchmark_cached_keys");

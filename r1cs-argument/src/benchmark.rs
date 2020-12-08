@@ -50,6 +50,7 @@ fn test_circuit<E: PairingEngine>(
 }
 
 #[test]
+#[ignore]
 fn benchmark() {
     type E = TestCurve;
     type F = TestCurveFr;

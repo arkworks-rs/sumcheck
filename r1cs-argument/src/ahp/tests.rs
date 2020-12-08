@@ -73,3 +73,8 @@ fn test_circuit<R: RngCore>(log_n: usize, log_v: usize, rng: &mut R) -> SResult<
 fn test_small() {
     test_circuit(8, 2, &mut test_rng()).expect("fail to test small");
 }
+
+#[test]
+fn test_medium() {
+    test_circuit(12, 3, &mut test_rng()).expect("fail to test medium");
+}
