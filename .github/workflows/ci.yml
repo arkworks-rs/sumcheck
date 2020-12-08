@@ -67,14 +67,14 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
             command: check
-            args: --all-features --examples --all --benches
+            args: --workspace --all-features --examples --all --benches
         if: matrix.rust == 'nightly'
 
       - name: Test
         uses: actions-rs/cargo@v1
         with:
             command: test
-            args: --release
+            args: --workspace --release
 
   check_no_std:
     name: Check no_std
@@ -95,11 +95,11 @@ jobs:
         with:
           use-cross: true
           command: build
-          args: --no-default-features --target thumbv6m-none-eabi
+          args: --workspace --no-default-features --target thumbv6m-none-eabi
 
       - name: Check
         uses: actions-rs/cargo@v1
         with:
           use-cross: true
           command: check
-          args: --examples --no-default-features --target thumbv6m-none-eabi
+          args: --examples --workspace --no-default-features --target thumbv6m-none-eabi
