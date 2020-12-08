@@ -1,6 +1,6 @@
 use ark_ff::Field;
+use ark_std::vec::Vec;
 use linear_sumcheck::data_structures::MLExtensionArray;
-
 /// Generate polynomial P(x) = eq(t,x) represented by products of multilinear polynomials
 pub fn eq_extension<F: Field>(t: &[F]) -> Result<Vec<MLExtensionArray<F>>, crate::Error> {
     let dim = t.len();

@@ -8,9 +8,9 @@ use ark_ec::{AffineCurve, PairingEngine, ProjectiveCurve};
 use ark_ff::{Field, PrimeField, UniformRand};
 use ark_std::collections::LinkedList;
 use ark_std::iter::FromIterator;
+use ark_std::vec::Vec;
 use linear_sumcheck::data_structures::ml_extension::MLExtension;
 use rand::RngCore;
-
 // convert f(0, x1, x2, ...) to f(x1, x2, ...)
 fn remove_dummy_variable<F: Field>(poly: &[F], pad: usize) -> SResult<Vec<F>> {
     if pad == 0 {

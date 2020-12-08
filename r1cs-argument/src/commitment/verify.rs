@@ -7,7 +7,7 @@ use crate::error::SResult;
 use ark_ec::msm::FixedBaseMSM;
 use ark_ec::{AffineCurve, PairingEngine, ProjectiveCurve};
 use ark_ff::PrimeField;
-
+use ark_std::vec::Vec;
 impl<E: PairingEngine> MLPolyCommit<E> {
     /// Verify the result of evaluation of polynomial at a point. Return true is the point is true.
     pub fn verify(

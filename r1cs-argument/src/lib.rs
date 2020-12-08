@@ -17,6 +17,9 @@ extern crate ark_relations;
 #[macro_use]
 extern crate bench_utils;
 
+#[macro_use]
+extern crate ark_std;
+
 use ark_std::marker::PhantomData;
 
 pub mod ahp;
@@ -36,11 +39,11 @@ use ark_relations::r1cs::Matrix;
 use ark_std::collections::LinkedList;
 use ark_std::iter::FromIterator;
 use ark_std::log2;
+use ark_std::vec::Vec;
 pub use error::Error;
 use linear_sumcheck::data_structures::random::FeedableRNG;
 use linear_sumcheck::data_structures::Blake2s512Rng;
 use linear_sumcheck::ml_sumcheck::ahp::prover::ProverMsg;
-
 /// module for interpret r1cs as ML Extension used by linear sumcheck
 pub mod data_structures;
 

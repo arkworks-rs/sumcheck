@@ -20,11 +20,11 @@ use ark_ec::PairingEngine;
 use ark_ff::{One, UniformRand, Zero};
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, Read, SerializationError, Write};
 use ark_std::log2;
+use ark_std::vec::Vec;
 use linear_sumcheck::ml_sumcheck::ahp::prover::ProverMsg as MLProverMsg;
 use linear_sumcheck::ml_sumcheck::ahp::verifier::VerifierMsg as MLVerifierMsg;
 use linear_sumcheck::ml_sumcheck::ahp::verifier::VerifierState as MLVerifierState;
 use linear_sumcheck::ml_sumcheck::ahp::AHPForMLSumcheck;
-
 /// r_v: randomness
 #[derive(CanonicalSerialize, CanonicalDeserialize)]
 pub struct VerifierFirstMessage<F: Field> {

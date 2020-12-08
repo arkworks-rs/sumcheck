@@ -1,6 +1,6 @@
 use ark_std::fmt;
 use ark_std::fmt::Formatter;
-
+use ark_std::string::String;
 #[derive(Debug)]
 /// Error used for R1CS Argument
 pub enum Error {

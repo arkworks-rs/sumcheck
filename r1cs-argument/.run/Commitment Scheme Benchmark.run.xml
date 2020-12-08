@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Commitment Scheme Benchmark" type="CompoundRunConfigurationType">
+    <toRun name="Prepare Setup Keys" type="CargoCommandRunConfiguration" />
+    <toRun name="Test commitment::commit_bench::commit_bench" type="CargoCommandRunConfiguration" />
+    <method v="2" />
+  </configuration>
+</component>

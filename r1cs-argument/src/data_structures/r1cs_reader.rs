@@ -3,6 +3,7 @@
 use ark_ff::Field;
 use ark_relations::r1cs::Matrix;
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, Read, SerializationError, Write};
+use ark_std::vec::Vec;
 use linear_sumcheck::data_structures::ml_extension::{MLExtension, SparseMLExtension};
 use linear_sumcheck::data_structures::{MLExtensionArray, SparseMLExtensionMap};
 #[derive(Clone, CanonicalSerialize, CanonicalDeserialize)]

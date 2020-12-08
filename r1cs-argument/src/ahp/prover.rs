@@ -23,6 +23,7 @@ use crate::error::{invalid_arg, SResult};
 use ark_ec::PairingEngine;
 use ark_ff::Zero;
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, Read, SerializationError, Write};
+use ark_std::vec::Vec;
 /// Prover State at first
 pub struct ProverFirstState<E: PairingEngine> {
     /// public witness

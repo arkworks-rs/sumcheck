@@ -4,8 +4,8 @@ use crate::ahp::prover::{
 };
 use ark_ec::PairingEngine;
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, Read, SerializationError, Write};
+use ark_std::vec::Vec;
 use linear_sumcheck::ml_sumcheck::ahp::prover::ProverMsg as MLProverMsg;
-
 /// message sent by the prover
 #[derive(CanonicalSerialize, CanonicalDeserialize)]
 pub struct Proof<E: PairingEngine> {

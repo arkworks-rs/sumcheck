@@ -6,9 +6,9 @@ use ark_ec::msm::VariableBaseMSM;
 use ark_ec::{PairingEngine, ProjectiveCurve};
 use ark_ff::{One, PrimeField, Zero};
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, Read, SerializationError, Write};
+use ark_std::vec::Vec;
 use linear_sumcheck::data_structures::ml_extension::MLExtension;
 use linear_sumcheck::data_structures::MLExtensionArray;
-
 #[derive(CanonicalSerialize, CanonicalDeserialize)]
 /// Proof of evaluation of a multilinear polynomial
 pub struct Proof<E: PairingEngine> {
