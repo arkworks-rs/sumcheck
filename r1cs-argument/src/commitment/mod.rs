@@ -1,3 +1,4 @@
+//! Commitment Scheme for multilinear function in evaluation form
 use ark_std::marker::PhantomData;
 
 pub mod data_structures;
@@ -8,6 +9,7 @@ pub mod verify;
 
 use ark_ec::PairingEngine;
 
+/// Commitment scheme for multilinear function in evaluation form.
 pub struct MLPolyCommit<E: PairingEngine> {
     #[doc(hidden)]
     _marker: PhantomData<E>,
@@ -25,7 +27,7 @@ mod commit_bench{
     use ark_std::collections::LinkedList;
     use ark_std::iter::FromIterator;
     use linear_sumcheck::data_structures::MLExtensionArray;
-    use ark_ec::{PairingEngine};
+    use ark_ec::PairingEngine;
     use ark_ff::UniformRand;
     const NV_RANGE_LOW: usize = 8;
     const NV_RANGE_HIGH: usize = 15;
@@ -34,8 +36,8 @@ mod commit_bench{
 
     #[derive(CanonicalSerialize, CanonicalDeserialize)]
     struct ParameterPair {
-        pub pp: PublicParameter<E>,
-        pub vp: VerifierParameter<E>
+        pp: PublicParameter<E>,
+        vp: VerifierParameter<E>
     }
 
     #[test]

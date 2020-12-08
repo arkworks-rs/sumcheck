@@ -1,3 +1,4 @@
+//! Commit function for the commitment scheme
 use ark_ec::{PairingEngine, ProjectiveCurve};
 use crate::commitment::MLPolyCommit;
 use crate::commitment::data_structures::PublicParameter;
@@ -8,13 +9,18 @@ use ark_ec::msm::VariableBaseMSM;
 use ark_ff::PrimeField;
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, Read, SerializationError, Write};
 #[derive(CanonicalSerialize, CanonicalDeserialize)]
+/// commitment
 pub struct Commitment<E: PairingEngine>{
+    /// number of variables
     pub nv: usize,
+    /// product of g as described by the vRAM paper
     pub g_product: E::G1Affine,
 }
 
 impl<E: PairingEngine> MLPolyCommit<E> {
-    pub fn commit(pp: &PublicParameter<E>, polynomial: MLExtensionArray<E::Fr>) -> SResult<Commitment<E>> {
+    /// commit a multilinear polynomial
+    pub fn commit(pp: &PublicParameter<E>, polynomial: impl Into<MLExtensionArray<E::Fr>>) -> SResult<Commitment<E>> {
+        let polynomial = polynomial.into();
         let nv = polynomial.num_variables()?;
         let timer = start_timer!(||"mapping variables into representation");
         let scalars: Vec<_> = polynomial.into_table()?

@@ -1,3 +1,15 @@
+//! A protocol of generating proofs for R1CS circuit using multilinear argument.
+#![forbid(unsafe_code)]
+#![cfg_attr(not(feature = "std"), no_std)]
+#![deny(unused_import_braces, unused_qualifications, trivial_casts)]
+#![deny(trivial_numeric_casts, private_in_public, variant_size_differences)]
+#![deny(stable_features, unreachable_pub, non_shorthand_field_patterns)]
+#![deny(unused_attributes, unused_mut)]
+#![deny(missing_docs)]
+#![deny(unused_imports)]
+#![deny(renamed_and_removed_lints, stable_features, unused_allocation)]
+#![deny(unused_comparisons, bare_trait_objects, unused_must_use, const_err)]
+
 #[macro_use]
 #[allow(unused_imports)]
 extern crate ark_relations;
@@ -33,11 +45,12 @@ use crate::ahp::setup::{PublicParameter, VerifierParameter};
 pub mod data_structures;
 
 /// error package
-mod error;
+pub mod error;
 /// testing utilities
 #[cfg(test)]
-pub(crate) mod test_utils;
+pub mod test_utils;
 
+/// A protocol of generating proofs for R1CS circuit using multilinear argument.
 pub struct MLArgumentForR1CS<E: PairingEngine>(#[doc(hidden)] PhantomData<E>);
 
 impl<E: PairingEngine> MLArgumentForR1CS<E> {
@@ -46,13 +59,13 @@ impl<E: PairingEngine> MLArgumentForR1CS<E> {
         matrix_a: Matrix<E::Fr>,
         matrix_b: Matrix<E::Fr>,
         matrix_c: Matrix<E::Fr>,
-    ) -> Result<IndexPK<E::Fr>, crate::Error> {
+    ) -> Result<IndexPK<E::Fr>, Error> {
         MLProofForR1CS::<E>::index(matrix_a, matrix_b, matrix_c)
     }
 
     /// prove the circuit, giving the index
     /// * `pk`: prover key
-    /// * `v`: public input
+    /// * `v`: public input (should have size in power of two)
     /// * `w`: private input
     /// * `pp`: public parameter
     pub fn prove(pk: IndexPK<E::Fr>, v: Vec<E::Fr>, w: Vec<E::Fr>, pp: &PublicParameter<E>) -> SResult<Proof<E>> {
@@ -144,6 +157,11 @@ impl<E: PairingEngine> MLArgumentForR1CS<E> {
             prover_sixth_message: pm6,
         })
     }
+    /// Verify if the proof is true.
+    /// * `vk`: verifier key
+    /// * `v`: public input
+    /// * `proof`: proof
+    /// * `vp`: verifier parameter (used by the commitment scheme)
     pub fn verify(vk: IndexVK<E::Fr>, v: Vec<E::Fr>, proof: Proof<E>, vp: &VerifierParameter<E>) -> SResult<bool> {
         let log_n = vk.log_n;
         let mut first_sumcheck_messages =

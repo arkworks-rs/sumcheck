@@ -1,10 +1,13 @@
+//! setup method for the protocol
 use ark_ec::PairingEngine;
 use crate::ahp::MLProofForR1CS;
 use rand::RngCore;
 use crate::commitment::MLPolyCommit;
 use crate::error::SResult;
 
+/// Public parameter used by the prover
 pub type PublicParameter<E> = crate::commitment::data_structures::PublicParameter<E>;
+/// Verifier parameter used by the verifier
 pub type VerifierParameter<E> = crate::commitment::data_structures::VerifierParameter<E>;
 
 impl<E: PairingEngine> MLProofForR1CS<E> {

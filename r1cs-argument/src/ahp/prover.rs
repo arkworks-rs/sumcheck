@@ -1,3 +1,4 @@
+//! R1CS argument Prover
 use linear_sumcheck::data_structures::ml_extension::{ArithmeticCombination, MLExtension};
 use linear_sumcheck::data_structures::MLExtensionArray;
 use linear_sumcheck::ml_sumcheck::ahp::indexer::IndexInfo as MLIndexInfo;
@@ -22,41 +23,44 @@ use crate::ahp::setup::PublicParameter;
 use crate::commitment::MLPolyCommit;
 use crate::commitment::open::Proof;
 use ark_ff::Zero;
+/// Prover State at first
 pub struct ProverFirstState<E: PairingEngine> {
-    pub v: Vec<E::Fr>,
-    pub w: Vec<E::Fr>,
-    pub pk: IndexPK<E::Fr>,
+    /// public witness
+    v: Vec<E::Fr>,
+    /// private witness
+    w: Vec<E::Fr>,
+    /// prover key
+    pub(crate) pk: IndexPK<E::Fr>,
 }
-
+/// Prover state at second round
 pub struct ProverSecondState<E: PairingEngine> {
-    pub v: Vec<E::Fr>,
-    pub w: Vec<E::Fr>,
-    pub pk: IndexPK<E::Fr>,
+    v: Vec<E::Fr>,
+    pub(crate) pk: IndexPK<E::Fr>,
     z: MLExtensionArray<E::Fr>
 }
 
 /// state after sending commitment and z_rv_0
 pub struct ProverThirdState<E: PairingEngine> {
-    pub pk: IndexPK<E::Fr>,
+    pub(crate) pk: IndexPK<E::Fr>,
     z: MLExtensionArray<E::Fr>,
 }
 
 /// state when prover is doing first sumcheck
 pub struct ProverFirstSumcheckState<E: PairingEngine> {
-    pub pk: IndexPK<E::Fr>,
+    pub(crate) pk: IndexPK<E::Fr>,
     z: MLExtensionArray<E::Fr>,
     sum_az_over_y: MLExtensionArray<E::Fr>,
     sum_bz_over_y: MLExtensionArray<E::Fr>,
     sum_cz_over_y: MLExtensionArray<E::Fr>,
     ml_prover_state: MLProverState<E::Fr>,
 }
-
+/// prover state after first sumcheck
 pub struct ProverFifthState<E: PairingEngine> {
-    pub pk: IndexPK<E::Fr>,
+    pub(crate) pk: IndexPK<E::Fr>,
     z: MLExtensionArray<E::Fr>,
     r_x: Vec<E::Fr>,
 }
-
+/// Prover state during second sumcheck
 pub struct ProverSecondSumcheckState<E: PairingEngine> {
     z: MLExtensionArray<E::Fr>,
     ml_prover_state: MLProverState<E::Fr>,
@@ -65,40 +69,40 @@ pub struct ProverSecondSumcheckState<E: PairingEngine> {
 /// first message is the commitment
 #[derive(CanonicalSerialize, CanonicalDeserialize)]
 pub struct ProverFirstMessage<E: PairingEngine> {
-    pub commitment: Commitment<E>
+    pub(crate) commitment: Commitment<E>
 }
-
+/// Z_rv_0
 #[derive(CanonicalSerialize, CanonicalDeserialize)]
 pub struct ProverSecondMessage<E: PairingEngine> {
-    pub z_rv_0: E::Fr,
-    pub proof_for_z_rv_0: Proof<E>
+    pub(crate) z_rv_0: E::Fr,
+    pub(crate) proof_for_z_rv_0: Proof<E>
 }
 
 /// contains some sumcheck info
 #[derive(CanonicalSerialize, CanonicalDeserialize)]
 pub struct ProverThirdMessage {
-    pub ml_index_info: MLIndexInfo,
+    pub(crate) ml_index_info: MLIndexInfo,
 }
 
 /// va, vb, vc
 #[derive(CanonicalSerialize, CanonicalDeserialize)]
 pub struct ProverFourthMessage<E: PairingEngine> {
-    pub va: E::Fr,
-    pub vb: E::Fr,
-    pub vc: E::Fr,
+    pub(crate) va: E::Fr,
+    pub(crate) vb: E::Fr,
+    pub(crate) vc: E::Fr,
 }
 
 /// information for second sumcheck
 #[derive(CanonicalSerialize, CanonicalDeserialize)]
 pub struct ProverFifthMessage {
-    pub index_info: MLIndexInfo,
+    pub(crate) index_info: MLIndexInfo,
 }
 
 /// z(r_y)
 #[derive(CanonicalSerialize, CanonicalDeserialize)]
 pub struct ProverSixthMessage<E: PairingEngine> {
-    pub z_ry: E::Fr,
-    pub proof_for_z_ry: Proof<E>
+    pub(crate) z_ry: E::Fr,
+    pub(crate) proof_for_z_ry: Proof<E>
 }
 /// final message
 pub type ProverFinalMessage<E> = ProverSixthMessage<E>;
@@ -130,7 +134,6 @@ impl<E: PairingEngine> MLProofForR1CS<E> {
         Ok((
             ProverSecondState {
                 v: state.v,
-                w: state.w,
                 pk: state.pk,
                 z
             },

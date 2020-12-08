@@ -1,3 +1,4 @@
+//! Verifier for the r1cs ahp
 use ark_ff::Field;
 use linear_sumcheck::data_structures::ml_extension::MLExtension;
 use linear_sumcheck::data_structures::MLExtensionArray;
@@ -27,119 +28,121 @@ use crate::commitment::open::Proof;
 /// r_v: randomness
 #[derive(CanonicalSerialize, CanonicalDeserialize)]
 pub struct VerifierFirstMessage<F: Field> {
-    pub r_v: Vec<F>,
+    pub(crate) r_v: Vec<F>,
 }
 
 /// random tor
 #[derive(CanonicalSerialize, CanonicalDeserialize)]
 pub struct VerifierSecondMessage<F: Field> {
-    pub tor: Vec<F>,
+    pub(crate) tor: Vec<F>,
 }
 
 /// the last randomness for MLSumcheck
 #[derive(CanonicalSerialize, CanonicalDeserialize)]
 pub struct VerifierThirdMessage<F: Field> {
-    pub last_random_point: F,
+    pub(crate) last_random_point: F,
 }
 
 #[derive(CanonicalSerialize, CanonicalDeserialize)]
+/// random value ra, rb, rc
 pub struct VerifierFourthMessage<F: Field> {
-    pub r_a: F,
-    pub r_b: F,
-    pub r_c: F,
+    pub(crate) r_a: F,
+    pub(crate) r_b: F,
+    pub(crate) r_c: F,
 }
 
 /// the last randomness for second MLSumcheck
 #[derive(CanonicalSerialize, CanonicalDeserialize)]
 pub struct VerifierFifthMessage<F: Field> {
-    pub last_random_point: F,
+    pub(crate) last_random_point: F,
 }
-
+/// verifier first state: initial state
 pub struct VerifierFirstState<E: PairingEngine> {
-    pub v: Vec<E::Fr>,
-    pub log_v: usize,
-    pub vk: IndexVK<E::Fr>,
+    pub(crate) v: Vec<E::Fr>,
+    pub(crate) log_v: usize,
+    pub(crate) vk: IndexVK<E::Fr>,
 }
-
+/// verifier second state: received commitment
 pub struct VerifierSecondState<E: PairingEngine> {
-    pub v: Vec<E::Fr>,
-    pub log_v: usize,
-    pub vk: IndexVK<E::Fr>,
-    pub r_v: Vec<E::Fr>,
-    pub commit: Commitment<E>, // todo: replace this with real commitment
+    v: Vec<E::Fr>,
+    log_v: usize,
+    pub(crate) vk: IndexVK<E::Fr>,
+    r_v: Vec<E::Fr>,
+    commit: Commitment<E>, // todo: replace this with real commitment
 }
-
+/// verifier state
 pub struct VerifierThirdState<E: PairingEngine> {
-    pub vk: IndexVK<E::Fr>,
-    pub commit: Commitment<E>,
-    pub tor: Vec<E::Fr>,
-    pub v: Vec<E::Fr>,
-    pub r_v: Vec<E::Fr>,
-    pub z_rv_0: E::Fr,
-    pub z_rv_0_proof: Proof<E>
+    pub(crate) vk: IndexVK<E::Fr>,
+    commit: Commitment<E>,
+    tor: Vec<E::Fr>,
+    v: Vec<E::Fr>,
+    r_v: Vec<E::Fr>,
+    z_rv_0: E::Fr,
+    z_rv_0_proof: Proof<E>
 }
 
 /// first sumcheck state
 pub struct VerifierFirstSumcheckState<E: PairingEngine> {
-    pub vk: IndexVK<E::Fr>,
-    pub commit: Commitment<E>,
-    pub tor: Vec<E::Fr>,
-    pub ml_verifier: MLVerifierState<E::Fr>,
-    pub v: Vec<E::Fr>,
-    pub r_v: Vec<E::Fr>,
-    pub z_rv_0: E::Fr,
-    pub z_rv_0_proof: Proof<E>
+    pub(crate) vk: IndexVK<E::Fr>,
+    commit: Commitment<E>,
+    tor: Vec<E::Fr>,
+    ml_verifier: MLVerifierState<E::Fr>,
+    v: Vec<E::Fr>,
+    r_v: Vec<E::Fr>,
+    z_rv_0: E::Fr,
+    z_rv_0_proof: Proof<E>
 }
-
+/// verifier state after first sumcheck
 pub struct VerifierFourthState<E: PairingEngine> {
-    pub vk: IndexVK<E::Fr>,
-    pub commit: Commitment<E>,
-    pub tor: Vec<E::Fr>,
-    pub first_verifier_state: MLVerifierState<E::Fr>,
-    pub v: Vec<E::Fr>,
-    pub r_v: Vec<E::Fr>,
-    pub z_rv_0: E::Fr,
-    pub z_rv_0_proof: Proof<E>
+    pub(crate) vk: IndexVK<E::Fr>,
+    commit: Commitment<E>,
+    tor: Vec<E::Fr>,
+    first_verifier_state: MLVerifierState<E::Fr>,
+    v: Vec<E::Fr>,
+    r_v: Vec<E::Fr>,
+    z_rv_0: E::Fr,
+    z_rv_0_proof: Proof<E>
 }
-
+/// verifier state: prepare for next sumcheck
 pub struct VerifierFifthState<E: PairingEngine> {
-    pub vk: IndexVK<E::Fr>,
-    pub commit: Commitment<E>,
-    pub r_a: E::Fr,
-    pub r_b: E::Fr,
-    pub r_c: E::Fr,
-    pub va: E::Fr,
-    pub vb: E::Fr,
-    pub vc: E::Fr,
-    pub tor: Vec<E::Fr>,
-    pub first_verifier_state: MLVerifierState<E::Fr>,
-    pub v: Vec<E::Fr>,
-    pub r_v: Vec<E::Fr>,
-    pub z_rv_0: E::Fr,
-    pub z_rv_0_proof: Proof<E>
+    pub(crate) vk: IndexVK<E::Fr>,
+    commit: Commitment<E>,
+     r_a: E::Fr,
+     r_b: E::Fr,
+     r_c: E::Fr,
+     va: E::Fr,
+     vb: E::Fr,
+     vc: E::Fr,
+     tor: Vec<E::Fr>,
+     first_verifier_state: MLVerifierState<E::Fr>,
+     v: Vec<E::Fr>,
+     r_v: Vec<E::Fr>,
+     z_rv_0: E::Fr,
+     z_rv_0_proof: Proof<E>
 }
-
+/// verifier state during second sumcheck
 pub struct VerifierSecondSumcheckState<E: PairingEngine> {
-    pub vk: IndexVK<E::Fr>,
-    pub commit: Commitment<E>,
-    pub va: E::Fr,
-    pub vb: E::Fr,
-    pub vc: E::Fr,
-    pub r_a: E::Fr,
-    pub r_b: E::Fr,
-    pub r_c: E::Fr,
-    pub tor: Vec<E::Fr>,
-    pub first_verifier_state: MLVerifierState<E::Fr>,
-    pub second_verifier_state: MLVerifierState<E::Fr>,
-    pub v: Vec<E::Fr>,
-    pub r_v: Vec<E::Fr>,
-    pub z_rv_0: E::Fr,
-    pub z_rv_0_proof: Proof<E>
+    pub(crate) vk: IndexVK<E::Fr>,
+     commit: Commitment<E>,
+     va: E::Fr,
+     vb: E::Fr,
+     vc: E::Fr,
+     r_a: E::Fr,
+     r_b: E::Fr,
+     r_c: E::Fr,
+     tor: Vec<E::Fr>,
+     first_verifier_state: MLVerifierState<E::Fr>,
+     second_verifier_state: MLVerifierState<E::Fr>,
+     v: Vec<E::Fr>,
+     r_v: Vec<E::Fr>,
+     z_rv_0: E::Fr,
+     z_rv_0_proof: Proof<E>
 }
-
+/// sixth state has same structure as second sumcheck state
 pub type VerifierSixthState<E> = VerifierSecondSumcheckState<E>;
 
 impl<E: PairingEngine> MLProofForR1CS<E> {
+    /// initialize the verifier and return the first state
     pub fn verifier_init(vk: IndexVK<E::Fr>, v: Vec<E::Fr>) -> SResult<VerifierFirstState<E>> {
         if !v.len().is_power_of_two() || v.len() > vk.matrix_a.num_constraints {
             return Err(invalid_arg("public input should be power of two and has size smaller than number of constraints"));
@@ -168,7 +171,7 @@ impl<E: PairingEngine> MLProofForR1CS<E> {
         };
         Ok((next_state, msg))
     }
-
+    /// sample first round randomness
     pub fn sample_first_round<R: RngCore>(
         log_v: usize,
         rng: &mut R,
@@ -207,7 +210,7 @@ impl<E: PairingEngine> MLProofForR1CS<E> {
         };
         Ok((state, msg))
     }
-
+    /// sample second round randomness
     pub fn sample_second_round<R: RngCore>(
         log_n: usize,
         rng: &mut R,
@@ -242,6 +245,7 @@ impl<E: PairingEngine> MLProofForR1CS<E> {
     }
 
     #[inline]
+    /// sample third round randomness
     pub fn sample_third_round() -> Option<MLVerifierMsg<E::Fr>> {
         None
     }
@@ -265,7 +269,7 @@ impl<E: PairingEngine> MLProofForR1CS<E> {
         };
         Ok((next_state, v_msg))
     }
-
+    /// sample first sumcheck randomness
     pub fn sample_verify_first_sumcheck_ongoing_round<R: RngCore>(
         rng: &mut R,
     ) -> Option<MLVerifierMsg<E::Fr>> {
@@ -298,6 +302,7 @@ impl<E: PairingEngine> MLProofForR1CS<E> {
         Ok((next_state, msg))
     }
 
+    /// sample first sumcheck final round randomness
     pub fn sample_verify_first_sumcheck_final_round<R: RngCore>(
         rng: &mut R,
     ) -> VerifierThirdMessage<E::Fr> {
@@ -350,7 +355,7 @@ impl<E: PairingEngine> MLProofForR1CS<E> {
 
         Ok((next_state, msg))
     }
-
+    /// sample fourth round randomness
     pub fn sample_verify_fourth_round<R: RngCore>(rng: &mut R) -> VerifierFourthMessage<E::Fr> {
         VerifierFourthMessage {
             r_a: E::Fr::rand(rng),
@@ -391,7 +396,7 @@ impl<E: PairingEngine> MLProofForR1CS<E> {
 
         Ok((next_state, None))
     }
-
+    /// sample fifth round randomness
     pub fn sample_verify_fifth_round() -> Option<MLVerifierMsg<E::Fr>> {
         None
     }
@@ -407,6 +412,7 @@ impl<E: PairingEngine> MLProofForR1CS<E> {
         Ok((state, v_msg))
     }
     #[inline]
+    /// sample second sumcheck round randomness
     pub fn sample_verify_second_sumcheck_ongoing_round<R: RngCore>(
         rng: &mut R,
     ) -> Option<MLVerifierMsg<E::Fr>> {
@@ -430,7 +436,7 @@ impl<E: PairingEngine> MLProofForR1CS<E> {
         };
         Ok((state, msg))
     }
-
+    /// sample second sumcheck final round randomness
     pub fn sample_verify_second_sumcheck_final_round<R: RngCore>(
         rng: &mut R,
     ) -> VerifierFifthMessage<E::Fr> {
@@ -450,7 +456,7 @@ impl<E: PairingEngine> MLProofForR1CS<E> {
 
         // verify if public witness extension asserted by prover is correct
         let mut r_v_0 = state.r_v.clone(); // extend r_v with zero
-        r_v_0.extend((0..(state.vk.log_n - ark_std::log2(state.v.len()) as usize)).map(|_|E::Fr::zero()));
+        r_v_0.extend((0..(state.vk.log_n - log2(state.v.len()) as usize)).map(|_|E::Fr::zero()));
         if !MLPolyCommit::verify(vp, &state.commit, &r_v_0, state.z_rv_0, state.z_rv_0_proof)? {
             return Err(invalid_arg("public witness failed in commitment check"));
         };

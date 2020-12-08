@@ -1,3 +1,4 @@
+//! Setup for the commitment scheme
 use ark_ec::{PairingEngine, ProjectiveCurve, AffineCurve};
 use crate::commitment::MLPolyCommit;
 use rand::RngCore;
@@ -5,7 +6,7 @@ use crate::commitment::data_structures::{PublicParameter, VerifierParameter};
 use ark_ff::{UniformRand, PrimeField, Field};
 use crate::data_structures::eq::eq_extension;
 use crate::error::{SResult, invalid_arg};
-use linear_sumcheck::data_structures::ml_extension::{MLExtension};
+use linear_sumcheck::data_structures::ml_extension::MLExtension;
 use ark_ec::msm::FixedBaseMSM;
 use ark_std::collections::LinkedList;
 use ark_std::iter::FromIterator;
@@ -24,6 +25,13 @@ fn remove_dummy_variable<F: Field>(poly: &[F], pad: usize) -> SResult<Vec<F>> {
 }
 
 impl<E: PairingEngine> MLPolyCommit<E> {
+    /// Generate random parameters
+    /// * `nv`: number of variables
+    ///
+    /// Returns a tuple:
+    /// - public parameter
+    /// - verifier parameter
+    /// - randomness used when generating those parameters: this randomness should be destroyed and should not be revealed
     pub fn keygen<R: RngCore>(nv: usize, rng: &mut R) -> SResult<(PublicParameter<E>, VerifierParameter<E>, Vec<E::Fr>)> {
         let g: E::G1Projective = E::G1Projective::rand(rng);
         let h: E::G2Projective = E::G2Projective::rand(rng);
@@ -117,7 +125,7 @@ mod tests{
     use crate::commitment::MLPolyCommit;
     use crate::test_utils::TestCurve;
 
-    pub fn dummy_keygen<R: RngCore, E: PairingEngine>(nv: usize, rng: &mut R) -> SResult<PublicParameter<E>> {
+    fn dummy_keygen<R: RngCore, E: PairingEngine>(nv: usize, rng: &mut R) -> SResult<PublicParameter<E>> {
         let g: E::G1Projective = E::G1Projective::rand(rng);
         let h: E::G2Projective = E::G2Projective::rand(rng);
         let mut powers_of_g = Vec::new();
@@ -127,9 +135,9 @@ mod tests{
             let ext = eq_extension(&t[i..nv])?;
             let mut comb = ArithmeticCombination::new(nv - i);
             comb.add_product(ext.into_iter())?;
-            let pp_k_g: Vec<_> = (0..(1<<(nv - i))).map(|x|g.mul((comb.eval_binary_at(x).unwrap() as E::Fr).into_repr())).collect();
+            let pp_k_g: Vec<_> = (0..(1<<(nv - i))).map(|x|g.mul(comb.eval_binary_at(x).unwrap().into_repr())).collect();
             let pp_k_g: EvaluationHyperCubeOnG1<E> = E::G1Projective::batch_normalization_into_affine(&pp_k_g);
-            let pp_k_h: Vec<_> = (0..(1<<(nv - i))).map(|x|h.mul((comb.eval_binary_at(x).unwrap() as E::Fr).into_repr())).collect();
+            let pp_k_h: Vec<_> = (0..(1<<(nv - i))).map(|x|h.mul(comb.eval_binary_at(x).unwrap().into_repr())).collect();
             let pp_k_h: EvaluationHyperCubeOnG2<E> = E::G2Projective::batch_normalization_into_affine(&pp_k_h);
             powers_of_g.push(pp_k_g);
             powers_of_h.push(pp_k_h);

@@ -1,3 +1,4 @@
+//! Verifier for commitment scheme
 use ark_ec::{PairingEngine, ProjectiveCurve, AffineCurve};
 use crate::commitment::MLPolyCommit;
 use crate::commitment::commit::Commitment;
@@ -9,6 +10,7 @@ use ark_ec::msm::FixedBaseMSM;
 
 
 impl<E: PairingEngine> MLPolyCommit<E> {
+    /// Verify the result of evaluation of polynomial at a point. Return true is the point is true. 
     pub fn verify(vp: &VerifierParameter<E>,commitment: &Commitment<E>, point: &[E::Fr], eval: E::Fr, proof: Proof<E>)
     ->SResult<bool>{
         let left =

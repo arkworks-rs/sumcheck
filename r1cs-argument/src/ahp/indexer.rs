@@ -1,3 +1,4 @@
+//! Indexer for the r1cs argument protocol
 use crate::ahp::MLProofForR1CS;
 use crate::data_structures::r1cs_reader::MatrixExtension;
 use crate::error::invalid_arg;
@@ -9,24 +10,31 @@ use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, Read, Serializatio
 /// Prover's Key
 #[derive(Clone, CanonicalSerialize, CanonicalDeserialize)]
 pub struct IndexPK<F: Field> {
+    /// Matrix A
     pub matrix_a: MatrixExtension<F>,
+    /// Matrix B
     pub matrix_b: MatrixExtension<F>,
+    /// Matrix C
     pub matrix_c: MatrixExtension<F>,
     /// log(|v|+|w|)
     pub log_n: usize,
 }
 
-/// Verifier's Key
+/// Verifier's Key for R1cs AxBx = Cx
 #[derive(Clone, CanonicalSerialize, CanonicalDeserialize)]
 pub struct IndexVK<F: Field> {
+    /// Matrix A
     pub matrix_a: MatrixExtension<F>,
+    /// Matrix B
     pub matrix_b: MatrixExtension<F>,
+    /// Matrix C
     pub matrix_c: MatrixExtension<F>,
     /// log(|v|+|w|)
     pub log_n: usize,
 }
 
 impl<F: Field> IndexPK<F> {
+    /// Get verifier key from prover key
     pub fn vk(&self) -> IndexVK<F> {
         IndexVK {
             matrix_a: self.matrix_a.clone(),
@@ -38,6 +46,7 @@ impl<F: Field> IndexPK<F> {
 }
 
 impl<E: PairingEngine> MLProofForR1CS<E> {
+    /// Index the raw matrix into prover key and verifier key
     pub fn index(
         matrix_a: Matrix<E::Fr>,
         matrix_b: Matrix<E::Fr>,

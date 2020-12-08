@@ -1,3 +1,4 @@
+//! functions used for opening the polynomial
 use ark_ec::{PairingEngine, ProjectiveCurve};
 use crate::commitment::MLPolyCommit;
 use crate::commitment::data_structures::PublicParameter;
@@ -9,13 +10,20 @@ use ark_ec::msm::VariableBaseMSM;
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, Read, SerializationError, Write};
 
 #[derive(CanonicalSerialize, CanonicalDeserialize)]
+/// Proof of evaluation of a multilinear polynomial
 pub struct Proof<E: PairingEngine> {
+    /// generator for G2
     pub h: E::G2Affine,
+    /// Evaluation of quotients
     pub proofs: Vec<E::G2Affine>
 }
 
 impl<E: PairingEngine> MLPolyCommit<E> {
-    // evaluate the polynomial and calculate the proof
+    /// evaluate the polynomial and calculate the proof
+    /// Return a tuple: 
+    /// - evaluation result
+    /// - proof
+    /// - raw quotient (verification does not need this)
     pub fn open(pp: &PublicParameter<E>,
                 polynomial: MLExtensionArray<E::Fr>,
                 point: &[E::Fr]) -> SResult<(E::Fr, Proof<E>, Vec<Vec<E::Fr>>)> {

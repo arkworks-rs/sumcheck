@@ -6,6 +6,7 @@ use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, Read, Serializatio
 use linear_sumcheck::data_structures::ml_extension::{MLExtension, SparseMLExtension};
 use linear_sumcheck::data_structures::{MLExtensionArray, SparseMLExtensionMap};
 #[derive(Clone, CanonicalSerialize, CanonicalDeserialize)]
+/// Matrix extended as a polynomial where point is the index
 pub struct MatrixExtension<F: Field> {
     constraint: Matrix<F>,
     /// number of constraints

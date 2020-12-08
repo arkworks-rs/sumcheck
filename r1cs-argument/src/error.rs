@@ -2,6 +2,7 @@ use ark_std::fmt;
 use ark_std::fmt::Formatter;
 
 #[derive(Debug)]
+/// Error used for R1CS Argument
 pub enum Error {
     /// bad argument
     InvalidArgument(Option<String>),
@@ -16,6 +17,7 @@ pub enum Error {
 /// result used for this crate
 pub type SResult<T> = Result<T, Error>;
 
+/// invalid argument error
 pub fn invalid_arg(msg: &str) -> Error {
     Error::InvalidArgument(Some(msg.into()))
 }
