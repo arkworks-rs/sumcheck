@@ -90,16 +90,30 @@ jobs:
           target: thumbv6m-none-eabi
           override: true
 
-      - name: Build
-        uses: actions-rs/cargo@v1
+      - name: Install Rust ARM64 (${{ matrix.rust }})
+        uses: actions-rs/toolchain@v1
         with:
-          use-cross: true
-          command: build
-          args: --no-default-features --target thumbv6m-none-eabi
+          toolchain: stable
+          target: aarch64-unknown-none
+          override: true
 
-      - name: Check
-        uses: actions-rs/cargo@v1
+      - uses: actions/cache@v2
         with:
-          use-cross: true
-          command: check
-          args: --examples --no-default-features --target thumbv6m-none-eabi
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: linear-sumcheck
+        run: |
+          cd linear-sumcheck
+          cargo build -p linear-sumcheck --no-default-features --target thumbv6m-none-eabi
+          cargo check --examples -p ark-std --no-default-features --target thumbv6m-none-eabi
+          cd ..
+      - name: r1cs-argument
+        run: |
+          cd r1cs-argument
+          cargo build -p r1cs-argument --no-default-features --target thumbv6m-none-eabi
+          cargo check --examples -p bench-utils --no-default-features --target thumbv6m-none-eabi
+          cd ..
