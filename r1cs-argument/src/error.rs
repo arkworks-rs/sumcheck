@@ -12,6 +12,8 @@ pub enum Error {
     WrongWitness(Option<String>),
     /// serialization error
     SerializationError(ark_serialize::SerializationError),
+    /// Commitment error
+    CommitmentError(ml_commitment::Error),
 }
 
 /// result used for this crate
@@ -37,5 +39,11 @@ impl From<linear_sumcheck::Error> for Error {
 impl From<ark_serialize::SerializationError> for Error {
     fn from(e: ark_serialize::SerializationError) -> Self {
         Error::SerializationError(e)
+    }
+}
+
+impl From<ml_commitment::Error> for Error {
+    fn from(e: ml_commitment::Error) -> Self {
+        Error::CommitmentError(e)
     }
 }

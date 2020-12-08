@@ -12,7 +12,7 @@ ark-relations = {git = "https://github.com/arkworks-rs/snark/", default-features
 ark-serialize = {git = "https://github.com/arkworks-rs/algebra", default-features = false}
 linear-sumcheck = {path = "../linear-sumcheck", default-features = false}
 bench-utils = {git = "https://github.com/arkworks-rs/utils", default-features = false}
-
+ml-commitment = {path = "../ml-commitment", default-features = false}
 hashbrown = {version = "0.9.1"}
 rand = {version =  "0.7.3", default-features = false}
 
@@ -21,5 +21,5 @@ ark-bls12-381 = { git = "https://github.com/arkworks-rs/curves", default-feature
 
 [features]
 default = ["std"] 
-std = ["ark-ff/std","ark-relations/std","ark-std/std","linear-sumcheck/std", "rand/std", "ark-serialize/std", "ark-ec/std"]
+std = ["ark-ff/std","ark-relations/std","ark-std/std","linear-sumcheck/std", "rand/std", "ark-serialize/std", "ark-ec/std", "ml-commitment/std"]
 print-trace  = ["bench-utils/print-trace"]

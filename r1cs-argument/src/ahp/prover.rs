@@ -15,15 +15,15 @@ use crate::ahp::verifier::{
     VerifierThirdMessage,
 };
 use crate::ahp::MLProofForR1CS;
-use crate::commitment::commit::Commitment;
-use crate::commitment::open::Proof;
-use crate::commitment::MLPolyCommit;
 use crate::data_structures::eq::eq_extension;
 use crate::error::{invalid_arg, SResult};
 use ark_ec::PairingEngine;
 use ark_ff::Zero;
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, Read, SerializationError, Write};
 use ark_std::vec::Vec;
+use ml_commitment::commit::Commitment;
+use ml_commitment::open::Proof;
+use ml_commitment::MLPolyCommit;
 /// Prover State at first
 pub struct ProverFirstState<E: PairingEngine> {
     /// public witness

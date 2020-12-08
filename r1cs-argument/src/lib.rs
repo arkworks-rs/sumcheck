@@ -27,8 +27,6 @@ pub mod ahp;
 #[cfg(test)]
 mod benchmark;
 
-pub mod commitment;
-
 use crate::ahp::indexer::{IndexPK, IndexVK};
 use crate::ahp::setup::{PublicParameter, VerifierParameter};
 use crate::ahp::MLProofForR1CS;

@@ -11,9 +11,6 @@ use crate::ahp::prover::{
 };
 use crate::ahp::setup::VerifierParameter;
 use crate::ahp::MLProofForR1CS;
-use crate::commitment::commit::Commitment;
-use crate::commitment::open::Proof;
-use crate::commitment::MLPolyCommit;
 use crate::data_structures::eq::eq_extension;
 use crate::error::{invalid_arg, SResult};
 use ark_ec::PairingEngine;
@@ -25,6 +22,9 @@ use linear_sumcheck::ml_sumcheck::ahp::prover::ProverMsg as MLProverMsg;
 use linear_sumcheck::ml_sumcheck::ahp::verifier::VerifierMsg as MLVerifierMsg;
 use linear_sumcheck::ml_sumcheck::ahp::verifier::VerifierState as MLVerifierState;
 use linear_sumcheck::ml_sumcheck::ahp::AHPForMLSumcheck;
+use ml_commitment::commit::Commitment;
+use ml_commitment::open::Proof;
+use ml_commitment::MLPolyCommit;
 /// r_v: randomness
 #[derive(CanonicalSerialize, CanonicalDeserialize)]
 pub struct VerifierFirstMessage<F: Field> {

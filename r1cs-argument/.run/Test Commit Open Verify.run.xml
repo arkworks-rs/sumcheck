@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Test Commit Open Verify" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
     <option name="channel" value="DEFAULT" />
-    <option name="command" value="test --package r1cs-spartan-raw --lib commitment::commit_bench::commit_open_verify_bench --release -- --exact --nocapture" />
+    <option name="command" value="test --package r1cs-argument --lib commitment::commit_bench::commit_open_verify_bench --release -- --exact --nocapture" />
     <option name="allFeatures" value="true" />
     <option name="emulateTerminal" value="false" />
     <option name="backtrace" value="SHORT" />
