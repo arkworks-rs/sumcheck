@@ -90,16 +90,29 @@ jobs:
           target: thumbv6m-none-eabi
           override: true
 
-      - name: Build
-        uses: actions-rs/cargo@v1
+      - name: Install Rust ARM64 (${{ matrix.rust }})
+        uses: actions-rs/toolchain@v1
         with:
-          use-cross: true
-          command: build
-          args: --workspace --no-default-features --target thumbv6m-none-eabi
+          toolchain: stable
+          target: aarch64-unknown-none
+          override: true
 
-      - name: Check
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: check
         uses: actions-rs/cargo@v1
         with:
-          use-cross: true
-          command: check
-          args: --examples --workspace --no-default-features --target thumbv6m-none-eabi
+            command: check
+            args: --examples --workspace --target thumbv6m-none-eabi
+
+      - name: build
+        uses: actions-rs/cargo@v1
+        with:
+            command: build
+            args: --workspace --target thumbv6m-none-eabi
