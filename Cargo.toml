@@ -2,7 +2,8 @@
 
 members = [
     "linear-sumcheck",
-    "r1cs-argument"
+    "r1cs-argument",
+    "ml-commitment"
 ]
 
 [profile.release]
