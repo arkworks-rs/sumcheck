@@ -65,7 +65,6 @@ pub struct VerifierFirstState<E: PairingEngine> {
 /// verifier second state: received commitment
 pub struct VerifierSecondState<E: PairingEngine> {
     v: Vec<E::Fr>,
-    log_v: usize,
     pub(crate) vk: IndexVK<E::Fr>,
     r_v: Vec<E::Fr>,
     commit: Commitment<E>, // todo: replace this with real commitment
@@ -164,7 +163,6 @@ impl<E: PairingEngine> MLProofForR1CS<E> {
         let r_v: Vec<_> = msg.r_v.clone();
         let next_state = VerifierSecondState {
             v: state.v,
-            log_v: state.log_v,
             vk,
             commit,
             r_v,
