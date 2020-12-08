@@ -9,20 +9,20 @@ use linear_sumcheck::ml_sumcheck::ahp::verifier::VerifierMsg as MLVerifierMsg;
 use linear_sumcheck::ml_sumcheck::ahp::AHPForMLSumcheck;
 
 use crate::ahp::indexer::IndexPK;
+use crate::ahp::setup::PublicParameter;
 use crate::ahp::verifier::{
     VerifierFifthMessage, VerifierFirstMessage, VerifierFourthMessage, VerifierSecondMessage,
     VerifierThirdMessage,
 };
 use crate::ahp::MLProofForR1CS;
+use crate::commitment::commit::Commitment;
+use crate::commitment::open::Proof;
+use crate::commitment::MLPolyCommit;
 use crate::data_structures::eq::eq_extension;
 use crate::error::{invalid_arg, SResult};
 use ark_ec::PairingEngine;
-use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, Read, SerializationError, Write};
-use crate::commitment::commit::Commitment;
-use crate::ahp::setup::PublicParameter;
-use crate::commitment::MLPolyCommit;
-use crate::commitment::open::Proof;
 use ark_ff::Zero;
+use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, Read, SerializationError, Write};
 /// Prover State at first
 pub struct ProverFirstState<E: PairingEngine> {
     /// public witness
@@ -36,7 +36,7 @@ pub struct ProverFirstState<E: PairingEngine> {
 pub struct ProverSecondState<E: PairingEngine> {
     v: Vec<E::Fr>,
     pub(crate) pk: IndexPK<E::Fr>,
-    z: MLExtensionArray<E::Fr>
+    z: MLExtensionArray<E::Fr>,
 }
 
 /// state after sending commitment and z_rv_0
@@ -69,13 +69,13 @@ pub struct ProverSecondSumcheckState<E: PairingEngine> {
 /// first message is the commitment
 #[derive(CanonicalSerialize, CanonicalDeserialize)]
 pub struct ProverFirstMessage<E: PairingEngine> {
-    pub(crate) commitment: Commitment<E>
+    pub(crate) commitment: Commitment<E>,
 }
 /// Z_rv_0
 #[derive(CanonicalSerialize, CanonicalDeserialize)]
 pub struct ProverSecondMessage<E: PairingEngine> {
     pub(crate) z_rv_0: E::Fr,
-    pub(crate) proof_for_z_rv_0: Proof<E>
+    pub(crate) proof_for_z_rv_0: Proof<E>,
 }
 
 /// contains some sumcheck info
@@ -102,7 +102,7 @@ pub struct ProverFifthMessage {
 #[derive(CanonicalSerialize, CanonicalDeserialize)]
 pub struct ProverSixthMessage<E: PairingEngine> {
     pub(crate) z_ry: E::Fr,
-    pub(crate) proof_for_z_ry: Proof<E>
+    pub(crate) proof_for_z_ry: Proof<E>,
 }
 /// final message
 pub type ProverFinalMessage<E> = ProverSixthMessage<E>;
@@ -126,7 +126,7 @@ impl<E: PairingEngine> MLProofForR1CS<E> {
     /// send commitment
     pub fn prover_first_round(
         state: ProverFirstState<E>,
-        pp: &PublicParameter<E>
+        pp: &PublicParameter<E>,
     ) -> Result<(ProverSecondState<E>, ProverFirstMessage<E>), crate::Error> {
         let z =
             MLExtensionArray::from_vec(state.v.iter().chain(state.w.iter()).map(|x| *x).collect())?;
@@ -135,24 +135,25 @@ impl<E: PairingEngine> MLProofForR1CS<E> {
             ProverSecondState {
                 v: state.v,
                 pk: state.pk,
-                z
+                z,
             },
-            ProverFirstMessage {
-                commitment,
-            },
+            ProverFirstMessage { commitment },
         ))
     }
     /// receive r_v, send z_rv_0
     pub fn prover_second_round(
         state: ProverSecondState<E>,
         v_msg: VerifierFirstMessage<E::Fr>,
-        pp: &PublicParameter<E>
+        pp: &PublicParameter<E>,
     ) -> Result<(ProverThirdState<E>, ProverSecondMessage<E>), crate::Error> {
         let pk = state.pk;
         let z = state.z;
         let mut r_v = v_msg.r_v;
         // extend r_v with zero
-        r_v.extend((0..(z.num_variables()? - ark_std::log2(state.v.len()) as usize)).map(|_|E::Fr::zero()));
+        r_v.extend(
+            (0..(z.num_variables()? - ark_std::log2(state.v.len()) as usize))
+                .map(|_| E::Fr::zero()),
+        );
         let (z_rv_0, proof, _) = MLPolyCommit::open(pp, z.clone(), &r_v)?;
         let state = ProverThirdState { pk, z };
         let msg = ProverSecondMessage {
@@ -271,11 +272,11 @@ impl<E: PairingEngine> MLProofForR1CS<E> {
     pub fn prove_sixth_round(
         state: ProverSecondSumcheckState<E>,
         v_msg: VerifierFifthMessage<E::Fr>,
-        pp: &PublicParameter<E>
+        pp: &PublicParameter<E>,
     ) -> Result<ProverFinalMessage<E>, crate::Error> {
         let mut r_y = state.ml_prover_state.randomness;
         r_y.push(v_msg.last_random_point);
-        let (z_ry, proof_for_z_ry, _) = MLPolyCommit::open(&pp,state.z, &r_y)?;
+        let (z_ry, proof_for_z_ry, _) = MLPolyCommit::open(&pp, state.z, &r_y)?;
         let msg = ProverFinalMessage {
             z_ry,
             proof_for_z_ry,

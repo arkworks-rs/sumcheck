@@ -9,7 +9,11 @@ use crate::ahp::prover::{
     ProverFifthMessage, ProverFinalMessage, ProverFirstMessage, ProverFourthMessage,
     ProverSecondMessage, ProverThirdMessage,
 };
+use crate::ahp::setup::VerifierParameter;
 use crate::ahp::MLProofForR1CS;
+use crate::commitment::commit::Commitment;
+use crate::commitment::open::Proof;
+use crate::commitment::MLPolyCommit;
 use crate::data_structures::eq::eq_extension;
 use crate::error::{invalid_arg, SResult};
 use ark_ec::PairingEngine;
@@ -20,10 +24,6 @@ use linear_sumcheck::ml_sumcheck::ahp::prover::ProverMsg as MLProverMsg;
 use linear_sumcheck::ml_sumcheck::ahp::verifier::VerifierMsg as MLVerifierMsg;
 use linear_sumcheck::ml_sumcheck::ahp::verifier::VerifierState as MLVerifierState;
 use linear_sumcheck::ml_sumcheck::ahp::AHPForMLSumcheck;
-use crate::commitment::commit::Commitment;
-use crate::commitment::MLPolyCommit;
-use crate::ahp::setup::VerifierParameter;
-use crate::commitment::open::Proof;
 
 /// r_v: randomness
 #[derive(CanonicalSerialize, CanonicalDeserialize)]
@@ -77,7 +77,7 @@ pub struct VerifierThirdState<E: PairingEngine> {
     v: Vec<E::Fr>,
     r_v: Vec<E::Fr>,
     z_rv_0: E::Fr,
-    z_rv_0_proof: Proof<E>
+    z_rv_0_proof: Proof<E>,
 }
 
 /// first sumcheck state
@@ -89,7 +89,7 @@ pub struct VerifierFirstSumcheckState<E: PairingEngine> {
     v: Vec<E::Fr>,
     r_v: Vec<E::Fr>,
     z_rv_0: E::Fr,
-    z_rv_0_proof: Proof<E>
+    z_rv_0_proof: Proof<E>,
 }
 /// verifier state after first sumcheck
 pub struct VerifierFourthState<E: PairingEngine> {
@@ -100,42 +100,42 @@ pub struct VerifierFourthState<E: PairingEngine> {
     v: Vec<E::Fr>,
     r_v: Vec<E::Fr>,
     z_rv_0: E::Fr,
-    z_rv_0_proof: Proof<E>
+    z_rv_0_proof: Proof<E>,
 }
 /// verifier state: prepare for next sumcheck
 pub struct VerifierFifthState<E: PairingEngine> {
     pub(crate) vk: IndexVK<E::Fr>,
     commit: Commitment<E>,
-     r_a: E::Fr,
-     r_b: E::Fr,
-     r_c: E::Fr,
-     va: E::Fr,
-     vb: E::Fr,
-     vc: E::Fr,
-     tor: Vec<E::Fr>,
-     first_verifier_state: MLVerifierState<E::Fr>,
-     v: Vec<E::Fr>,
-     r_v: Vec<E::Fr>,
-     z_rv_0: E::Fr,
-     z_rv_0_proof: Proof<E>
+    r_a: E::Fr,
+    r_b: E::Fr,
+    r_c: E::Fr,
+    va: E::Fr,
+    vb: E::Fr,
+    vc: E::Fr,
+    tor: Vec<E::Fr>,
+    first_verifier_state: MLVerifierState<E::Fr>,
+    v: Vec<E::Fr>,
+    r_v: Vec<E::Fr>,
+    z_rv_0: E::Fr,
+    z_rv_0_proof: Proof<E>,
 }
 /// verifier state during second sumcheck
 pub struct VerifierSecondSumcheckState<E: PairingEngine> {
     pub(crate) vk: IndexVK<E::Fr>,
-     commit: Commitment<E>,
-     va: E::Fr,
-     vb: E::Fr,
-     vc: E::Fr,
-     r_a: E::Fr,
-     r_b: E::Fr,
-     r_c: E::Fr,
-     tor: Vec<E::Fr>,
-     first_verifier_state: MLVerifierState<E::Fr>,
-     second_verifier_state: MLVerifierState<E::Fr>,
-     v: Vec<E::Fr>,
-     r_v: Vec<E::Fr>,
-     z_rv_0: E::Fr,
-     z_rv_0_proof: Proof<E>
+    commit: Commitment<E>,
+    va: E::Fr,
+    vb: E::Fr,
+    vc: E::Fr,
+    r_a: E::Fr,
+    r_b: E::Fr,
+    r_c: E::Fr,
+    tor: Vec<E::Fr>,
+    first_verifier_state: MLVerifierState<E::Fr>,
+    second_verifier_state: MLVerifierState<E::Fr>,
+    v: Vec<E::Fr>,
+    r_v: Vec<E::Fr>,
+    z_rv_0: E::Fr,
+    z_rv_0_proof: Proof<E>,
 }
 /// sixth state has same structure as second sumcheck state
 pub type VerifierSixthState<E> = VerifierSecondSumcheckState<E>;
@@ -204,7 +204,7 @@ impl<E: PairingEngine> MLProofForR1CS<E> {
             v: state.v,
             r_v: state.r_v,
             z_rv_0,
-            z_rv_0_proof
+            z_rv_0_proof,
         };
         Ok((state, msg))
     }
@@ -236,7 +236,7 @@ impl<E: PairingEngine> MLProofForR1CS<E> {
             v: state.v,
             r_v: state.r_v,
             z_rv_0: state.z_rv_0,
-            z_rv_0_proof: state.z_rv_0_proof
+            z_rv_0_proof: state.z_rv_0_proof,
         };
 
         Ok((next_state, None))
@@ -263,7 +263,7 @@ impl<E: PairingEngine> MLProofForR1CS<E> {
             v: state.v,
             r_v: state.r_v,
             z_rv_0: state.z_rv_0,
-            z_rv_0_proof: state.z_rv_0_proof
+            z_rv_0_proof: state.z_rv_0_proof,
         };
         Ok((next_state, v_msg))
     }
@@ -295,7 +295,7 @@ impl<E: PairingEngine> MLProofForR1CS<E> {
             v: state.v,
             r_v: state.r_v,
             z_rv_0: state.z_rv_0,
-            z_rv_0_proof: state.z_rv_0_proof
+            z_rv_0_proof: state.z_rv_0_proof,
         };
         Ok((next_state, msg))
     }
@@ -348,7 +348,7 @@ impl<E: PairingEngine> MLProofForR1CS<E> {
             v: state.v,
             r_v: state.r_v,
             z_rv_0: state.z_rv_0,
-            z_rv_0_proof: state.z_rv_0_proof
+            z_rv_0_proof: state.z_rv_0_proof,
         };
 
         Ok((next_state, msg))
@@ -389,7 +389,7 @@ impl<E: PairingEngine> MLProofForR1CS<E> {
             v: state.v,
             r_v: state.r_v,
             z_rv_0: state.z_rv_0,
-            z_rv_0_proof: state.z_rv_0_proof
+            z_rv_0_proof: state.z_rv_0_proof,
         };
 
         Ok((next_state, None))
@@ -447,14 +447,13 @@ impl<E: PairingEngine> MLProofForR1CS<E> {
     pub fn verify_sixth_round(
         state: VerifierSixthState<E>,
         p_msg: ProverFinalMessage<E>,
-        vp: &VerifierParameter<E>
+        vp: &VerifierParameter<E>,
     ) -> SResult<bool> {
-
         let eq = eq_extension(&state.tor)?;
 
         // verify if public witness extension asserted by prover is correct
         let mut r_v_0 = state.r_v.clone(); // extend r_v with zero
-        r_v_0.extend((0..(state.vk.log_n - log2(state.v.len()) as usize)).map(|_|E::Fr::zero()));
+        r_v_0.extend((0..(state.vk.log_n - log2(state.v.len()) as usize)).map(|_| E::Fr::zero()));
         if !MLPolyCommit::verify(vp, &state.commit, &r_v_0, state.z_rv_0, state.z_rv_0_proof)? {
             return Err(invalid_arg("public witness failed in commitment check"));
         };
@@ -502,14 +501,14 @@ impl<E: PairingEngine> MLProofForR1CS<E> {
         if expected != actual {
             return Err(crate::Error::WrongWitness(Some(
                 "Cannot verify matrix A, B, C".into(),
-            )))
+            )));
         }
 
         // verify if z_ry is correct using proof
         if !MLPolyCommit::verify(vp, &state.commit, &r_y, z_ry, p_msg.proof_for_z_ry)? {
             return Err(crate::Error::WrongWitness(Some(
-                "Cannot verify z_ry".into()
-            )))
+                "Cannot verify z_ry".into(),
+            )));
         };
 
         Ok(true)

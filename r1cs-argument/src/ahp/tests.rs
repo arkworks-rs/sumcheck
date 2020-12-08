@@ -1,9 +1,9 @@
 use crate::ahp::MLProofForR1CS;
+use crate::commitment::MLPolyCommit;
 use crate::error::SResult;
 use crate::test_utils::{generate_circuit_with_random_input, TestCurve, TestCurveFr};
 use ark_ff::test_rng;
 use rand::RngCore;
-use crate::commitment::MLPolyCommit;
 
 fn test_circuit<R: RngCore>(log_n: usize, log_v: usize, rng: &mut R) -> SResult<()> {
     let num_public = 1 << log_v;

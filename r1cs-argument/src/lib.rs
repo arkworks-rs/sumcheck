@@ -27,6 +27,7 @@ mod benchmark;
 pub mod commitment;
 
 use crate::ahp::indexer::{IndexPK, IndexVK};
+use crate::ahp::setup::{PublicParameter, VerifierParameter};
 use crate::ahp::MLProofForR1CS;
 use crate::data_structures::proof::Proof;
 use crate::error::{invalid_arg, SResult};
@@ -39,7 +40,6 @@ pub use error::Error;
 use linear_sumcheck::data_structures::random::FeedableRNG;
 use linear_sumcheck::data_structures::Blake2s512Rng;
 use linear_sumcheck::ml_sumcheck::ahp::prover::ProverMsg;
-use crate::ahp::setup::{PublicParameter, VerifierParameter};
 
 /// module for interpret r1cs as ML Extension used by linear sumcheck
 pub mod data_structures;
@@ -68,7 +68,12 @@ impl<E: PairingEngine> MLArgumentForR1CS<E> {
     /// * `v`: public input (should have size in power of two)
     /// * `w`: private input
     /// * `pp`: public parameter
-    pub fn prove(pk: IndexPK<E::Fr>, v: Vec<E::Fr>, w: Vec<E::Fr>, pp: &PublicParameter<E>) -> SResult<Proof<E>> {
+    pub fn prove(
+        pk: IndexPK<E::Fr>,
+        v: Vec<E::Fr>,
+        w: Vec<E::Fr>,
+        pp: &PublicParameter<E>,
+    ) -> SResult<Proof<E>> {
         let log_n = pk.log_n;
 
         let mut fs_rng = Blake2s512Rng::setup();
@@ -81,25 +86,25 @@ impl<E: PairingEngine> MLArgumentForR1CS<E> {
 
         let ps = MLProofForR1CS::prover_init(pk, v, w)?;
 
-        let timer = start_timer!(||"Prove 1");
+        let timer = start_timer!(|| "Prove 1");
         let (ps, pm1) = MLProofForR1CS::prover_first_round(ps, pp)?;
         end_timer!(timer);
         fs_rng.feed_randomness(&pm1)?;
         let vm = MLProofForR1CS::<E>::sample_first_round(log_v, &mut fs_rng);
 
-        let timer = start_timer!(||"Prove 2");
+        let timer = start_timer!(|| "Prove 2");
         let (ps, pm2) = MLProofForR1CS::prover_second_round(ps, vm, pp)?;
         end_timer!(timer);
         fs_rng.feed_randomness(&pm2)?;
         let vm = MLProofForR1CS::<E>::sample_second_round(ps.pk.log_n, &mut fs_rng);
 
-        let timer = start_timer!(||"Prove 3");
+        let timer = start_timer!(|| "Prove 3");
         let (mut ps, pm3) = MLProofForR1CS::prover_third_round(ps, vm)?;
         end_timer!(timer);
         fs_rng.feed_randomness(&pm3)?;
         let mut vm = MLProofForR1CS::<E>::sample_third_round();
 
-        let timer = start_timer!(||"Prove Sumcheck 1");
+        let timer = start_timer!(|| "Prove Sumcheck 1");
         let mut sumcheck1_msgs = Vec::with_capacity(log_n);
         for _ in 0..(log_n - 1) {
             let (ps_new, pm) = MLProofForR1CS::prove_first_sumcheck_round(ps, vm)?;
@@ -115,20 +120,20 @@ impl<E: PairingEngine> MLArgumentForR1CS<E> {
         sumcheck1_msgs.push(pm);
         let vm = MLProofForR1CS::<E>::sample_verify_first_sumcheck_final_round(&mut fs_rng);
 
-        let timer = start_timer!(||"Prove 4");
+        let timer = start_timer!(|| "Prove 4");
         let (ps, pm4) = MLProofForR1CS::prove_fourth_round(ps, vm)?;
         end_timer!(timer);
         fs_rng.feed_randomness(&pm4)?;
         let vm = MLProofForR1CS::<E>::sample_verify_fourth_round(&mut fs_rng);
 
-        let timer = start_timer!(||"Prove 5");
+        let timer = start_timer!(|| "Prove 5");
         let (mut ps, pm5) = MLProofForR1CS::prove_fifth_round(ps, vm)?;
         end_timer!(timer);
         fs_rng.feed_randomness(&pm5)?;
         let mut vm = MLProofForR1CS::<E>::sample_verify_fifth_round();
 
         let mut sumcheck2_msgs = Vec::with_capacity(log_n);
-        let timer = start_timer!(||"Prove Sumcheck 2");
+        let timer = start_timer!(|| "Prove Sumcheck 2");
         for _ in 0..(log_n - 1) {
             let (ps_new, pm) = MLProofForR1CS::prove_second_sumcheck_round(ps, vm)?;
             ps = ps_new;
@@ -143,7 +148,7 @@ impl<E: PairingEngine> MLArgumentForR1CS<E> {
         sumcheck2_msgs.push(pm);
         let vm = MLProofForR1CS::<E>::sample_verify_second_sumcheck_final_round(&mut fs_rng);
 
-        let timer = start_timer!(||"Prove 6");
+        let timer = start_timer!(|| "Prove 6");
         let pm6 = MLProofForR1CS::prove_sixth_round(ps, vm, pp)?;
         end_timer!(timer);
         Ok(Proof {
@@ -162,7 +167,12 @@ impl<E: PairingEngine> MLArgumentForR1CS<E> {
     /// * `v`: public input
     /// * `proof`: proof
     /// * `vp`: verifier parameter (used by the commitment scheme)
-    pub fn verify(vk: IndexVK<E::Fr>, v: Vec<E::Fr>, proof: Proof<E>, vp: &VerifierParameter<E>) -> SResult<bool> {
+    pub fn verify(
+        vk: IndexVK<E::Fr>,
+        v: Vec<E::Fr>,
+        proof: Proof<E>,
+        vp: &VerifierParameter<E>,
+    ) -> SResult<bool> {
         let log_n = vk.log_n;
         let mut first_sumcheck_messages =
             LinkedList::from_iter(proof.first_sumcheck_messages.into_iter());

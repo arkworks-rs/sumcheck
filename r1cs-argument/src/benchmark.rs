@@ -3,17 +3,17 @@ use ark_ff::test_rng;
 use ark_relations::r1cs::ConstraintMatrices;
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
 
+use crate::ahp::MLProofForR1CS;
 use crate::data_structures::proof::Proof;
 use crate::test_utils::{generate_circuit_with_random_input, TestCurve, TestCurveFr};
 use ark_ec::PairingEngine;
-use crate::ahp::MLProofForR1CS;
 
 fn test_circuit<E: PairingEngine>(
     matrices: ConstraintMatrices<E::Fr>,
     v: Vec<E::Fr>,
     w: Vec<E::Fr>,
 ) -> Result<(), crate::Error> {
-    #[cfg(feature="print-trace")]
+    #[cfg(feature = "print-trace")]
     let config_str = format!(
         " (|v| = {}, |w| = {}, #non-zero-entries = {})",
         matrices.num_instance_variables,
@@ -25,12 +25,12 @@ fn test_circuit<E: PairingEngine>(
 
     let timer = start_timer!(|| format!("Setup{}", config_str));
     let (pp, vp) = MLProofForR1CS::setup(ark_std::log2(matrices.a.len()) as usize, &mut rng)?;
-        end_timer!(timer);
+    end_timer!(timer);
 
     let timer = start_timer!(|| format!("Index{}", config_str));
     let index_pk = MLArgumentForR1CS::<E>::index(matrices.a, matrices.b, matrices.c)?;
     let index_vk = index_pk.vk();
-        end_timer!(timer);
+    end_timer!(timer);
     let timer = start_timer!(|| format!("Prove{}", config_str));
     let proof = MLArgumentForR1CS::<E>::prove(index_pk, v.to_vec(), w, &pp)?;
     let proof_serialized = {
@@ -55,7 +55,6 @@ fn benchmark() {
     type E = TestCurve;
     type F = TestCurveFr;
     let mut rng = test_rng();
-
 
     println!(
         "Benchmark: Prover and Verifier Runtime with different matrix size with same sparsity\n"
