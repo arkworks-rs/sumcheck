@@ -63,7 +63,7 @@ impl<E: PairingEngine> MLPolyCommit<E> {
         let mut eq = LinkedList::from_iter(eq_extension(&t)?.into_iter());
         let mut eq_arr = LinkedList::new();
         let mut base = eq.pop_back().unwrap().into_table()?;
-        let eq_ext_timer = start_timer!(|| "eq_extension");
+        // let eq_ext_timer = start_timer!(|| "eq_extension");
         for i in (0..nv).rev() {
             eq_arr.push_front(remove_dummy_variable(&base, i)?);
             if i != 0 {
@@ -75,8 +75,8 @@ impl<E: PairingEngine> MLPolyCommit<E> {
                     .collect();
             }
         }
-        end_timer!(eq_ext_timer);
-        let variable_mul_timer = start_timer!(|| "variable multiplication");
+        // end_timer!(eq_ext_timer);
+        // let variable_mul_timer = start_timer!(|| "variable multiplication");
 
         let mut pp_powers = Vec::new();
         let mut total_scalars = 0;
@@ -106,7 +106,7 @@ impl<E: PairingEngine> MLPolyCommit<E> {
             start += size;
         }
 
-        end_timer!(variable_mul_timer);
+        // end_timer!(variable_mul_timer);
         let pp = PublicParameter {
             nv,
             g,
@@ -115,7 +115,7 @@ impl<E: PairingEngine> MLPolyCommit<E> {
             powers_of_h,
         };
         // calculate vp
-        let vp_generation_timer = start_timer!(|| "VP generation");
+        // let vp_generation_timer = start_timer!(|| "VP generation");
         let vp = {
             let window_size = FixedBaseMSM::get_mul_window_size(nv);
             let g_table =
@@ -130,7 +130,7 @@ impl<E: PairingEngine> MLPolyCommit<E> {
                 g_mask_random: g_mask,
             }
         };
-        end_timer!(vp_generation_timer);
+        // end_timer!(vp_generation_timer);
 
         Ok((pp, vp, t))
     }

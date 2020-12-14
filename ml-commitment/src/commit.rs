@@ -26,18 +26,18 @@ impl<E: PairingEngine> MLPolyCommit<E> {
     ) -> SResult<Commitment<E>> {
         let polynomial = polynomial.into();
         let nv = polynomial.num_variables()?;
-        let timer = start_timer!(|| "mapping variables into representation");
+        // let timer = start_timer!(|| "mapping variables into representation");
         let scalars: Vec<_> = polynomial
             .into_table()?
             .into_iter()
             .map(|x| x.into_repr())
             .collect();
-        end_timer!(timer);
+        // end_timer!(timer);
         // let g_bases: Vec<_> = E::G1Projective::batch_normalization_into_affine(&pp.powers_of_g[0]);  // do it in setup
-        let timer = start_timer!(|| "MSM");
+        // let timer = start_timer!(|| "MSM");
         let g_product: E::G1Projective =
             VariableBaseMSM::multi_scalar_mul(&pp.powers_of_g[0], scalars.as_slice());
-        end_timer!(timer);
+        // end_timer!(timer);
 
         Ok(Commitment {
             nv,

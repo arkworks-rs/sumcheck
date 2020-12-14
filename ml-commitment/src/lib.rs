@@ -11,6 +11,7 @@
 #![deny(unused_comparisons, bare_trait_objects, unused_must_use, const_err)]
 
 #[macro_use]
+#[allow(unused_imports)]
 extern crate bench_utils;
 
 #[macro_use]

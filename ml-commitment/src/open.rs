@@ -29,9 +29,9 @@ impl<E: PairingEngine> MLPolyCommit<E> {
         polynomial: MLExtensionArray<E::Fr>,
         point: &[E::Fr],
     ) -> SResult<(E::Fr, Proof<E>, Vec<Vec<E::Fr>>)> {
-        let timer = start_timer!(|| "Polynomial evaluation");
+        // let timer = start_timer!(|| "Polynomial evaluation");
         let eval_result = polynomial.eval_at(point)?;
-        end_timer!(timer);
+        // end_timer!(timer);
         let nv = polynomial.num_variables()?;
         let mut r: Vec<Vec<E::Fr>> = (0..nv + 1).map(|_| Vec::new()).collect();
         let mut q: Vec<Vec<E::Fr>> = (0..nv + 1).map(|_| Vec::new()).collect();
@@ -39,7 +39,7 @@ impl<E: PairingEngine> MLPolyCommit<E> {
         r[nv] = polynomial.into_table()?;
 
         let mut proofs = Vec::new();
-        let timer = start_timer!(|| "quotient calculation");
+        // let timer = start_timer!(|| "quotient calculation");
         for i in 0..nv {
             let k = nv - i;
             let point_at_k = point[i];
@@ -58,7 +58,7 @@ impl<E: PairingEngine> MLPolyCommit<E> {
                 VariableBaseMSM::multi_scalar_mul(&pp.powers_of_h[i], &scalars).into_affine(); // no need to move outside and partition
             proofs.push(pi_h);
         }
-        end_timer!(timer);
+        // end_timer!(timer);
 
         Ok((eval_result, Proof { h: pp.h, proofs }, q))
     }
