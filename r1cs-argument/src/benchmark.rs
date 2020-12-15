@@ -15,10 +15,8 @@ fn test_circuit<E: PairingEngine>(
 ) -> Result<(), crate::Error> {
     #[cfg(feature = "print-trace")]
     let config_str = format!(
-        " (|v| = {}, |w| = {}, #non-zero-entries = {})",
-        matrices.num_instance_variables,
-        matrices.num_witness_variables,
-        matrices.a_num_non_zero + matrices.b_num_non_zero + matrices.c_num_non_zero
+        " (number of constraint = {})",
+        matrices.num_witness_variables + 1 // plus 1 dense constraint
     );
 
     let mut rng = test_rng();
@@ -40,7 +38,7 @@ fn test_circuit<E: PairingEngine>(
     };
     end_timer!(timer);
     // test communication cost
-    println!("Communication Cost: {} bytes", proof_serialized.len());
+    println!("Communication: {} bytes{}", proof_serialized.len(), config_str);
     let timer = start_timer!(|| format!("Verify{}", config_str));
     let proof = Proof::<E>::deserialize(&proof_serialized[..])?;
     let result = MLArgumentForR1CS::verify(index_vk, v, proof, &vp)?;
@@ -59,20 +57,20 @@ fn benchmark() {
     println!(
         "Benchmark: Prover and Verifier Runtime with different matrix size with same sparsity\n"
     );
-    for i in 7..16 {
+    for i in 10..21 {
         let (r1cs, v, w) =
             generate_circuit_with_random_input::<F, _>(32, (2 << i) - 32, true, 0, &mut rng);
 
         test_circuit::<E>(r1cs.to_matrices().unwrap(), v, w).expect("Failed to test circuit");
     }
-    println!(
-        "Benchmark: Prover and Verifier Runtime with same matrix size with different sparsity\n"
-    );
-    for i in 0..10 {
-        let density = (255 * i / 10) as u8;
-        let (r1cs, v, w) =
-            generate_circuit_with_random_input::<F, _>(32, (2 << 10) - 32, true, density, &mut rng);
-
-        test_circuit::<E>(r1cs.to_matrices().unwrap(), v, w).expect("Failed to test circuit");
-    }
+    // println!(
+    //     "Benchmark: Prover and Verifier Runtime with same matrix size with different sparsity\n"
+    // );
+    // for i in 0..10 {
+    //     let density = (255 * i / 10) as u8;
+    //     let (r1cs, v, w) =
+    //         generate_circuit_with_random_input::<F, _>(32, (2 << 10) - 32, true, density, &mut rng);
+    //
+    //     test_circuit::<E>(r1cs.to_matrices().unwrap(), v, w).expect("Failed to test circuit");
+    // }
 }

@@ -1,11 +1,11 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="BENCHMARK" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
+  <configuration default="false" name="R1CS_BENCHMARK" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
     <option name="channel" value="DEFAULT" />
-    <option name="command" value="test --package r1cs-argument --lib benchmark::benchmark --release -- --exact --ignored" />
-    <option name="allFeatures" value="true" />
+    <option name="command" value="test --package r1cs-argument --lib benchmark::benchmark --release --features print-trace -- --exact --ignored" />
+    <option name="allFeatures" value="false" />
     <option name="emulateTerminal" value="false" />
     <option name="backtrace" value="SHORT" />
-    <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+    <option name="workingDirectory" value="file://$PROJECT_DIR$/r1cs-argument" />
     <envs />
     <method v="2">
       <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
