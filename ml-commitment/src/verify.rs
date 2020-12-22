@@ -32,9 +32,9 @@ impl<E: PairingEngine> MLPolyCommit<E> {
             FixedBaseMSM::get_window_table(scalar_size, window_size, vp.g.into_projective());
         let vp_g_mul: Vec<E::G1Projective> =
             FixedBaseMSM::multi_scalar_mul(scalar_size, window_size, &vp_g_table, point); // may have overhead
-        // end_timer!(timer);
-        // let timer = start_timer!(|| "Pairing");
-        // let timer2 = start_timer!(|| "Calculating Left");
+                                                                                          // end_timer!(timer);
+                                                                                          // let timer = start_timer!(|| "Pairing");
+                                                                                          // let timer2 = start_timer!(|| "Calculating Left");
         let pairing_lefts: Vec<_> = (0..vp.nv)
             .map(|i| vp.g_mask_random[i].into_projective() - &vp_g_mul[i])
             .collect();

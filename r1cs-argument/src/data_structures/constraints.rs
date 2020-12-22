@@ -36,7 +36,6 @@ impl<'a, R: RngCore, F: Field> TestSynthesizer<'a, R, F> {
 }
 
 impl<'a, R: RngCore, F: Field> ConstraintSynthesizer<F> for TestSynthesizer<'a, R, F> {
-
     fn generate_constraints(self, cs: ConstraintSystemRef<F>) -> Result<(), SynthesisError> {
         let mut assignments = Vec::new();
         let mut a_val = F::rand(self.rng);

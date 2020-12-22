@@ -52,7 +52,7 @@ pub(crate) fn bits_to_field_elements<F: Field>(mut bits: usize, mut num_bits: us
 }
 
 /// generate a circuit with random input
-/// 
+///
 /// Returns matrices, public parameter v, and private parameter w
 pub fn generate_circuit_with_random_input<F: Field, R: RngCore>(
     num_public_variables: usize,

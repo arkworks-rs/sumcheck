@@ -37,7 +37,11 @@ fn test_circuit<E: PairingEngine>(
     };
     end_timer!(timer);
     // test communication cost
-    println!("Communication: {} bytes{}", proof_serialized.len(), config_str);
+    println!(
+        "Communication: {} bytes{}",
+        proof_serialized.len(),
+        config_str
+    );
     let timer = start_timer!(|| format!("Verify{}", config_str));
     let proof = Proof::<E>::deserialize(&proof_serialized[..])?;
     let result = MLArgumentForR1CS::verify(index_vk, v, proof, &vp)?;
