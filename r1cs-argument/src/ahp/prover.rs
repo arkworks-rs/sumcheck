@@ -68,25 +68,25 @@ pub struct ProverSecondSumcheckState<E: PairingEngine> {
 }
 
 /// first message is the commitment
-#[derive(CanonicalSerialize, CanonicalDeserialize)]
+#[derive(CanonicalSerialize, CanonicalDeserialize, Clone)]
 pub struct ProverFirstMessage<E: PairingEngine> {
     pub(crate) commitment: Commitment<E>,
 }
 /// Z_rv_0
-#[derive(CanonicalSerialize, CanonicalDeserialize)]
+#[derive(CanonicalSerialize, CanonicalDeserialize, Clone)]
 pub struct ProverSecondMessage<E: PairingEngine> {
     pub(crate) z_rv_0: E::Fr,
     pub(crate) proof_for_z_rv_0: Proof<E>,
 }
 
 /// contains some sumcheck info
-#[derive(CanonicalSerialize, CanonicalDeserialize)]
+#[derive(CanonicalSerialize, CanonicalDeserialize, Clone)]
 pub struct ProverThirdMessage {
     pub(crate) ml_index_info: MLIndexInfo,
 }
 
 /// va, vb, vc
-#[derive(CanonicalSerialize, CanonicalDeserialize)]
+#[derive(CanonicalSerialize, CanonicalDeserialize, Clone)]
 pub struct ProverFourthMessage<E: PairingEngine> {
     pub(crate) va: E::Fr,
     pub(crate) vb: E::Fr,
@@ -94,13 +94,13 @@ pub struct ProverFourthMessage<E: PairingEngine> {
 }
 
 /// information for second sumcheck
-#[derive(CanonicalSerialize, CanonicalDeserialize)]
+#[derive(CanonicalSerialize, CanonicalDeserialize, Clone)]
 pub struct ProverFifthMessage {
     pub(crate) index_info: MLIndexInfo,
 }
 
 /// z(r_y)
-#[derive(CanonicalSerialize, CanonicalDeserialize)]
+#[derive(CanonicalSerialize, CanonicalDeserialize, Clone)]
 pub struct ProverSixthMessage<E: PairingEngine> {
     pub(crate) z_ry: E::Fr,
     pub(crate) proof_for_z_ry: Proof<E>,

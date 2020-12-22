@@ -9,7 +9,7 @@ use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, Read, Serializatio
 use ark_std::vec::Vec;
 use linear_sumcheck::data_structures::ml_extension::MLExtension;
 use linear_sumcheck::data_structures::MLExtensionArray;
-#[derive(CanonicalSerialize, CanonicalDeserialize)]
+#[derive(CanonicalSerialize, CanonicalDeserialize, Clone)]
 /// Proof of evaluation of a multilinear polynomial
 pub struct Proof<E: PairingEngine> {
     /// generator for G2

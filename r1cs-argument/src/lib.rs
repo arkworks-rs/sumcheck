@@ -48,7 +48,6 @@ pub mod data_structures;
 /// error package
 pub mod error;
 /// testing utilities
-#[cfg(test)]
 pub mod test_utils;
 
 /// A protocol of generating proofs for R1CS circuit using multilinear argument.

@@ -7,7 +7,7 @@ use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, Read, Serializatio
 use ark_std::vec::Vec;
 use linear_sumcheck::ml_sumcheck::ahp::prover::ProverMsg as MLProverMsg;
 /// message sent by the prover
-#[derive(CanonicalSerialize, CanonicalDeserialize)]
+#[derive(CanonicalSerialize, CanonicalDeserialize, Clone)]
 pub struct Proof<E: PairingEngine> {
     pub(crate) prover_first_message: ProverFirstMessage<E>,
     pub(crate) prover_second_message: ProverSecondMessage<E>,

@@ -9,7 +9,7 @@ use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, Read, Serializatio
 use ark_std::vec::Vec;
 use linear_sumcheck::data_structures::ml_extension::MLExtension;
 use linear_sumcheck::data_structures::MLExtensionArray;
-#[derive(CanonicalSerialize, CanonicalDeserialize)]
+#[derive(CanonicalSerialize, CanonicalDeserialize, Clone)]
 /// commitment
 pub struct Commitment<E: PairingEngine> {
     /// number of variables

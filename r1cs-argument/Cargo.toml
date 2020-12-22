@@ -15,9 +15,14 @@ bench-utils = {git = "https://github.com/arkworks-rs/utils", default-features = 
 ml-commitment = {path = "../ml-commitment", default-features = false}
 hashbrown = {version = "0.9.1"}
 rand = {version =  "0.7.3", default-features = false}
+ark-bls12-381 = { git = "https://github.com/arkworks-rs/curves", default-features = false, features = [ "curve" ] }
 
 [dev-dependencies]
-ark-bls12-381 = { git = "https://github.com/arkworks-rs/curves", default-features = false, features = [ "curve" ] }
+criterion = "0.3.1"
+json = "0.12.4"
+[[bench]]
+name = "bench"
+harness = false
 
 [features]
 default = ["std"] 

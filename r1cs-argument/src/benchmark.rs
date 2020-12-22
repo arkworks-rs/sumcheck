@@ -13,7 +13,6 @@ fn test_circuit<E: PairingEngine>(
     v: Vec<E::Fr>,
     w: Vec<E::Fr>,
 ) -> Result<(), crate::Error> {
-    #[cfg(feature = "print-trace")]
     let config_str = format!(
         " (number of constraint = {})",
         matrices.num_witness_variables + 1 // plus 1 dense constraint
@@ -57,7 +56,7 @@ fn benchmark() {
     println!(
         "Benchmark: Prover and Verifier Runtime with different matrix size with same sparsity\n"
     );
-    for i in 10..21 {
+    for i in 10..15 {
         let (r1cs, v, w) =
             generate_circuit_with_random_input::<F, _>(32, (2 << i) - 32, true, 0, &mut rng);
 

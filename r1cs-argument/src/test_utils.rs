@@ -1,6 +1,6 @@
 //! testing utility
 
-use ark_ff::{Field, UniformRand};
+use ark_ff::Field;
 use ark_relations::r1cs::{
     ConstraintSynthesizer, ConstraintSystem, ConstraintSystemRef, Matrix, Variable,
 };
@@ -10,11 +10,13 @@ use rand::RngCore;
 use crate::data_structures::constraints::TestSynthesizer;
 use ark_bls12_381::Bls12_381;
 use ark_ec::PairingEngine;
-
-/// scalar field used for tests
+use ark_std::UniformRand;
+/// pairing engine used for tests
 pub type TestCurve = Bls12_381;
+/// scalar field used for tests
 pub type TestCurveFr = <TestCurve as PairingEngine>::Fr;
 
+/// generate a random matrix
 pub fn random_matrix<R: RngCore>(
     log_size: usize,
     num_non_zero: usize,
@@ -36,7 +38,8 @@ pub fn random_matrix<R: RngCore>(
     mat
 }
 
-pub fn bits_to_field_elements<F: Field>(mut bits: usize, mut num_bits: usize) -> Vec<F> {
+#[cfg(test)]
+pub(crate) fn bits_to_field_elements<F: Field>(mut bits: usize, mut num_bits: usize) -> Vec<F> {
     let mut result = Vec::new();
     while num_bits > 0 {
         let bi = bits & 1;
@@ -48,6 +51,9 @@ pub fn bits_to_field_elements<F: Field>(mut bits: usize, mut num_bits: usize) ->
     result
 }
 
+/// generate a circuit with random input
+/// 
+/// Returns matrices, public parameter v, and private parameter w
 pub fn generate_circuit_with_random_input<F: Field, R: RngCore>(
     num_public_variables: usize,
     num_private_variables: usize,

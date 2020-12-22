@@ -87,7 +87,7 @@ pub struct MLExtensionArray<F: Field> {
 /// * `nv`: number of variables
 /// * `at`: the point we want to evaluate
 fn eval_dense<F: Field>(poly: &[F], nv: usize, at: &[F]) -> Result<F, crate::Error> {
-    Ok(partial_eval_dense(poly, nv, at)?[0])
+    Ok(eval_part(poly, nv, (0, nv), at)[0])
 }
 
 fn partial_eval_dense<F: Field>(poly: &[F], nv: usize, at: &[F]) -> Result<Vec<F>, crate::Error> {
@@ -106,6 +106,25 @@ fn partial_eval_dense<F: Field>(poly: &[F], nv: usize, at: &[F]) -> Result<Vec<F
     }
 
     Ok((&a[0..(1 << (nv - dim))]).to_vec())
+}
+
+fn eval_part<F: Field>(poly: &[F], nv: usize, range: (usize, usize),at: &[F]) -> Vec<F> {
+    assert!(range.0 + range.1 <= nv);
+    assert!(at.len() <= nv && at.len() == range.1);
+    let mut a = poly.to_vec();
+    let dim = range.1;
+    for i in 1..dim + 1 {
+        let r = at[i - 1];
+        for b in 0usize..(1 << (nv - range.0 - i)) {
+            let left = b << range.0; // all variables after the variable we want to evaluate
+            for right in 0 .. (1 << range.0) { // all variables before the variable we want to evaluate
+                // evaluate an one variable
+                a[left + right] = a[((b << 1) << range.0) + range.0] * (F::one() - r) + a[(((b << 1) + 1) << range.0) + range.0] * r
+            }
+        }
+    }
+
+    (&a[0..(1 << (nv - dim))]).to_vec()
 }
 
 impl<F: Field> MLExtensionArray<F> {
@@ -179,6 +198,15 @@ impl<F: Field> MLExtensionArray<F> {
             self.store.iter().map(|&v| v + with).collect(),
         )?)
     }
+
+    /// range: start at which variable, evaluate how many?
+    pub fn eval_part(&self, range: (usize, usize), point: &[F]) -> Self {
+        Self::from_vec(eval_part(&self.store,
+                  self.num_variables,
+                  range,
+                 point
+        )).unwrap()
+    }
 }
 
 impl<F: Field> MLExtension<F> for MLExtensionArray<F> {
@@ -205,11 +233,12 @@ impl<F: Field> MLExtension<F> for MLExtensionArray<F> {
     }
 
     fn eval_partial_at(&self, point: &[F]) -> Result<Self, Self::Error> {
-        Ok(Self::from_vec(partial_eval_dense(
+        Ok(Self::from_vec(eval_part(
             &self.store,
             self.num_variables,
+            (0, point.len()),
             point,
-        )?)?)
+        ))?)
     }
 
     fn table(&self) -> Result<Vec<F>, Self::Error> {
@@ -343,8 +372,9 @@ impl<F: Field> SparseMLExtensionMap<F> {
         }
         // batch evaluation
         let mut last = self.store.clone();
+        let window = log2(self.store.len()) as usize;
         while !point.is_empty() {
-            let focus_length = if point.len() > 8 { 8 } else { point.len() };
+            let focus_length = if point.len() > window { window } else { point.len() };
             let focus = &point[..focus_length];
             point = &point[focus_length..];
             let pre = Self::precompute(focus);
@@ -502,7 +532,7 @@ pub mod tests {
     fn test_sparse_ml_functionality() {
         const DENSE_ITER: i32 = 3;
         const SPARSE_ITER: i32 = 7;
-        const NUM_VARS: usize = 10;
+        const NUM_VARS: usize = 12;
         let mut rng = test_rng();
         type F = TestField;
 

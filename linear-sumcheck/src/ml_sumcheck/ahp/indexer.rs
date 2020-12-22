@@ -21,7 +21,7 @@ pub struct Index<F: Field> {
     _marker: PhantomData<F>,
 }
 
-#[derive(CanonicalSerialize, CanonicalDeserialize)]
+#[derive(CanonicalSerialize, CanonicalDeserialize, Clone)]
 /// Index information used by verifier
 pub struct IndexInfo {
     /// max number of multiplicands in each product

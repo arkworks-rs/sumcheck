@@ -5,6 +5,7 @@ use ark_relations::r1cs::{
 use ark_std::marker::PhantomData;
 use rand::{Rng, RngCore};
 
+/// Synthesizer for testing circuit
 pub struct TestSynthesizer<'a, R: RngCore, F: Field> {
     num_private_variables: usize,
     num_public_variables: usize,
@@ -14,6 +15,7 @@ pub struct TestSynthesizer<'a, R: RngCore, F: Field> {
 }
 
 impl<'a, R: RngCore, F: Field> TestSynthesizer<'a, R, F> {
+    /// Generate a new synthesizer
     pub fn new(
         num_private_variables: usize,
         num_public_variables: usize,
