@@ -90,23 +90,23 @@ fn eval_dense<F: Field>(poly: &[F], nv: usize, at: &[F]) -> Result<F, crate::Err
     Ok(eval_part(poly, nv, (0, nv), at)[0])
 }
 
-fn partial_eval_dense<F: Field>(poly: &[F], nv: usize, at: &[F]) -> Result<Vec<F>, crate::Error> {
-    if at.len() > nv {
-        return Err(crate::Error::InvalidArgumentError(Some(
-            "dimension of point is greater than nv".into(),
-        )));
-    }
-    let mut a = poly.to_vec();
-    let dim = at.len();
-    for i in 1..dim + 1 {
-        let r = at[i - 1];
-        for b in 0usize..(1 << (nv - i)) {
-            a[b] = a[b << 1] * (F::one() - r) + a[(b << 1) + 1] * r
-        }
-    }
-
-    Ok((&a[0..(1 << (nv - dim))]).to_vec())
-}
+// fn partial_eval_dense<F: Field>(poly: &[F], nv: usize, at: &[F]) -> Result<Vec<F>, crate::Error> {
+//     if at.len() > nv {
+//         return Err(crate::Error::InvalidArgumentError(Some(
+//             "dimension of point is greater than nv".into(),
+//         )));
+//     }
+//     let mut a = poly.to_vec();
+//     let dim = at.len();
+//     for i in 1..dim + 1 {
+//         let r = at[i - 1];
+//         for b in 0usize..(1 << (nv - i)) {
+//             a[b] = a[b << 1] * (F::one() - r) + a[(b << 1) + 1] * r
+//         }
+//     }
+//
+//     Ok((&a[0..(1 << (nv - dim))]).to_vec())
+// }
 
 fn eval_part<F: Field>(poly: &[F], nv: usize, range: (usize, usize), at: &[F]) -> Vec<F> {
     assert!(range.0 + range.1 <= nv);
