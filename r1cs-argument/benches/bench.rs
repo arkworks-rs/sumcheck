@@ -6,12 +6,10 @@ extern crate json;
 use ark_bls12_381::Bls12_381;
 use ark_ec::PairingEngine;
 use ark_ff::test_rng;
-use ark_std::collections::LinkedList;
 use ark_std::fs::File;
 use ark_std::io::Write;
 use ark_std::ops::Range;
 use criterion::{BenchmarkId, Criterion};
-use r1cs_argument::ahp::setup::VerifierParameter;
 use r1cs_argument::ahp::MLProofForR1CS;
 use r1cs_argument::test_utils::generate_circuit_with_random_input;
 use r1cs_argument::MLArgumentForR1CS;
@@ -19,7 +17,7 @@ use r1cs_argument::MLArgumentForR1CS;
 type E = Bls12_381;
 
 fn setup_bench(c: &mut Criterion) {
-    let log_num_constraints = 10..18;
+    let log_num_constraints = 10..20;
     let mut group = c.benchmark_group("Setup");
     let mut rng = test_rng();
 
@@ -197,6 +195,6 @@ fn communication_bench(_c: &mut Criterion) {
 criterion_group! {
     name = benches;
     config = Criterion::default().significance_level(0.1).sample_size(10);
-    targets = communication_bench
+    targets = setup_bench,prove_bench,verify_bench,communication_bench
 }
 criterion_main!(benches);
