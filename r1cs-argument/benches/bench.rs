@@ -15,7 +15,7 @@ use r1cs_argument::test_utils::generate_circuit_with_random_input;
 use r1cs_argument::MLArgumentForR1CS;
 
 type E = Bls12_381;
-const LOG_NUM_CONSTRAINTS: Range<usize> = 10..20;
+const LOG_NUM_CONSTRAINTS: Range<usize> = 10..21;
 fn setup_bench(c: &mut Criterion) {
     let mut group = c.benchmark_group("Setup");
     let mut rng = test_rng();
