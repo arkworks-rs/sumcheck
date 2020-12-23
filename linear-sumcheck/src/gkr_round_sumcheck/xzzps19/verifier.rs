@@ -222,9 +222,10 @@ impl<F: Field> CanonicalDeserialize for XZZPS19Subclaim<F> {
 
 #[cfg(test)]
 mod tests {
-    use ark_ff::{test_rng, One, Zero};
+    use ark_ff::{One, Zero};
     use ark_poly::polynomial::UVPolynomial;
     use ark_poly::univariate::DensePolynomial;
+    use ark_std::test_rng;
     use rand::Rng;
 
     use crate::data_structures::test_field::TestField;

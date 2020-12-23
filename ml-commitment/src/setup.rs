@@ -147,7 +147,7 @@ mod tests {
     use crate::MLPolyCommit;
     use ark_ec::{AffineCurve, PairingEngine, ProjectiveCurve};
     use ark_ff::fields::PrimeField;
-    use ark_ff::{test_rng, UniformRand};
+    use ark_std::{test_rng, UniformRand};
     use linear_sumcheck::data_structures::ml_extension::ArithmeticCombination;
     use rand::RngCore;
     fn dummy_keygen<R: RngCore, E: PairingEngine>(

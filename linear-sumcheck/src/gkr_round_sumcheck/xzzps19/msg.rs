@@ -82,7 +82,7 @@ impl<F: Field> ToBytes for XZZPS19VMsg<F> {
 
 #[cfg(test)]
 mod tests {
-    use ark_ff::{test_rng, UniformRand};
+    use ark_std::{test_rng, UniformRand};
 
     use crate::data_structures::protocol::tests::test_message_serialization;
     use crate::data_structures::test_field::TestField as TF;

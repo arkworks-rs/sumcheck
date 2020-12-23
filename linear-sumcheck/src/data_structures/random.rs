@@ -29,9 +29,9 @@ pub trait FeedableRNG: RngCore {
 
 #[cfg(test)]
 pub mod tests {
-    use ark_ff::test_rng;
     use ark_ff::{Field, ToBytes};
     use ark_std::io::{Result as IOResult, Write};
+    use ark_std::test_rng;
     use rand::Rng;
     use rand_core::RngCore;
 

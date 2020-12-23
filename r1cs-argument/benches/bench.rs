@@ -5,23 +5,22 @@ extern crate json;
 
 use ark_bls12_381::Bls12_381;
 use ark_ec::PairingEngine;
-use ark_ff::test_rng;
 use ark_std::fs::File;
 use ark_std::io::Write;
 use ark_std::ops::Range;
+use ark_std::test_rng;
 use criterion::{BenchmarkId, Criterion};
 use r1cs_argument::ahp::MLProofForR1CS;
 use r1cs_argument::test_utils::generate_circuit_with_random_input;
 use r1cs_argument::MLArgumentForR1CS;
 
 type E = Bls12_381;
-
+const LOG_NUM_CONSTRAINTS: Range<usize> = 10..20;
 fn setup_bench(c: &mut Criterion) {
-    let log_num_constraints = 10..20;
     let mut group = c.benchmark_group("Setup");
     let mut rng = test_rng();
 
-    for log_num_constraint in log_num_constraints {
+    for log_num_constraint in LOG_NUM_CONSTRAINTS {
         group.bench_with_input(
             BenchmarkId::new("Setup", log_num_constraint),
             &log_num_constraint,
@@ -36,7 +35,6 @@ fn setup_bench(c: &mut Criterion) {
 }
 
 fn prove_bench(c: &mut Criterion) {
-    const LOG_NUM_CONSTRAINTS: Range<usize> = 10..18;
     let offset = LOG_NUM_CONSTRAINTS.start;
     let mut rng = test_rng();
     let parameters: Vec<_> = LOG_NUM_CONSTRAINTS
@@ -83,7 +81,6 @@ fn prove_bench(c: &mut Criterion) {
 
 fn verify_bench(c: &mut Criterion) {
     let mut rng = test_rng();
-    const LOG_NUM_CONSTRAINTS: Range<usize> = 10..18;
     let offset = LOG_NUM_CONSTRAINTS.start;
     let parameters: Vec<_> = LOG_NUM_CONSTRAINTS
         .map(|nv| MLProofForR1CS::<E>::setup(nv, &mut rng).expect("fail to setup"))
@@ -142,7 +139,6 @@ fn communication_bench(_c: &mut Criterion) {
     let mut target_file =
         File::create("target/criterion/comm_bench_result.json").expect("cannot create file");
     let mut rng = test_rng();
-    const LOG_NUM_CONSTRAINTS: Range<usize> = 10..18;
     let offset = LOG_NUM_CONSTRAINTS.start;
     let parameters: Vec<_> = LOG_NUM_CONSTRAINTS
         .map(|nv| MLProofForR1CS::<E>::setup(nv, &mut rng).expect("fail to setup"))

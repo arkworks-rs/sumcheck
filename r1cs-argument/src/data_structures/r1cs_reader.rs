@@ -123,7 +123,8 @@ impl<F: Field> MatrixExtension<F> {
 mod test {
     use crate::data_structures::r1cs_reader::MatrixExtension;
     use crate::test_utils::{random_matrix, TestCurveFr};
-    use ark_ff::{test_rng, One, Zero};
+    use ark_ff::{One, Zero};
+    use ark_std::test_rng;
     use linear_sumcheck::data_structures::ml_extension::MLExtension;
 
     #[test]

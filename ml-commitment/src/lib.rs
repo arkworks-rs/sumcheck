@@ -48,7 +48,6 @@ mod commit_bench {
     use crate::MLPolyCommit;
     use crate::TestCurve;
     use ark_ec::PairingEngine;
-    use ark_ff::test_rng;
     use ark_ff::UniformRand;
     use ark_serialize::{
         CanonicalDeserialize, CanonicalSerialize, Read, SerializationError, Write,
@@ -57,6 +56,7 @@ mod commit_bench {
     use ark_std::fs::File;
     use ark_std::iter::FromIterator;
     use ark_std::path::Path;
+    use ark_std::test_rng;
     use linear_sumcheck::data_structures::MLExtensionArray;
     const NV_RANGE_LOW: usize = 8;
     const NV_RANGE_HIGH: usize = 15;

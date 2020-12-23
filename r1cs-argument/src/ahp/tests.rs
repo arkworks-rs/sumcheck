@@ -1,7 +1,7 @@
 use crate::ahp::MLProofForR1CS;
 use crate::error::SResult;
 use crate::test_utils::{generate_circuit_with_random_input, TestCurve, TestCurveFr};
-use ark_ff::test_rng;
+use ark_std::test_rng;
 use ml_commitment::MLPolyCommit;
 use rand::RngCore;
 

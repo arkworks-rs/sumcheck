@@ -69,8 +69,8 @@ mod sanity {
     use crate::test_utils::TestCurve;
     use crate::MLPolyCommit;
     use ark_ec::{AffineCurve, PairingEngine};
-    use ark_ff::{test_rng, One};
-    use ark_ff::{UniformRand, Zero};
+    use ark_ff::{One, UniformRand, Zero};
+    use ark_std::test_rng;
     use linear_sumcheck::data_structures::ml_extension::MLExtension;
     use linear_sumcheck::data_structures::MLExtensionArray;
 

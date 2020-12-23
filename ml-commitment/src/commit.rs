@@ -54,7 +54,7 @@ mod test {
     use crate::test_utils::TestCurve;
     use crate::MLPolyCommit;
     use ark_ec::{AffineCurve, PairingEngine, ProjectiveCurve};
-    use ark_ff::{test_rng, UniformRand};
+    use ark_std::{test_rng, UniformRand};
     use linear_sumcheck::data_structures::ml_extension::MLExtension;
     use linear_sumcheck::data_structures::MLExtensionArray;
 

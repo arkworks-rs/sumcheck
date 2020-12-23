@@ -23,7 +23,7 @@ pub mod tests {
     #[cfg(feature = "std")]
     use std::time::Instant;
 
-    use ark_ff::{test_rng, UniformRand};
+    use ark_std::{test_rng, UniformRand};
 
     use crate::data_structures::ml_extension::{GKRFunction, MLExtension};
     use crate::data_structures::protocol::tests::{test_communication, test_protocol_completeness};

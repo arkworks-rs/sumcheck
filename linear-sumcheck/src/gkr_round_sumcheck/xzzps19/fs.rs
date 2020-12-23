@@ -156,7 +156,7 @@ impl<F: Field> GKRRoundSubClaim<F> for XZZPS19SubClaim<F> {
 
 #[cfg(test)]
 mod tests {
-    use ark_ff::{test_rng, UniformRand};
+    use ark_std::{test_rng, UniformRand};
 
     use crate::data_structures::test_field::TestField;
     use crate::data_structures::tests::random_sparse_poly_fast;

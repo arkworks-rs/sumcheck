@@ -454,9 +454,10 @@ impl<F: Field> MLExtension<F> for SparseMLExtensionMap<F> {
 
 #[cfg(test)]
 pub mod tests {
-    use ark_ff::{test_rng, Field, UniformRand};
+    use ark_ff::Field;
     use ark_std::collections::BTreeMap;
     use ark_std::vec::Vec;
+    use ark_std::{test_rng, UniformRand};
     use rand::Rng;
     use rand_core::RngCore;
 

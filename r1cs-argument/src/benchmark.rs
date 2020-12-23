@@ -1,7 +1,7 @@
 use crate::MLArgumentForR1CS;
-use ark_ff::test_rng;
 use ark_relations::r1cs::ConstraintMatrices;
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
+use ark_std::test_rng;
 
 use crate::ahp::MLProofForR1CS;
 use crate::data_structures::proof::Proof;

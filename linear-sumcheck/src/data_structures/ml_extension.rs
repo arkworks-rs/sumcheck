@@ -171,8 +171,8 @@ impl<F: Field, P: MLExtension<F>> ArithmeticCombination<F, P> {
 #[cfg(test)]
 pub mod tests {
     use crate::data_structures::ml_extension::{MLExtension, SparseMLExtension};
-    use ark_ff::test_rng;
     use ark_ff::Field;
+    use ark_std::test_rng;
     use ark_std::vec::Vec;
 
     /// utility: evaluate multilinear extension (in form of data array) at a random point in Field

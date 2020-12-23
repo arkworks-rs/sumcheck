@@ -3,11 +3,13 @@ use crate::data_structures::test_field::TestField;
 use crate::data_structures::MLExtensionArray;
 use crate::ml_sumcheck::ahp::AHPForMLSumcheck;
 use crate::ml_sumcheck::MLSumcheck;
-use ark_ff::{test_rng, Field};
+use ark_ff::Field;
 use ark_std::cmp::max;
+use ark_std::test_rng;
 use ark_std::vec::Vec;
 use rand::Rng;
 use rand_core::RngCore;
+
 fn random_product<F: Field, R: RngCore>(
     nv: usize,
     num_multiplicands: usize,
