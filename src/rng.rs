@@ -1,7 +1,7 @@
 use ark_serialize::CanonicalSerialize;
+use ark_std::vec::Vec;
 use blake2::{Blake2s, Digest};
 use rand_core::RngCore;
-
 /// Random Field Element Generator where randomness `feed` adds entropy for the output.
 ///
 /// Implementation should support all types of input that has `ToBytes` trait.

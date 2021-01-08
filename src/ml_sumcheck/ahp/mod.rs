@@ -4,7 +4,7 @@ use ark_ff::Field;
 use ark_poly::{DenseMultilinearExtension, MultilinearExtension};
 use ark_std::cmp::max;
 use ark_std::marker::PhantomData;
-
+use ark_std::vec::Vec;
 pub mod indexer;
 pub mod prover;
 pub mod verifier;
