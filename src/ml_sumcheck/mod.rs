@@ -1,16 +1,14 @@
 //! Sumcheck Protocol for multilinear extension
 
-use crate::data_structures::ml_extension::{ArithmeticCombination, MLExtension};
-use crate::data_structures::random::FeedableRNG;
-use crate::data_structures::Blake2s512Rng;
-use crate::error::invalid_args;
 use crate::ml_sumcheck::ahp::indexer::{Index, IndexInfo};
 use crate::ml_sumcheck::ahp::prover::ProverMsg;
 use crate::ml_sumcheck::ahp::verifier::SubClaim;
-use crate::ml_sumcheck::ahp::AHPForMLSumcheck;
+use crate::ml_sumcheck::ahp::{AHPForMLSumcheck, ProductsOfMLExtensions};
 use ark_ff::Field;
 use ark_std::marker::PhantomData;
 use ark_std::vec::Vec;
+use crate::rng::{Blake2s512Rng, FeedableRNG};
+
 pub mod ahp;
 
 #[cfg(test)]
@@ -28,10 +26,10 @@ pub type Proof<F> = Vec<ProverMsg<F>>;
 
 impl<F: Field> MLSumcheck<F> {
     /// index the polynomial
-    pub fn index<P: MLExtension<F>>(
-        polynomial: &ArithmeticCombination<F, P>,
+    pub fn index(
+        polynomial: &ProductsOfMLExtensions<F>,
     ) -> Result<(IndexProverKey<F>, IndexVerifierKey), crate::Error> {
-        let index = AHPForMLSumcheck::index(polynomial)?;
+        let index = AHPForMLSumcheck::index(polynomial);
         let index_info = index.info();
         Ok((index, index_info))
     }
@@ -39,16 +37,16 @@ impl<F: Field> MLSumcheck<F> {
     /// generate proof of the sum
     pub fn prove(index_pk: &IndexProverKey<F>) -> Result<Proof<F>, crate::Error> {
         let mut fs_rng = Blake2s512Rng::setup();
-        fs_rng.feed_randomness(&index_pk.info())?;
+        fs_rng.feed(&index_pk.info())?;
 
         let mut prover_state = AHPForMLSumcheck::prover_init(&index_pk);
         let mut verifier_msg = None;
         let mut prover_msgs = Vec::with_capacity(index_pk.num_variables);
         for _ in 0..index_pk.num_variables {
-            let result = AHPForMLSumcheck::prove_round(prover_state, &verifier_msg)?;
-            prover_state = result.1;
-            fs_rng.feed_randomness(&result.0)?;
-            prover_msgs.push(result.0);
+            let (prover_msg, prover_state_new) = AHPForMLSumcheck::prove_round(prover_state, &verifier_msg);
+            prover_state = prover_state_new;
+            fs_rng.feed(&prover_msg)?;
+            prover_msgs.push(prover_msg);
             verifier_msg = Some(AHPForMLSumcheck::sample_round(&mut fs_rng));
         }
 
@@ -62,13 +60,13 @@ impl<F: Field> MLSumcheck<F> {
         proof: &Proof<F>,
     ) -> Result<SubClaim<F>, crate::Error> {
         let mut fs_rng = Blake2s512Rng::setup();
-        fs_rng.feed_randomness(index_vk)?;
+        fs_rng.feed(index_vk)?;
         let mut verifier_state = AHPForMLSumcheck::verifier_init(index_vk);
         for i in 0..index_vk.num_variables {
-            let prover_msg = proof.get(i).ok_or(invalid_args("proof is incomplete"))?;
-            fs_rng.feed_randomness(prover_msg)?;
+            let prover_msg = proof.get(i).expect("proof is incomplete");
+            fs_rng.feed(prover_msg)?;
             let result =
-                AHPForMLSumcheck::verify_round((*prover_msg).clone(), verifier_state, &mut fs_rng)?;
+                AHPForMLSumcheck::verify_round((*prover_msg).clone(), verifier_state, &mut fs_rng);
             verifier_state = result.1;
         }
 
