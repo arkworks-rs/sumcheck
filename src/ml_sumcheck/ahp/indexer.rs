@@ -8,8 +8,6 @@ use ark_std::marker::PhantomData;
 use ark_std::vec::Vec;
 
 use ark_std::iter::FromIterator;
-#[cfg(feature = "parallel")]
-use rayon::prelude::*;
 
 /// Index used for MLSumcheck
 #[derive(CanonicalSerialize, CanonicalDeserialize)]
