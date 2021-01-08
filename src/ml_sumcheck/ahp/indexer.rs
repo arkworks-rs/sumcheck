@@ -2,14 +2,14 @@
 
 use crate::ml_sumcheck::ahp::{AHPForMLSumcheck, ProductsOfMLExtensions};
 use ark_ff::Field;
+use ark_poly::DenseMultilinearExtension;
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, Read, SerializationError, Write};
 use ark_std::marker::PhantomData;
 use ark_std::vec::Vec;
-use ark_poly::DenseMultilinearExtension;
 
+use ark_std::iter::FromIterator;
 #[cfg(feature = "parallel")]
 use rayon::prelude::*;
-use ark_std::iter::FromIterator;
 
 /// Index used for MLSumcheck
 #[derive(CanonicalSerialize, CanonicalDeserialize)]
@@ -45,16 +45,12 @@ impl<F: Field> Index<F> {
 
 impl<F: Field> AHPForMLSumcheck<F> {
     /// index to sum of products of multilinear polynomials from data array
-    pub fn index(
-        polynomial: &ProductsOfMLExtensions<F>,
-    ) -> Index<F> {
+    pub fn index(polynomial: &ProductsOfMLExtensions<F>) -> Index<F> {
         let mut add_table = Vec::new();
         assert!(polynomial.products.len() > 0);
 
         for product in polynomial.products.iter() {
-            let mul_table = Vec::from_iter(
-                product.iter().map(|x|x.clone())
-            );
+            let mul_table = Vec::from_iter(product.iter().map(|x| x.clone()));
             add_table.push(mul_table);
         }
         Index {
@@ -66,9 +62,7 @@ impl<F: Field> AHPForMLSumcheck<F> {
     }
 
     /// consume the polynomial and index to sum of products of multilinear polynomials from data array
-    pub fn index_move(
-        polynomial: ProductsOfMLExtensions<F>,
-    ) -> Index<F> {
+    pub fn index_move(polynomial: ProductsOfMLExtensions<F>) -> Index<F> {
         assert!(polynomial.products.len() > 0);
 
         Index {

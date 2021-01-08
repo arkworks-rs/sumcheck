@@ -1,9 +1,9 @@
 //! AHP protocol for multilinear sumcheck
 
 use ark_ff::Field;
-use ark_std::marker::PhantomData;
 use ark_poly::{DenseMultilinearExtension, MultilinearExtension};
 use ark_std::cmp::max;
+use ark_std::marker::PhantomData;
 
 pub mod indexer;
 pub mod prover;
@@ -31,7 +31,7 @@ impl<F: Field> ProductsOfMLExtensions<F> {
         ProductsOfMLExtensions {
             max_multiplicands: 0,
             num_variables,
-            products: Vec::new()
+            products: Vec::new(),
         }
     }
 
@@ -39,15 +39,19 @@ impl<F: Field> ProductsOfMLExtensions<F> {
     pub fn add_product(&mut self, product: impl IntoIterator<Item = DenseMultilinearExtension<F>>) {
         let product: Vec<DenseMultilinearExtension<F>> = product.into_iter().collect();
         assert!(product.len() > 0);
-        product.iter().map(|p|assert_eq!(p.num_vars, self.num_variables)).last();
+        product
+            .iter()
+            .map(|p| assert_eq!(p.num_vars, self.num_variables))
+            .last();
         self.max_multiplicands = max(self.max_multiplicands, product.len());
         self.products.push(product);
     }
 
     /// Evaluate the polynomial at point `point`
     pub fn evaluate(&self, point: &[F]) -> F {
-        self.products.iter().map(|p|
-            p.iter().map(|f|f.evaluate(point).unwrap()).product::<F>()
-        ).sum()
+        self.products
+            .iter()
+            .map(|p| p.iter().map(|f| f.evaluate(point).unwrap()).product::<F>())
+            .sum()
     }
 }

@@ -17,7 +17,6 @@ pub enum Error {
     OtherError(String),
 }
 
-
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         if let Self::OtherError(s) = self {

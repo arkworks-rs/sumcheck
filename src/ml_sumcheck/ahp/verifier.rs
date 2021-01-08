@@ -105,7 +105,9 @@ impl<F: Field> AHPForMLSumcheck<F> {
             let p0 = evaluations[0];
             let p1 = evaluations[1];
             if p0 + p1 != expected {
-                return Err(crate::Error::Reject(Some("Prover message is not consistent with the claim.".into())));
+                return Err(crate::Error::Reject(Some(
+                    "Prover message is not consistent with the claim.".into(),
+                )));
             }
             expected = interpolate_uni_poly(evaluations, verifier_state.randomness[i]);
         }

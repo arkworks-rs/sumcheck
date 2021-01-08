@@ -1,13 +1,13 @@
 use crate::ml_sumcheck::ahp::{AHPForMLSumcheck, ProductsOfMLExtensions};
 use crate::ml_sumcheck::MLSumcheck;
 use ark_ff::Field;
+use ark_poly::DenseMultilinearExtension;
 use ark_std::cmp::max;
 use ark_std::test_rng;
 use ark_std::vec::Vec;
+use ark_test_curves::bls12_381::Fr;
 use rand::Rng;
 use rand_core::RngCore;
-use ark_poly::DenseMultilinearExtension;
-use ark_test_curves::bls12_381::Fr;
 
 fn random_product<F: Field, R: RngCore>(
     nv: usize,
@@ -82,8 +82,7 @@ fn test_ahp(nv: usize, num_multiplicands_range: (usize, usize), num_products: us
     let mut verifier_state = AHPForMLSumcheck::verifier_init(&index.info());
     let mut verifier_msg = None;
     for _ in 0..index.num_variables {
-        let result =
-            AHPForMLSumcheck::prove_round(prover_state, &verifier_msg);
+        let result = AHPForMLSumcheck::prove_round(prover_state, &verifier_msg);
         prover_state = result.1;
         let (verifier_msg2, verifier_state2) =
             AHPForMLSumcheck::verify_round(result.0, verifier_state, &mut rng);

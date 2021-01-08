@@ -1,6 +1,6 @@
 use ark_serialize::CanonicalSerialize;
-use rand_core::RngCore;
 use blake2::{Blake2s, Digest};
+use rand_core::RngCore;
 
 /// Random Field Element Generator where randomness `feed` adds entropy for the output.
 ///
@@ -85,10 +85,10 @@ mod tests {
     use rand::Rng;
     use rand_core::RngCore;
 
-    use ark_std::vec::Vec;
-    use crate::rng::{FeedableRNG, Blake2s512Rng};
+    use crate::rng::{Blake2s512Rng, FeedableRNG};
     use ark_serialize::{CanonicalSerialize, SerializationError, Write};
     use ark_std::test_rng;
+    use ark_std::vec::Vec;
     use ark_test_curves::bls12_381::Fr;
 
     /// Special type of input used for test.

@@ -3,9 +3,9 @@ use crate::ml_sumcheck::ahp::indexer::Index;
 use crate::ml_sumcheck::ahp::verifier::VerifierMsg;
 use crate::ml_sumcheck::ahp::AHPForMLSumcheck;
 use ark_ff::Field;
+use ark_poly::{DenseMultilinearExtension, MultilinearExtension};
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, Read, SerializationError, Write};
 use ark_std::vec::Vec;
-use ark_poly::{DenseMultilinearExtension, MultilinearExtension};
 
 /// Prover Message
 #[derive(Clone, CanonicalSerialize, CanonicalDeserialize)]
@@ -67,7 +67,7 @@ impl<F: Field> AHPForMLSumcheck<F> {
         prover_state.round += 1;
 
         if prover_state.round > prover_state.nv {
-                panic!("Prover is not active");
+            panic!("Prover is not active");
         }
 
         let i = prover_state.round;

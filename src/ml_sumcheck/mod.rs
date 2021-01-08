@@ -4,10 +4,10 @@ use crate::ml_sumcheck::ahp::indexer::{Index, IndexInfo};
 use crate::ml_sumcheck::ahp::prover::ProverMsg;
 use crate::ml_sumcheck::ahp::verifier::SubClaim;
 use crate::ml_sumcheck::ahp::{AHPForMLSumcheck, ProductsOfMLExtensions};
+use crate::rng::{Blake2s512Rng, FeedableRNG};
 use ark_ff::Field;
 use ark_std::marker::PhantomData;
 use ark_std::vec::Vec;
-use crate::rng::{Blake2s512Rng, FeedableRNG};
 
 pub mod ahp;
 
@@ -43,7 +43,8 @@ impl<F: Field> MLSumcheck<F> {
         let mut verifier_msg = None;
         let mut prover_msgs = Vec::with_capacity(index_pk.num_variables);
         for _ in 0..index_pk.num_variables {
-            let (prover_msg, prover_state_new) = AHPForMLSumcheck::prove_round(prover_state, &verifier_msg);
+            let (prover_msg, prover_state_new) =
+                AHPForMLSumcheck::prove_round(prover_state, &verifier_msg);
             prover_state = prover_state_new;
             fs_rng.feed(&prover_msg)?;
             prover_msgs.push(prover_msg);
