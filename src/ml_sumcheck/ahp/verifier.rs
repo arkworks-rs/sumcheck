@@ -1,5 +1,4 @@
 //! Verifier
-use crate::error::invalid_args;
 use crate::ml_sumcheck::ahp::indexer::IndexInfo;
 use crate::ml_sumcheck::ahp::prover::ProverMsg;
 use crate::ml_sumcheck::ahp::AHPForMLSumcheck;
@@ -49,11 +48,9 @@ impl<F: Field> AHPForMLSumcheck<F> {
         prover_msg: ProverMsg<F>,
         mut verifier_state: VerifierState<F>,
         rng: &mut R,
-    ) -> Result<(Option<VerifierMsg<F>>, VerifierState<F>), crate::Error> {
+    ) -> (Option<VerifierMsg<F>>, VerifierState<F>) {
         if verifier_state.finished {
-            return Err(crate::Error::InvalidOperationError(Some(
-                "Verifier is already finished.".into(),
-            )));
+            panic!("Incorrect verifier state: Verifier is already finished.");
         }
         // commented out code is part of verification, which will be performed when verifying the subclaim
 
@@ -82,7 +79,7 @@ impl<F: Field> AHPForMLSumcheck<F> {
         } else {
             verifier_state.round += 1;
         }
-        Ok((Some(msg), verifier_state))
+        (Some(msg), verifier_state)
     }
 
     /// verify the sumcheck phase, and generate the subclaim
@@ -93,26 +90,26 @@ impl<F: Field> AHPForMLSumcheck<F> {
         asserted_sum: F,
     ) -> Result<SubClaim<F>, crate::Error> {
         if !verifier_state.finished {
-            return Err(crate::Error::InvalidOperationError(Some(
-                "Verifier has not finished. ".into(),
-            )));
+            panic!("Verifier has not finished.");
         }
 
         let mut expected = asserted_sum;
         if verifier_state.lagrange_sets.len() != verifier_state.nv {
-            return Err(invalid_args("insufficient rounds"));
+            panic!("insufficient rounds");
         }
         for i in 0..verifier_state.nv {
             let evaluations = &verifier_state.lagrange_sets[i];
             if evaluations.len() != verifier_state.max_multiplicands + 1 {
-                return Err(invalid_args("incorrect number of evaluations"));
+                panic!("incorrect number of evaluations");
             }
             let p0 = evaluations[0];
             let p1 = evaluations[1];
             if p0 + p1 != expected {
-                return Err(crate::Error::Reject(Some("broken midway".into())));
+                return Err(crate::Error::Reject(Some(
+                    "Prover message is not consistent with the claim.".into(),
+                )));
             }
-            expected = interpolate_deg_n_poly(evaluations, verifier_state.randomness[i]);
+            expected = interpolate_uni_poly(evaluations, verifier_state.randomness[i]);
         }
 
         return Ok(SubClaim {
@@ -133,7 +130,8 @@ impl<F: Field> AHPForMLSumcheck<F> {
     }
 }
 
-pub(crate) fn interpolate_deg_n_poly<F: Field>(p_i: &[F], eval_at: F) -> F {
+/// interpolate a uni-variate degree-`p_i.len()-1` polynomial and evaluate this polynomial at `eval_at`.
+pub(crate) fn interpolate_uni_poly<F: Field>(p_i: &[F], eval_at: F) -> F {
     let mut result = F::zero();
     let mut i = F::zero();
     for term in p_i.iter() {

@@ -1,12 +1,13 @@
 //! Indexer
 
-use crate::data_structures::ml_extension::{ArithmeticCombination, MLExtension};
-use crate::error::invalid_args;
-use crate::ml_sumcheck::ahp::AHPForMLSumcheck;
+use crate::ml_sumcheck::ahp::{AHPForMLSumcheck, ProductsOfMLExtensions};
 use ark_ff::Field;
+use ark_poly::DenseMultilinearExtension;
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, Read, SerializationError, Write};
 use ark_std::marker::PhantomData;
 use ark_std::vec::Vec;
+
+use ark_std::iter::FromIterator;
 
 /// Index used for MLSumcheck
 #[derive(CanonicalSerialize, CanonicalDeserialize)]
@@ -16,12 +17,12 @@ pub struct Index<F: Field> {
     /// number of variables of the polynomial
     pub num_variables: usize,
     /// sum of product of multilinear extensions
-    pub add_table: Vec<Vec<Vec<F>>>,
+    pub add_table: Vec<Vec<DenseMultilinearExtension<F>>>,
     #[doc(hidden)]
     _marker: PhantomData<F>,
 }
 
-#[derive(CanonicalSerialize, CanonicalDeserialize)]
+#[derive(CanonicalSerialize, CanonicalDeserialize, Clone)]
 /// Index information used by verifier
 pub struct IndexInfo {
     /// max number of multiplicands in each product
@@ -41,75 +42,32 @@ impl<F: Field> Index<F> {
 }
 
 impl<F: Field> AHPForMLSumcheck<F> {
-    /// index the polynomial
-    pub fn index<P: MLExtension<F>>(
-        polynomial: &ArithmeticCombination<F, P>,
-    ) -> Result<Index<F>, crate::Error> {
-        let num_variables = polynomial.num_variables;
-        let max_multiplicands = polynomial.max_multiplicands;
+    /// index to sum of products of multilinear polynomials from data array
+    pub fn index(polynomial: &ProductsOfMLExtensions<F>) -> Index<F> {
         let mut add_table = Vec::new();
-        if polynomial.vector_of_products.len() < 1 {
-            return Err(invalid_args("Input is empty."));
-        }
-        for product in polynomial.vector_of_products.iter() {
-            if product.len() > max_multiplicands {
-                return Err(invalid_args("invalid max_multiplicands"));
-            }
-            let mut mul_table = Vec::with_capacity(max_multiplicands);
-            for single_poly in product.iter() {
-                if unwrap_safe!(single_poly.num_variables()) != num_variables {
-                    return Err(crate::Error::InvalidArgumentError(Some(
-                        "polynomials should be same number of variables".into(),
-                    )));
-                }
+        assert!(polynomial.products.len() > 0);
 
-                mul_table.push(unwrap_safe!(single_poly.table()));
-            }
+        for product in polynomial.products.iter() {
+            let mul_table = Vec::from_iter(product.iter().map(|x| x.clone()));
             add_table.push(mul_table);
         }
-        Ok(Index {
-            num_variables,
-            max_multiplicands,
+        Index {
+            num_variables: polynomial.num_variables,
+            max_multiplicands: polynomial.max_multiplicands,
             add_table,
             _marker: PhantomData,
-        })
+        }
     }
 
-    /// consume the polynomial instance and index the polynomial
-    pub fn convert_to_index<P: MLExtension<F>>(
-        polynomial: ArithmeticCombination<F, P>,
-    ) -> Result<Index<F>, crate::Error> {
-        let num_variables = polynomial.num_variables;
-        let max_multiplicands = polynomial.max_multiplicands;
-        let mut add_table = Vec::new();
-        if polynomial.vector_of_products.len() < 1 {
-            return Err(invalid_args("Input is empty."));
-        }
-        for product in polynomial.vector_of_products.into_iter() {
-            if product.len() > max_multiplicands {
-                return Err(invalid_args("invalid max_multiplicands"));
-            }
-            let mut mul_table = Vec::with_capacity(max_multiplicands);
-            for single_poly in product.into_iter() {
-                if unwrap_safe!(single_poly.num_variables()) != num_variables {
-                    return Err(crate::Error::InvalidArgumentError(Some(
-                        "polynomials should be same number of variables".into(),
-                    )));
-                }
+    /// consume the polynomial and index to sum of products of multilinear polynomials from data array
+    pub fn index_move(polynomial: ProductsOfMLExtensions<F>) -> Index<F> {
+        assert!(polynomial.products.len() > 0);
 
-                mul_table.push(
-                    single_poly
-                        .into_table()
-                        .map_err(|_| crate::Error::CausedBy("into table".into()))?,
-                );
-            }
-            add_table.push(mul_table);
-        }
-        Ok(Index {
-            num_variables,
-            max_multiplicands,
-            add_table,
+        Index {
+            num_variables: polynomial.num_variables,
+            max_multiplicands: polynomial.max_multiplicands,
+            add_table: polynomial.products,
             _marker: PhantomData,
-        })
+        }
     }
 }

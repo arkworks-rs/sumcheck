@@ -19,16 +19,9 @@ extern crate ark_std;
 /// error for this crate
 mod error;
 
-/// local macros
-#[macro_use]
-mod macros;
-
-pub mod gkr_round_sumcheck;
-
 pub mod ml_sumcheck;
 
-/// data structures
-pub mod data_structures;
+mod rng;
 
 #[cfg(test)]
 mod tests {}

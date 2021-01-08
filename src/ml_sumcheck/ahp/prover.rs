@@ -1,11 +1,12 @@
 //! Prover
-use crate::error::invalid_args;
 use crate::ml_sumcheck::ahp::indexer::Index;
 use crate::ml_sumcheck::ahp::verifier::VerifierMsg;
 use crate::ml_sumcheck::ahp::AHPForMLSumcheck;
 use ark_ff::Field;
+use ark_poly::{DenseMultilinearExtension, MultilinearExtension};
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, Read, SerializationError, Write};
 use ark_std::vec::Vec;
+
 /// Prover Message
 #[derive(Clone, CanonicalSerialize, CanonicalDeserialize)]
 pub struct ProverMsg<F: Field> {
@@ -16,7 +17,7 @@ pub struct ProverMsg<F: Field> {
 pub struct ProverState<F: Field> {
     /// sampled randomness given by the verifier
     pub randomness: Vec<F>,
-    tables: Vec<Vec<Vec<F>>>,
+    tables: Vec<Vec<DenseMultilinearExtension<F>>>,
     nv: usize,
     num_multiplicands: usize,
     round: usize,
@@ -41,10 +42,10 @@ impl<F: Field> AHPForMLSumcheck<F> {
     pub fn prove_round(
         mut prover_state: ProverState<F>,
         v_msg: &Option<VerifierMsg<F>>,
-    ) -> Result<(ProverMsg<F>, ProverState<F>), crate::Error> {
+    ) -> (ProverMsg<F>, ProverState<F>) {
         if let Some(msg) = v_msg {
             if prover_state.round == 0 {
-                return Err(invalid_args("first round should be prover first."));
+                panic!("first round should be prover first.");
             }
             prover_state.randomness.push(msg.randomness);
 
@@ -54,23 +55,19 @@ impl<F: Field> AHPForMLSumcheck<F> {
             for pmf in &mut prover_state.tables {
                 let num_multiplicands = pmf.len();
                 for j in 0..num_multiplicands {
-                    for b in 0..1 << (prover_state.nv - i) {
-                        pmf[j][b] = pmf[j][b << 1] * (F::one() - r) + pmf[j][(b << 1) + 1] * r;
-                    }
+                    pmf[j] = pmf[j].fix_variables(&[r]);
                 }
             }
         } else {
             if prover_state.round > 0 {
-                return Err(invalid_args("verifier message is empty"));
+                panic!("verifier message is empty");
             }
         }
 
         prover_state.round += 1;
 
         if prover_state.round > prover_state.nv {
-            return Err(crate::Error::InvalidOperationError(Some(
-                "Prover is not active".into(),
-            )));
+            panic!("Prover is not active");
         }
 
         let i = prover_state.round;
@@ -98,11 +95,11 @@ impl<F: Field> AHPForMLSumcheck<F> {
             }
         }
 
-        Ok((
+        (
             ProverMsg {
                 evaluations: products_sum,
             },
             prover_state,
-        ))
+        )
     }
 }
