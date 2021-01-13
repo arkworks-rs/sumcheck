@@ -7,7 +7,7 @@ use rand_core::RngCore;
 /// Implementation should support all types of input that has `ToBytes` trait.
 ///
 /// Same sequence of `feed` and `get` call should yield same result!
-pub(crate) trait FeedableRNG: RngCore {
+pub trait FeedableRNG: RngCore {
     /// Error type
     type Error: ark_std::error::Error + From<crate::Error>;
     /// Setup should not have any parameter.
@@ -18,7 +18,7 @@ pub(crate) trait FeedableRNG: RngCore {
 }
 
 /// 512-bits digest hash pseudorandom generator
-pub(crate) struct Blake2s512Rng {
+pub struct Blake2s512Rng {
     /// current digest instance
     current_digest: Blake2s,
 }
