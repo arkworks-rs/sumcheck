@@ -1,3 +1,4 @@
+/// Fiat-Shamir Random Generator
 use ark_serialize::CanonicalSerialize;
 use ark_std::vec::Vec;
 use blake2::{Blake2s, Digest};
