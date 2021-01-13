@@ -21,7 +21,7 @@ mod error;
 
 pub mod ml_sumcheck;
 
-mod rng;
+pub mod rng;
 
 #[cfg(test)]
 mod tests {}
