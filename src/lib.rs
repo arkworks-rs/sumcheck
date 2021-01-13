@@ -22,7 +22,7 @@ mod error;
 pub mod gkr_round_sumcheck;
 pub mod ml_sumcheck;
 
-mod rng;
+pub mod rng;
 
 #[cfg(test)]
 mod tests {}
