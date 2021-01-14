@@ -20,6 +20,7 @@ extern crate ark_std;
 mod error;
 
 pub mod ml_sumcheck;
+pub mod gkr_round_sumcheck;
 
 mod rng;
 
