@@ -2,7 +2,7 @@
 
 use ark_ff::Field;
 use ark_poly::{DenseMultilinearExtension, MultilinearExtension, SparseMultilinearExtension};
-
+use ark_std::vec::Vec;
 /// Takes multilinear f1, f3, and input g = g1,...,gl. Returns h_g, and f1 fixed at g.
 pub fn initialize_phase_one<F: Field>(
     f1: &SparseMultilinearExtension<F>,
