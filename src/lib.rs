@@ -21,6 +21,7 @@ mod error;
 
 pub mod gkr_round_sumcheck;
 pub mod ml_sumcheck;
+pub mod gkr_round_sumcheck;
 
 pub mod rng;
 
