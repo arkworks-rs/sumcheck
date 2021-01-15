@@ -3,6 +3,7 @@
 <p align="center">
     <a href="./LICENSE-APACHE"><img src="https://img.shields.io/badge/license-APACHE-blue.svg"></a>
    <a href="./LICENSE-MIT"><img src="https://img.shields.io/badge/license-MIT-blue.svg"></a>
+  <a href="https://github.com/arkworks-rs/sumcheck/actions?query=workflow%3ACI"><img src="https://github.com/arkworks-rs/sumcheck/workflows/CI/badge.svg"></a>
 </p>
 
 
@@ -48,12 +49,6 @@ This library is licensed under either of the following licenses, at your discret
 * [MIT License](LICENSE-MIT)
 
 Unless you explicitly state otherwise, any contribution that you submit to this library shall be dual licensed as above (as defined in the Apache v2 License), without any additional terms or conditions.
-
-[marlin]: https://ia.cr/2019/1047
-[sonic]: https://ia.cr/2019/099
-[groth16]: https://ia.cr/2016/260
-
-## Reference paper
 
 [Libra: Succinct Zero-Knowledge Proofs with Optimal ProverComputation](https://eprint.iacr.org/2019/317)     
 Tiancheng Xie, Jiaheng Zhang, Yupeng Zhang, Charalampos Papamanthou, Dawn Song
