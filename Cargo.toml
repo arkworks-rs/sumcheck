@@ -1,14 +1,18 @@
 [package]
-name = "linear-sumcheck"
+name = "ark-linear-sumcheck"
 version = "0.1.0"
 authors = [
-    "Tom Shen <tomshen@berkeley.edu>"
+    "Tom Shen <tomshen@berkeley.edu>",
+    "arkworks contributors"
 ]
+description = "A library for efficient sumcheck protocols"
+homepage = "https://arkworks.rs"
+repository = "https://github.com/arkworks-rs/sumcheck/"
+keywords = ["cryptography", "finite fields", "polynomials", "sumcheck"]
+categories = ["cryptography"]
+include = ["Cargo.toml", "src", "README.md", "LICENSE-APACHE", "LICENSE-MIT"]
+license = "MIT/Apache-2.0"
 edition = "2018"
-
-[lib]
-name = "linear_sumcheck"
-path = "src/lib.rs"
 
 
 [dependencies]
@@ -23,9 +27,9 @@ ark-poly = { git = "https://github.com/arkworks-rs/algebra/" }
 rayon = { version = "1", optional = true }
 
 [dev-dependencies]
-ark-test-curves = { git = "https://github.com/arkworks-rs/algebra/",  default-features = false, features = ["bls12_381_scalar_field", "bls12_381_curve"] }
+ark-test-curves = { git = "https://github.com/arkworks-rs/algebra/", default-features = false, features = ["bls12_381_scalar_field", "bls12_381_curve"] }
 
 [features]
 default = ["std"]
 std = ["ark-ff/std", "ark-serialize/std", "rand/std", "rand_core/std", "blake2/std", "ark-std/std"]
-parallel = [ "std", "ark-ff/parallel", "ark-poly/parallel", "ark-std/parallel", "rayon" ]
+parallel = ["std", "ark-ff/parallel", "ark-poly/parallel", "ark-std/parallel", "rayon"]
