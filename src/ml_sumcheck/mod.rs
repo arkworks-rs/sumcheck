@@ -14,7 +14,7 @@ pub mod ahp;
 #[cfg(test)]
 mod test;
 
-/// Sumcheck for linear combination of products of multilinear polynomial
+/// Sumcheck for products of multilinear polynomial
 pub struct MLSumcheck<F: Field>(#[doc(hidden)] PhantomData<F>);
 
 /// index for prover
