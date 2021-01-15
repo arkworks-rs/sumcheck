@@ -6,8 +6,15 @@
 </p>
 
 
-`linear-sumcheck` is a Rust library that implements sumcheck protocol for products of multilinear polynomials in
-its evaluation form over boolean hypercubes evaluation domain. 
+`linear-sumcheck` is a Rust library that implements the sumcheck protocol. 
+
+This crate implements the following protocols: 
+- [`MLSumcheck`](src/ml_sumcheck/mod.rs#L18): The sumcheck protocol for 
+  products of multilinear polynomials in evaluation form over boolean hypercube.
+- [`GKRRoundSumcheck`](#todo): The sumcheck protocol for GKR Round Function. 
+  This protocol will be available in [#32](https://github.com/arkworks-rs/sumcheck/pull/32).
+  
+
 
 ## Build guide
 
