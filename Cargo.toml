@@ -1,5 +1,5 @@
 [package]
-name = "linear-sumcheck"
+name = "ark-linear-sumcheck"
 version = "0.1.0"
 authors = [
     "Tom Shen <tomshen@berkeley.edu>"
