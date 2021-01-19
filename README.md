@@ -12,10 +12,10 @@
 This crate implements the following protocols: 
 - [`MLSumcheck`](src/ml_sumcheck/mod.rs#L18): The sumcheck protocol for 
   products of multilinear polynomials in evaluation form over boolean hypercube.
-- [`GKRRoundSumcheck`](#todo): The sumcheck protocol for GKR Round Function. 
-  This protocol will be available in [#32](https://github.com/arkworks-rs/sumcheck/pull/32).
-  
+- [`GKRRoundSumcheck`](src/gkr_round_sumcheck/mod.rs#L83): The sumcheck protocol for GKR Round Function. 
+  This protocol takes `MLSumcheck` as a subroutine.
 
+**WARNING**: This is an academic proof-of-concept prototype, and in particular has not received careful code review. This implementation is NOT ready for production use.
 
 ## Build guide
 
