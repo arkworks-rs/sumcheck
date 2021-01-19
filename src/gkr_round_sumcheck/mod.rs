@@ -3,6 +3,8 @@
 //! GKR Round Sumcheck will use `ml_sumcheck` as a subroutine.
 
 pub mod data_structures;
+#[cfg(test)]
+mod test;
 
 use crate::gkr_round_sumcheck::data_structures::GKRProof;
 use crate::ml_sumcheck::ahp::prover::ProverState;
@@ -20,8 +22,8 @@ pub fn initialize_phase_one<F: Field>(
     f3: &DenseMultilinearExtension<F>,
     g: &[F],
 ) -> (DenseMultilinearExtension<F>, SparseMultilinearExtension<F>) {
-    let dim = f1.num_vars; // 'l` in paper
-    assert_eq!(f3.num_vars, dim * 3);
+    let dim = f3.num_vars; // 'l` in paper
+    assert_eq!(f1.num_vars, dim * 3);
     assert_eq!(g.len(), dim);
     let mut a_hg: Vec<_> = (0..(1 << dim)).map(|_| F::zero()).collect();
     let f1_at_g = f1.fix_variables(g);
