@@ -13,7 +13,7 @@ pub struct GKRProof<F: Field> {
 
 impl<F: Field> GKRProof<F> {
     /// Extract the witness (i.e. the sum of GKR)
-    pub fn extract(&self) -> F {
+    pub fn extract_sum(&self) -> F {
         self.phase1_sumcheck_msgs[0].evaluations[0] + self.phase1_sumcheck_msgs[0].evaluations[1]
     }
 }

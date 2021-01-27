@@ -35,9 +35,7 @@ impl<F: Field> MLSumcheck<F> {
     }
 
     /// extract sum from the proof
-    pub fn extract_sum(
-        proof: &Proof<F>
-    ) -> F {
+    pub fn extract_sum(proof: &Proof<F>) -> F {
         proof[0].evaluations[0] + proof[0].evaluations[1]
     }
 

@@ -78,7 +78,7 @@ fn test_extract() {
     let g: Vec<_> = (0..nv).map(|_| Fr::rand(&mut rng)).collect();
     let expected_sum = calculate_sum_naive(&f1, &f2, &f3, &g);
     let proof = GKRRoundSumcheck::prove(&f1, &f2, &f3, &g);
-    let actual_sum = proof.extract();
+    let actual_sum = proof.extract_sum();
 
     assert_eq!(actual_sum, expected_sum);
 }
