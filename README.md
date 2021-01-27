@@ -51,5 +51,5 @@ This library is licensed under either of the following licenses, at your discret
 Unless you explicitly state otherwise, any contribution that you submit to this library shall be dual licensed as above (as defined in the Apache v2 License), without any additional terms or conditions.
 
 ## Reference Paper
-[Libra: Succinct Zero-Knowledge Proofs with Optimal ProverComputation](https://eprint.iacr.org/2019/317)     
+[Libra: Succinct Zero-Knowledge Proofs with Optimal Prover Computation](https://eprint.iacr.org/2019/317)     
 Tiancheng Xie, Jiaheng Zhang, Yupeng Zhang, Charalampos Papamanthou, Dawn Song
