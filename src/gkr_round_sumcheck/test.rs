@@ -1,7 +1,7 @@
 use crate::gkr_round_sumcheck::GKRRoundSumcheck;
 use ark_ff::Field;
 use ark_poly::{DenseMultilinearExtension, MultilinearExtension, SparseMultilinearExtension};
-use ark_std::test_rng;
+use ark_std::{test_rng, UniformRand};
 use ark_test_curves::bls12_381::Fr;
 use rand_core::RngCore;
 
@@ -20,7 +20,7 @@ fn random_gkr_instance<F: Field, R: RngCore>(
     )
 }
 
-fn calculate_sum<F: Field>(
+fn calculate_sum_naive<F: Field>(
     f1: &SparseMultilinearExtension<F>,
     f2: &DenseMultilinearExtension<F>,
     f3: &DenseMultilinearExtension<F>,
@@ -57,7 +57,7 @@ fn test_circuit<F: Field>(nv: usize) {
     let mut rng = test_rng();
     let (f1, f2, f3) = random_gkr_instance(nv, &mut rng);
     let g: Vec<_> = (0..nv).map(|_| F::rand(&mut rng)).collect();
-    let claimed_sum = calculate_sum(&f1, &f2, &f3, &g);
+    let claimed_sum = calculate_sum_naive(&f1, &f2, &f3, &g);
     let proof = GKRRoundSumcheck::prove(&f1, &f2, &f3, &g);
     let subclaim =
         GKRRoundSumcheck::verify(f2.num_vars, &proof, claimed_sum).expect("verification failed");
@@ -68,4 +68,17 @@ fn test_circuit<F: Field>(nv: usize) {
 #[test]
 fn test_small() {
     test_circuit::<Fr>(9);
+}
+
+#[test]
+fn test_extract() {
+    let nv = 6;
+    let mut rng = test_rng();
+    let (f1, f2, f3) = random_gkr_instance(nv, &mut rng);
+    let g: Vec<_> = (0..nv).map(|_| Fr::rand(&mut rng)).collect();
+    let expected_sum = calculate_sum_naive(&f1, &f2, &f3, &g);
+    let proof = GKRRoundSumcheck::prove(&f1, &f2, &f3, &g);
+    let actual_sum = proof.extract();
+
+    assert_eq!(actual_sum, expected_sum);
 }

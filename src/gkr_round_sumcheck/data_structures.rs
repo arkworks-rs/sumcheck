@@ -11,6 +11,13 @@ pub struct GKRProof<F: Field> {
     pub(crate) phase2_sumcheck_msgs: Vec<ProverMsg<F>>,
 }
 
+impl<F: Field> GKRProof<F> {
+    /// Extract the witness (i.e. the sum of GKR)
+    pub fn extract(&self) -> F {
+        self.phase1_sumcheck_msgs[0].evaluations[0] + self.phase1_sumcheck_msgs[0].evaluations[1]
+    }
+}
+
 /// Subclaim for GKR Round Function
 pub struct GKRRoundSumcheckSubClaim<F: Field> {
     /// u
