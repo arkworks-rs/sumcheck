@@ -10,7 +10,7 @@ use ark_std::ops::Range;
 use ark_std::test_rng;
 use criterion::{black_box, BenchmarkId, Criterion};
 
-const NUM_VARIABLES_RANGE: Range<usize> = 8..16;
+const NUM_VARIABLES_RANGE: Range<usize> = 10..21;
 
 fn prove_bench<F: Field>(c: &mut Criterion) {
     let mut rng = test_rng();
