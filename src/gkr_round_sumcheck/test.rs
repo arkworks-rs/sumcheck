@@ -59,8 +59,9 @@ fn test_circuit<F: Field>(nv: usize) {
     let g: Vec<_> = (0..nv).map(|_| F::rand(&mut rng)).collect();
     let claimed_sum = calculate_sum(&f1, &f2, &f3, &g);
     let proof = GKRRoundSumcheck::prove(&f1, &f2, &f3, &g);
-    let result = GKRRoundSumcheck::verify(&f1, &f2, &f3, &g, &proof, claimed_sum)
-        .expect("verification failed");
+    let subclaim =
+        GKRRoundSumcheck::verify(f2.num_vars, &proof, claimed_sum).expect("verification failed");
+    let result = subclaim.verify_subclaim(&f1, &f2, &f3, &g);
     assert!(result)
 }
 

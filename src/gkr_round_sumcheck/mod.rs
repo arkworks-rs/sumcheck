@@ -6,7 +6,7 @@ pub mod data_structures;
 #[cfg(test)]
 mod test;
 
-use crate::gkr_round_sumcheck::data_structures::GKRProof;
+use crate::gkr_round_sumcheck::data_structures::{GKRProof, GKRRoundSumcheckSubClaim};
 use crate::ml_sumcheck::ahp::prover::ProverState;
 use crate::ml_sumcheck::ahp::{AHPForMLSumcheck, ProductsOfMLExtensions};
 use crate::ml_sumcheck::IndexVerifierKey;
@@ -101,10 +101,6 @@ impl<F: Field> GKRRoundSumcheck<F> {
         let g = g.to_vec();
 
         let mut rng = Blake2s512Rng::setup();
-        rng.feed(&g).unwrap();
-        rng.feed(f1).unwrap();
-        rng.feed(f2).unwrap();
-        rng.feed(f3).unwrap();
 
         let (h_g, f1_g) = initialize_phase_one(f1, f3, &g);
         let mut phase1_ps = start_phase1_sumcheck(&h_g, f2);
@@ -143,27 +139,16 @@ impl<F: Field> GKRRoundSumcheck<F> {
     }
 
     /// Takes a GKR Round Function, input, and proof, verify the sum.
-    /// * `f1`,`f2`,`f3`: represents the GKR round function
-    /// * `g`: represents the fixed input.
+    /// * `f2_num_vars`: represents number of variables of f2
     pub fn verify(
-        f1: &SparseMultilinearExtension<F>,
-        f2: &DenseMultilinearExtension<F>,
-        f3: &DenseMultilinearExtension<F>,
-        g: &[F],
+        f2_num_vars: usize,
         proof: &GKRProof<F>,
         claimed_sum: F,
-    ) -> Result<bool, crate::Error> {
+    ) -> Result<GKRRoundSumcheckSubClaim<F>, crate::Error> {
         // verify first sumcheck
-        let dim = f2.num_vars;
-        assert_eq!(f1.num_vars, 3 * dim);
-        assert_eq!(f3.num_vars, dim);
+        let dim = f2_num_vars;
 
-        let g = g.to_vec();
         let mut rng = Blake2s512Rng::setup();
-        rng.feed(&g).unwrap();
-        rng.feed(f1).unwrap();
-        rng.feed(f2).unwrap();
-        rng.feed(f3).unwrap();
 
         let mut phase1_vs = AHPForMLSumcheck::verifier_init(&IndexVerifierKey {
             max_multiplicands: 2,
@@ -197,16 +182,20 @@ impl<F: Field> GKRRoundSumcheck<F> {
 
         let v = phase2_subclaim.point;
 
-        let expect_evaluation = phase2_subclaim.expected_evaluation;
-        let guv: Vec<_> = g
-            .iter()
-            .chain(u.iter())
-            .chain(v.iter())
-            .map(|x| *x)
-            .collect();
-        let actual_evaluation =
-            f1.evaluate(&guv).unwrap() * &f2.evaluate(&u).unwrap() * &f3.evaluate(&v).unwrap();
+        let expected_evaluation = phase2_subclaim.expected_evaluation;
+        // let guv: Vec<_> = g
+        //     .iter()
+        //     .chain(u.iter())
+        //     .chain(v.iter())
+        //     .map(|x| *x)
+        //     .collect();
+        // let actual_evaluation =
+        //     f1.evaluate(&guv).unwrap() * &f2.evaluate(&u).unwrap() * &f3.evaluate(&v).unwrap();
 
-        Ok(expect_evaluation == actual_evaluation)
+        Ok(GKRRoundSumcheckSubClaim {
+            u,
+            v,
+            expected_evaluation,
+        })
     }
 }
