@@ -48,17 +48,17 @@ cargo +nightly bench --all-features
 
 All benchmarks below are performed over BLS12-381 scalar field implemented in the `ark-test-curves` library. Benchmarks were run on a machine with an Intel Xeon 6136 CPU running at 3.0 GHz.
 
-#### Benchmarks for `GKRRoundSumcheck`
-
-<img src="benchmark_results/ml_sumcheck_prove.jpg" alt="gkr_round_sumcheck_prove" style="zoom:25%;" />
-
-<img src="benchmark_results/ml_sumcheck_verify.jpg" alt="gkr_round_sumcheck_verify" style="zoom:25%;" />
-
 #### Benchmarks for `MLSumcheck`
 
-<img src="benchmark_results/gkr_round_sumcheck_prove.jpg" alt="gkr_round_sumcheck_prove" style="zoom: 25%;" />
+<img src="benchmark_results/ml_sumcheck_prove.jpg" alt="ml_sumcheck_prove" width="50%" />
 
-<img src="benchmark_results/gkr_round_sumcheck_verify.jpg" alt="gkr_round_sumcheck_verify" style="zoom:25%;" />
+<img src="benchmark_results/ml_sumcheck_verify.jpg" alt="ml_sumcheck_verify" width="50%" />
+
+#### Benchmarks for `GKRRoundSumcheck`
+
+<img src="benchmark_results/gkr_round_sumcheck_prove.jpg" alt="gkr_round_sumcheck_prove"  width="50%" />
+
+<img src="benchmark_results/gkr_round_sumcheck_verify.jpg" alt="gkr_round_sumcheck_verify"  width="50%" />
 
 ## License
 
