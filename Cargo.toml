@@ -28,7 +28,7 @@ rayon = { version = "1", optional = true }
 
 [dev-dependencies]
 ark-test-curves = { git = "https://github.com/arkworks-rs/algebra/", default-features = false, features = ["bls12_381_scalar_field", "bls12_381_curve"] }
-criterion = {version = "0.3.1", default-features = false}
+criterion = "0.3.1"
 
 [features]
 default = ["std"]
