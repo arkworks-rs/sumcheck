@@ -40,7 +40,18 @@ Lastly, this library is instrumented with profiling infrastructure that prints d
 
 
 ## Benchmarks
-todo
+#### Benchmarks for `MLSumcheck`
+
+![gkr_round_sumcheck_prove](benchmark_results/gkr_round_sumcheck_prove.svg)
+
+![gkr_round_sumcheck_verify](benchmark_results/gkr_round_sumcheck_verify.svg)
+
+#### Benchmarks for `GKRRoundSumcheck`
+
+![gkr_round_sumcheck_prove](benchmark_results/gkr_round_sumcheck_prove-1611884082165.svg)
+
+![gkr_round_sumcheck_verify](benchmark_results/gkr_round_sumcheck_verify-1611884088830.svg)
+
 ## License
 
 This library is licensed under either of the following licenses, at your discretion.
