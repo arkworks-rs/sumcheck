@@ -17,7 +17,7 @@ fn prove_bench<F: Field>(c: &mut Criterion) {
 
     let mut group = c.benchmark_group("Prove");
     for nv in NUM_VARIABLES_RANGE {
-        group.bench_with_input(BenchmarkId::new("Prove", nv), &nv, |b, &nv| {
+        group.bench_with_input(BenchmarkId::new("GKR", nv), &nv, |b, &nv| {
             let f1 = SparseMultilinearExtension::rand_with_config(3 * nv, 1 << nv, &mut rng);
             let f2 = DenseMultilinearExtension::rand(nv, &mut rng);
             let f3 = DenseMultilinearExtension::rand(nv, &mut rng);
@@ -39,19 +39,15 @@ fn verify_bench<F: Field>(c: &mut Criterion) {
 
     let mut group = c.benchmark_group("Verify");
     for nv in NUM_VARIABLES_RANGE {
-        group.bench_with_input(
-            BenchmarkId::new("Verify (output subclaim)", nv),
-            &nv,
-            |b, &nv| {
-                let f1 = SparseMultilinearExtension::rand_with_config(3 * nv, 1 << nv, &mut rng);
-                let f2 = DenseMultilinearExtension::rand(nv, &mut rng);
-                let f3 = DenseMultilinearExtension::rand(nv, &mut rng);
-                let g: Vec<_> = (0..nv).map(|_| F::rand(&mut rng)).collect();
-                let proof = GKRRoundSumcheck::prove(&f1, &f2, &f3, &g);
-                let expected_sum = proof.extract_sum();
-                b.iter(|| GKRRoundSumcheck::verify(f2.num_vars, &proof, expected_sum));
-            },
-        );
+        group.bench_with_input(BenchmarkId::new("GKR", nv), &nv, |b, &nv| {
+            let f1 = SparseMultilinearExtension::rand_with_config(3 * nv, 1 << nv, &mut rng);
+            let f2 = DenseMultilinearExtension::rand(nv, &mut rng);
+            let f3 = DenseMultilinearExtension::rand(nv, &mut rng);
+            let g: Vec<_> = (0..nv).map(|_| F::rand(&mut rng)).collect();
+            let proof = GKRRoundSumcheck::prove(&f1, &f2, &f3, &g);
+            let expected_sum = proof.extract_sum();
+            b.iter(|| GKRRoundSumcheck::verify(f2.num_vars, &proof, expected_sum));
+        });
     }
 }
 

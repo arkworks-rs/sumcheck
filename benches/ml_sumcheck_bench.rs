@@ -16,19 +16,15 @@ fn prove_bench<F: Field>(c: &mut Criterion) {
 
     let mut group = c.benchmark_group("Prove");
     for nv in NUM_VARIABLES_RANGE {
-        group.bench_with_input(
-            BenchmarkId::new("Prove with 3 multiplicands", nv),
-            &nv,
-            |b, &nv| {
-                let polys: Vec<_> = (0..3)
-                    .map(|_| DenseMultilinearExtension::<F>::rand(nv, &mut rng))
-                    .collect();
-                let mut products = ProductsOfMLExtensions::new(nv);
-                products.add_product(polys);
-                let (pk, _) = MLSumcheck::index(&products).unwrap();
-                b.iter(|| MLSumcheck::prove(black_box(&pk)));
-            },
-        );
+        group.bench_with_input(BenchmarkId::new("ML", nv), &nv, |b, &nv| {
+            let polys: Vec<_> = (0..3)
+                .map(|_| DenseMultilinearExtension::<F>::rand(nv, &mut rng))
+                .collect();
+            let mut products = ProductsOfMLExtensions::new(nv);
+            products.add_product(polys);
+            let (pk, _) = MLSumcheck::index(&products).unwrap();
+            b.iter(|| MLSumcheck::prove(black_box(&pk)));
+        });
     }
 }
 
@@ -37,22 +33,18 @@ fn verify_bench<F: Field>(c: &mut Criterion) {
 
     let mut group = c.benchmark_group("Verify");
     for nv in NUM_VARIABLES_RANGE {
-        group.bench_with_input(
-            BenchmarkId::new("Verify with 3 multiplicands", nv),
-            &nv,
-            |b, &nv| {
-                let polys: Vec<_> = (0..3)
-                    .map(|_| DenseMultilinearExtension::<F>::rand(nv, &mut rng))
-                    .collect();
-                // calculate expected sum
-                let expected_sum = expected_sum(&polys);
-                let mut products = ProductsOfMLExtensions::new(nv);
-                products.add_product(polys);
-                let (pk, vk) = MLSumcheck::index(&products).unwrap();
-                let proof = MLSumcheck::prove(&pk).unwrap();
-                b.iter(|| MLSumcheck::verify(&vk, black_box(expected_sum), &proof));
-            },
-        );
+        group.bench_with_input(BenchmarkId::new("ML", nv), &nv, |b, &nv| {
+            let polys: Vec<_> = (0..3)
+                .map(|_| DenseMultilinearExtension::<F>::rand(nv, &mut rng))
+                .collect();
+            // calculate expected sum
+            let expected_sum = expected_sum(&polys);
+            let mut products = ProductsOfMLExtensions::new(nv);
+            products.add_product(polys);
+            let (pk, vk) = MLSumcheck::index(&products).unwrap();
+            let proof = MLSumcheck::prove(&pk).unwrap();
+            b.iter(|| MLSumcheck::verify(&vk, black_box(expected_sum), &proof));
+        });
     }
 }
 
