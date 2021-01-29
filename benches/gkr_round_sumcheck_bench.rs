@@ -3,8 +3,6 @@ extern crate criterion;
 
 use ark_ff::Field;
 use ark_linear_sumcheck::gkr_round_sumcheck::GKRRoundSumcheck;
-use ark_linear_sumcheck::ml_sumcheck::ahp::ProductsOfMLExtensions;
-use ark_linear_sumcheck::ml_sumcheck::MLSumcheck;
 use ark_poly::{DenseMultilinearExtension, MultilinearExtension, SparseMultilinearExtension};
 use ark_std::ops::Range;
 use ark_std::test_rng;
