@@ -125,3 +125,13 @@ fn zero_polynomial_should_error() {
     test_polynomial(nv, num_multiplicands_range, num_products);
     test_ahp(nv, num_multiplicands_range, num_products);
 }
+
+#[test]
+fn test_extract_sum() {
+    let mut rng = test_rng();
+    let (comb, asserted_sum) = random_combination::<Fr, _>(8, (3, 4), 3, &mut rng);
+
+    let (index_pk, _) = MLSumcheck::index(&comb).expect("Fail to index");
+    let proof = MLSumcheck::prove(&index_pk).expect("fail to prove");
+    assert_eq!(MLSumcheck::extract_sum(&proof), asserted_sum);
+}

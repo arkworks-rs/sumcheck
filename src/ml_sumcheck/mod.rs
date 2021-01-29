@@ -34,6 +34,11 @@ impl<F: Field> MLSumcheck<F> {
         Ok((index, index_info))
     }
 
+    /// extract sum from the proof
+    pub fn extract_sum(proof: &Proof<F>) -> F {
+        proof[0].evaluations[0] + proof[0].evaluations[1]
+    }
+
     /// generate proof of the sum
     pub fn prove(index_pk: &IndexProverKey<F>) -> Result<Proof<F>, crate::Error> {
         let mut fs_rng = Blake2s512Rng::setup();
