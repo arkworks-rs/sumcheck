@@ -48,9 +48,9 @@ Lastly, this library is instrumented with profiling infrastructure that prints d
 
 #### Benchmarks for `GKRRoundSumcheck`
 
-![gkr_round_sumcheck_prove](benchmark_results/gkr_round_sumcheck_prove-1611884082165.svg)
+![gkr_round_sumcheck_prove](benchmark_results/ml_sumcheck_prove.svg)
 
-![gkr_round_sumcheck_verify](benchmark_results/gkr_round_sumcheck_verify-1611884088830.svg)
+![gkr_round_sumcheck_verify](benchmark_results/ml_sumcheck_verify.svg)
 
 ## License
 
