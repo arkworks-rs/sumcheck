@@ -38,19 +38,27 @@ cargo test
 
 Lastly, this library is instrumented with profiling infrastructure that prints detailed traces of execution time. To enable this, compile with `cargo build --features print-trace`.
 
-
 ## Benchmarks
-#### Benchmarks for `MLSumcheck`
 
-![gkr_round_sumcheck_prove](benchmark_results/gkr_round_sumcheck_prove.svg)
+To run the benchmarks, install the nightly Rust toolchain, via `rustup install nightly`, and then run the following command:
 
-![gkr_round_sumcheck_verify](benchmark_results/gkr_round_sumcheck_verify.svg)
+```shell
+cargo +nightly bench --all-features
+```
+
+All benchmarks below are performed over BLS12-381 scalar field implemented in the `ark-test-curves` library. Benchmarks were run on a machine with an Intel Xeon 6136 CPU running at 3.0 GHz.
 
 #### Benchmarks for `GKRRoundSumcheck`
 
-![gkr_round_sumcheck_prove](benchmark_results/ml_sumcheck_prove.svg)
+<img src="benchmark_results/ml_sumcheck_prove.jpg" alt="gkr_round_sumcheck_prove" style="zoom:25%;" />
 
-![gkr_round_sumcheck_verify](benchmark_results/ml_sumcheck_verify.svg)
+<img src="benchmark_results/ml_sumcheck_verify.jpg" alt="gkr_round_sumcheck_verify" style="zoom:25%;" />
+
+#### Benchmarks for `MLSumcheck`
+
+<img src="benchmark_results/gkr_round_sumcheck_prove.jpg" alt="gkr_round_sumcheck_prove" style="zoom: 25%;" />
+
+<img src="benchmark_results/gkr_round_sumcheck_verify.jpg" alt="gkr_round_sumcheck_verify" style="zoom:25%;" />
 
 ## License
 
