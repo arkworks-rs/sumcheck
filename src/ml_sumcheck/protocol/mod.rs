@@ -1,34 +1,56 @@
-//! AHP protocol for multilinear sumcheck
+//! Interactive Protocol used for Multilinear Sumcheck
 
 use ark_ff::Field;
 use ark_poly::{DenseMultilinearExtension, MultilinearExtension};
+use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, Read, SerializationError, Write};
 use ark_std::cmp::max;
 use ark_std::marker::PhantomData;
 use ark_std::vec::Vec;
-pub mod indexer;
 pub mod prover;
 pub mod verifier;
 
-/// Algebraic Holographic Proof defined in [T13](https://eprint.iacr.org/2013/351).
-pub struct AHPForMLSumcheck<F: Field> {
+/// Interactive Protocol for Multilinear Sumcheck
+pub struct IPForMLSumcheck<F: Field> {
     #[doc(hidden)]
     _marker: PhantomData<F>,
 }
 
-/// Represents a polynomial which is the sum of products of multilinear extensions.
-pub struct ProductsOfMLExtensions<F: Field> {
+/// Stores a list of products of polynomials that is meant to be added together.
+/// The result polynomial is used as the prover key.
+#[derive(CanonicalSerialize, CanonicalDeserialize)]
+pub struct ListOfProductsOfPolynomials<F: Field> {
     /// max number of multiplicands in each product
     pub max_multiplicands: usize,
-    /// number of variables
+    /// number of variables of the polynomial
     pub num_variables: usize,
     /// list of products of multilinear extension
     pub products: Vec<Vec<DenseMultilinearExtension<F>>>,
 }
 
-impl<F: Field> ProductsOfMLExtensions<F> {
+impl<F: Field> ListOfProductsOfPolynomials<F> {
+    /// Extract the max number of multiplicands and number of variables of the list of products.
+    pub fn info(&self) -> PolynomialInfo {
+        PolynomialInfo {
+            max_multiplicands: self.max_multiplicands,
+            num_variables: self.num_variables,
+        }
+    }
+}
+
+#[derive(CanonicalSerialize, CanonicalDeserialize, Clone)]
+/// Stores the number of variables and max number of multiplicands of the added polynomial used by the prover.
+/// This data structures will is used as the verifier key.
+pub struct PolynomialInfo {
+    /// max number of multiplicands in each product
+    pub max_multiplicands: usize,
+    /// number of variables of the polynomial
+    pub num_variables: usize,
+}
+
+impl<F: Field> ListOfProductsOfPolynomials<F> {
     /// Returns an empty polynomial
     pub fn new(num_variables: usize) -> Self {
-        ProductsOfMLExtensions {
+        ListOfProductsOfPolynomials {
             max_multiplicands: 0,
             num_variables,
             products: Vec::new(),

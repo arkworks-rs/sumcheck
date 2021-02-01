@@ -1,6 +1,6 @@
 //! Data structures used by GKR Round Sumcheck
 
-use crate::ml_sumcheck::ahp::prover::ProverMsg;
+use crate::ml_sumcheck::protocol::prover::ProverMsg;
 use ark_ff::Field;
 use ark_poly::{DenseMultilinearExtension, MultilinearExtension, SparseMultilinearExtension};
 use ark_std::vec::Vec;

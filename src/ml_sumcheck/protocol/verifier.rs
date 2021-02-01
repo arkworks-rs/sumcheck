@@ -1,11 +1,12 @@
 //! Verifier
-use crate::ml_sumcheck::ahp::indexer::IndexInfo;
-use crate::ml_sumcheck::ahp::prover::ProverMsg;
-use crate::ml_sumcheck::ahp::AHPForMLSumcheck;
+use crate::ml_sumcheck::protocol::prover::ProverMsg;
+use crate::ml_sumcheck::protocol::IPForMLSumcheck;
+use crate::ml_sumcheck::protocol::PolynomialInfo;
 use ark_ff::Field;
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, Read, SerializationError, Write};
 use ark_std::vec::Vec;
 use rand_core::RngCore;
+
 #[derive(Clone, CanonicalSerialize, CanonicalDeserialize)]
 /// Verifier Message
 pub struct VerifierMsg<F: Field> {
@@ -19,7 +20,9 @@ pub struct VerifierState<F: Field> {
     nv: usize,
     max_multiplicands: usize,
     finished: bool,
-    lagrange_sets: Vec<Vec<F>>,
+    /// a list storing the univariate polynomial in evaluation form sent by the prover at each round
+    polynomials_received: Vec<Vec<F>>,
+    /// a list storing the randomness sampled by the verifier at each round
     randomness: Vec<F>,
 }
 /// Subclaim when verifier is convinced
@@ -30,15 +33,15 @@ pub struct SubClaim<F: Field> {
     pub expected_evaluation: F,
 }
 
-impl<F: Field> AHPForMLSumcheck<F> {
+impl<F: Field> IPForMLSumcheck<F> {
     /// initialize the verifier
-    pub fn verifier_init(index_info: &IndexInfo) -> VerifierState<F> {
+    pub fn verifier_init(index_info: &PolynomialInfo) -> VerifierState<F> {
         VerifierState {
             round: 1,
             nv: index_info.num_variables,
             max_multiplicands: index_info.max_multiplicands,
             finished: false,
-            lagrange_sets: Vec::with_capacity(index_info.num_variables),
+            polynomials_received: Vec::with_capacity(index_info.num_variables),
             randomness: Vec::with_capacity(index_info.num_variables),
         }
     }
@@ -68,7 +71,9 @@ impl<F: Field> AHPForMLSumcheck<F> {
 
         let msg = Self::sample_round(rng);
         verifier_state.randomness.push(msg.randomness);
-        verifier_state.lagrange_sets.push(prover_msg.evaluations);
+        verifier_state
+            .polynomials_received
+            .push(prover_msg.evaluations);
 
         // verifier_state.expected = interpolate_deg_n_poly(&prover_msg.evaluations, r);
         // verifier_state.fixed_args.push(r);
@@ -94,11 +99,11 @@ impl<F: Field> AHPForMLSumcheck<F> {
         }
 
         let mut expected = asserted_sum;
-        if verifier_state.lagrange_sets.len() != verifier_state.nv {
+        if verifier_state.polynomials_received.len() != verifier_state.nv {
             panic!("insufficient rounds");
         }
         for i in 0..verifier_state.nv {
-            let evaluations = &verifier_state.lagrange_sets[i];
+            let evaluations = &verifier_state.polynomials_received[i];
             if evaluations.len() != verifier_state.max_multiplicands + 1 {
                 panic!("incorrect number of evaluations");
             }

@@ -2,7 +2,7 @@
 extern crate criterion;
 
 use ark_ff::Field;
-use ark_linear_sumcheck::ml_sumcheck::ahp::ProductsOfMLExtensions;
+use ark_linear_sumcheck::ml_sumcheck::protocol::ListOfProductsOfPolynomials;
 use ark_linear_sumcheck::ml_sumcheck::MLSumcheck;
 use ark_poly::{DenseMultilinearExtension, MultilinearExtension};
 use ark_std::ops::Range;
@@ -20,10 +20,9 @@ fn prove_bench<F: Field>(c: &mut Criterion) {
             let polys: Vec<_> = (0..3)
                 .map(|_| DenseMultilinearExtension::<F>::rand(nv, &mut rng))
                 .collect();
-            let mut products = ProductsOfMLExtensions::new(nv);
+            let mut products = ListOfProductsOfPolynomials::new(nv);
             products.add_product(polys);
-            let (pk, _) = MLSumcheck::index(&products).unwrap();
-            b.iter(|| MLSumcheck::prove(black_box(&pk)));
+            b.iter(|| MLSumcheck::prove(black_box(&products)));
         });
     }
 }
@@ -39,11 +38,10 @@ fn verify_bench<F: Field>(c: &mut Criterion) {
                 .collect();
             // calculate expected sum
             let expected_sum = expected_sum(&polys);
-            let mut products = ProductsOfMLExtensions::new(nv);
+            let mut products = ListOfProductsOfPolynomials::new(nv);
             products.add_product(polys);
-            let (pk, vk) = MLSumcheck::index(&products).unwrap();
-            let proof = MLSumcheck::prove(&pk).unwrap();
-            b.iter(|| MLSumcheck::verify(&vk, black_box(expected_sum), &proof));
+            let proof = MLSumcheck::prove(&products).unwrap();
+            b.iter(|| MLSumcheck::verify(&products.info(), black_box(expected_sum), &proof));
         });
     }
 }

@@ -7,9 +7,8 @@ pub mod data_structures;
 mod test;
 
 use crate::gkr_round_sumcheck::data_structures::{GKRProof, GKRRoundSumcheckSubClaim};
-use crate::ml_sumcheck::ahp::prover::ProverState;
-use crate::ml_sumcheck::ahp::{AHPForMLSumcheck, ProductsOfMLExtensions};
-use crate::ml_sumcheck::IndexVerifierKey;
+use crate::ml_sumcheck::protocol::prover::ProverState;
+use crate::ml_sumcheck::protocol::{IPForMLSumcheck, ListOfProductsOfPolynomials, PolynomialInfo};
 use crate::rng::{Blake2s512Rng, FeedableRNG};
 use ark_ff::{Field, Zero};
 use ark_poly::{DenseMultilinearExtension, MultilinearExtension, SparseMultilinearExtension};
@@ -44,10 +43,9 @@ pub fn start_phase1_sumcheck<F: Field>(
 ) -> ProverState<F> {
     let dim = h_g.num_vars;
     assert_eq!(f2.num_vars, dim);
-    let mut poly = ProductsOfMLExtensions::new(dim);
+    let mut poly = ListOfProductsOfPolynomials::new(dim);
     poly.add_product(vec![h_g.clone(), f2.clone()]);
-    let index = AHPForMLSumcheck::index_move(poly);
-    AHPForMLSumcheck::prover_init(&index)
+    IPForMLSumcheck::prover_init(&poly)
 }
 
 /// Takes multilinear f1 fixed at g, phase one randomness u. Returns f1 fixed at g||u
@@ -73,10 +71,9 @@ pub fn start_phase2_sumcheck<F: Field>(
 
     let dim = f1_gu.num_vars;
     assert_eq!(f3.num_vars, dim);
-    let mut poly = ProductsOfMLExtensions::new(dim);
+    let mut poly = ListOfProductsOfPolynomials::new(dim);
     poly.add_product(vec![f1_gu.clone(), f3_f2u]);
-    let index = AHPForMLSumcheck::index(&poly);
-    AHPForMLSumcheck::prover_init(&index)
+    IPForMLSumcheck::prover_init(&poly)
 }
 
 /// Sumcheck Argument for GKR Round Function
@@ -108,11 +105,11 @@ impl<F: Field> GKRRoundSumcheck<F> {
         let mut phase1_prover_msgs = Vec::with_capacity(dim);
         let mut u = Vec::with_capacity(dim);
         for _ in 0..dim {
-            let (pm, ps) = AHPForMLSumcheck::prove_round(phase1_ps, &phase1_vm);
+            let (pm, ps) = IPForMLSumcheck::prove_round(phase1_ps, &phase1_vm);
             phase1_ps = ps;
             rng.feed(&pm).unwrap();
             phase1_prover_msgs.push(pm);
-            let vm = AHPForMLSumcheck::sample_round(&mut rng);
+            let vm = IPForMLSumcheck::sample_round(&mut rng);
             phase1_vm = Some(vm.clone());
             u.push(vm.randomness);
         }
@@ -123,11 +120,11 @@ impl<F: Field> GKRRoundSumcheck<F> {
         let mut phase2_prover_msgs = Vec::with_capacity(dim);
         let mut v = Vec::with_capacity(dim);
         for _ in 0..dim {
-            let (pm, ps) = AHPForMLSumcheck::prove_round(phase2_ps, &phase2_vm);
+            let (pm, ps) = IPForMLSumcheck::prove_round(phase2_ps, &phase2_vm);
             phase2_ps = ps;
             rng.feed(&pm).unwrap();
             phase2_prover_msgs.push(pm);
-            let vm = AHPForMLSumcheck::sample_round(&mut rng);
+            let vm = IPForMLSumcheck::sample_round(&mut rng);
             phase2_vm = Some(vm.clone());
             v.push(vm.randomness);
         }
@@ -150,7 +147,7 @@ impl<F: Field> GKRRoundSumcheck<F> {
 
         let mut rng = Blake2s512Rng::setup();
 
-        let mut phase1_vs = AHPForMLSumcheck::verifier_init(&IndexVerifierKey {
+        let mut phase1_vs = IPForMLSumcheck::verifier_init(&PolynomialInfo {
             max_multiplicands: 2,
             num_variables: dim,
         });
@@ -158,24 +155,23 @@ impl<F: Field> GKRRoundSumcheck<F> {
         for i in 0..dim {
             let pm = &proof.phase1_sumcheck_msgs[i];
             rng.feed(pm).unwrap();
-            let result = AHPForMLSumcheck::verify_round((*pm).clone(), phase1_vs, &mut rng);
+            let result = IPForMLSumcheck::verify_round((*pm).clone(), phase1_vs, &mut rng);
             phase1_vs = result.1;
         }
-        let phase1_subclaim =
-            AHPForMLSumcheck::check_and_generate_subclaim(phase1_vs, claimed_sum)?;
+        let phase1_subclaim = IPForMLSumcheck::check_and_generate_subclaim(phase1_vs, claimed_sum)?;
         let u = phase1_subclaim.point;
 
-        let mut phase2_vs = AHPForMLSumcheck::verifier_init(&IndexVerifierKey {
+        let mut phase2_vs = IPForMLSumcheck::verifier_init(&PolynomialInfo {
             max_multiplicands: 2,
             num_variables: dim,
         });
         for i in 0..dim {
             let pm = &proof.phase2_sumcheck_msgs[i];
             rng.feed(pm).unwrap();
-            let result = AHPForMLSumcheck::verify_round((*pm).clone(), phase2_vs, &mut rng);
+            let result = IPForMLSumcheck::verify_round((*pm).clone(), phase2_vs, &mut rng);
             phase2_vs = result.1;
         }
-        let phase2_subclaim = AHPForMLSumcheck::check_and_generate_subclaim(
+        let phase2_subclaim = IPForMLSumcheck::check_and_generate_subclaim(
             phase2_vs,
             phase1_subclaim.expected_evaluation,
         )?;
@@ -183,6 +179,7 @@ impl<F: Field> GKRRoundSumcheck<F> {
         let v = phase2_subclaim.point;
 
         let expected_evaluation = phase2_subclaim.expected_evaluation;
+        // // The following code was used to evaluate the subclaim, which now we assume is user's responsibility.
         // let guv: Vec<_> = g
         //     .iter()
         //     .chain(u.iter())

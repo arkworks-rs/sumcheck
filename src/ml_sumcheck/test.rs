@@ -1,4 +1,4 @@
-use crate::ml_sumcheck::ahp::{AHPForMLSumcheck, ProductsOfMLExtensions};
+use crate::ml_sumcheck::protocol::{IPForMLSumcheck, ListOfProductsOfPolynomials};
 use crate::ml_sumcheck::MLSumcheck;
 use ark_ff::Field;
 use ark_poly::DenseMultilinearExtension;
@@ -39,15 +39,15 @@ fn random_product<F: Field, R: RngCore>(
     );
 }
 
-fn random_combination<F: Field, R: RngCore>(
+fn random_list_of_products<F: Field, R: RngCore>(
     nv: usize,
     num_multiplicands_range: (usize, usize),
     num_products: usize,
     rng: &mut R,
-) -> (ProductsOfMLExtensions<F>, F) {
+) -> (ListOfProductsOfPolynomials<F>, F) {
     let mut max_num_multiplicands = 0;
     let mut sum = F::zero();
-    let mut comb = ProductsOfMLExtensions::new(nv);
+    let mut comb = ListOfProductsOfPolynomials::new(nv);
     for _ in 0..num_products {
         let num_multiplicands = rng.gen_range(num_multiplicands_range.0, num_multiplicands_range.1);
         max_num_multiplicands = max(num_multiplicands, max_num_multiplicands);
@@ -61,38 +61,37 @@ fn random_combination<F: Field, R: RngCore>(
 
 fn test_polynomial(nv: usize, num_multiplicands_range: (usize, usize), num_products: usize) {
     let mut rng = test_rng();
-    let (comb, asserted_sum) =
-        random_combination::<Fr, _>(nv, num_multiplicands_range, num_products, &mut rng);
-
-    let (index_pk, index_vk) = MLSumcheck::index(&comb).expect("Fail to index");
-    let proof = MLSumcheck::prove(&index_pk).expect("fail to prove");
-    let subclaim = MLSumcheck::verify(&index_vk, asserted_sum, &proof).expect("fail to verify");
+    let (poly, asserted_sum) =
+        random_list_of_products::<Fr, _>(nv, num_multiplicands_range, num_products, &mut rng);
+    let poly_info = poly.info();
+    let proof = MLSumcheck::prove(&poly).expect("fail to prove");
+    let subclaim = MLSumcheck::verify(&poly_info, asserted_sum, &proof).expect("fail to verify");
     assert!(
-        comb.evaluate(&subclaim.point) == subclaim.expected_evaluation,
+        poly.evaluate(&subclaim.point) == subclaim.expected_evaluation,
         "wrong subclaim"
     );
 }
 
 fn test_ahp(nv: usize, num_multiplicands_range: (usize, usize), num_products: usize) {
     let mut rng = test_rng();
-    let (comb, asserted_sum) =
-        random_combination::<Fr, _>(nv, num_multiplicands_range, num_products, &mut rng);
-    let index = AHPForMLSumcheck::index(&comb);
-    let mut prover_state = AHPForMLSumcheck::prover_init(&index);
-    let mut verifier_state = AHPForMLSumcheck::verifier_init(&index.info());
+    let (poly, asserted_sum) =
+        random_list_of_products::<Fr, _>(nv, num_multiplicands_range, num_products, &mut rng);
+    let poly_info = poly.info();
+    let mut prover_state = IPForMLSumcheck::prover_init(&poly);
+    let mut verifier_state = IPForMLSumcheck::verifier_init(&poly_info);
     let mut verifier_msg = None;
-    for _ in 0..index.num_variables {
-        let result = AHPForMLSumcheck::prove_round(prover_state, &verifier_msg);
+    for _ in 0..poly.num_variables {
+        let result = IPForMLSumcheck::prove_round(prover_state, &verifier_msg);
         prover_state = result.1;
         let (verifier_msg2, verifier_state2) =
-            AHPForMLSumcheck::verify_round(result.0, verifier_state, &mut rng);
+            IPForMLSumcheck::verify_round(result.0, verifier_state, &mut rng);
         verifier_msg = verifier_msg2;
         verifier_state = verifier_state2;
     }
-    let subclaim = AHPForMLSumcheck::check_and_generate_subclaim(verifier_state, asserted_sum)
+    let subclaim = IPForMLSumcheck::check_and_generate_subclaim(verifier_state, asserted_sum)
         .expect("fail to generate subclaim");
     assert!(
-        comb.evaluate(&subclaim.point) == subclaim.expected_evaluation,
+        poly.evaluate(&subclaim.point) == subclaim.expected_evaluation,
         "wrong subclaim"
     );
 }
@@ -129,9 +128,8 @@ fn zero_polynomial_should_error() {
 #[test]
 fn test_extract_sum() {
     let mut rng = test_rng();
-    let (comb, asserted_sum) = random_combination::<Fr, _>(8, (3, 4), 3, &mut rng);
+    let (poly, asserted_sum) = random_list_of_products::<Fr, _>(8, (3, 4), 3, &mut rng);
 
-    let (index_pk, _) = MLSumcheck::index(&comb).expect("Fail to index");
-    let proof = MLSumcheck::prove(&index_pk).expect("fail to prove");
+    let proof = MLSumcheck::prove(&poly).expect("fail to prove");
     assert_eq!(MLSumcheck::extract_sum(&proof), asserted_sum);
 }

@@ -1,7 +1,6 @@
 //! Prover
-use crate::ml_sumcheck::ahp::indexer::Index;
-use crate::ml_sumcheck::ahp::verifier::VerifierMsg;
-use crate::ml_sumcheck::ahp::AHPForMLSumcheck;
+use crate::ml_sumcheck::protocol::verifier::VerifierMsg;
+use crate::ml_sumcheck::protocol::{IPForMLSumcheck, ListOfProductsOfPolynomials};
 use ark_ff::Field;
 use ark_poly::{DenseMultilinearExtension, MultilinearExtension};
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, Read, SerializationError, Write};
@@ -17,28 +16,30 @@ pub struct ProverMsg<F: Field> {
 pub struct ProverState<F: Field> {
     /// sampled randomness given by the verifier
     pub randomness: Vec<F>,
-    tables: Vec<Vec<DenseMultilinearExtension<F>>>,
-    nv: usize,
+    list_of_products: Vec<Vec<DenseMultilinearExtension<F>>>,
+    num_vars: usize,
     num_multiplicands: usize,
     round: usize,
 }
 
-impl<F: Field> AHPForMLSumcheck<F> {
+impl<F: Field> IPForMLSumcheck<F> {
     /// initialize the prover
-    pub fn prover_init(index: &Index<F>) -> ProverState<F> {
-        if index.num_variables == 0 {
+    pub fn prover_init(polynomial: &ListOfProductsOfPolynomials<F>) -> ProverState<F> {
+        if polynomial.num_variables == 0 {
             panic!("Attempt to prove a constant.")
         }
         ProverState {
-            randomness: Vec::with_capacity(index.num_variables),
-            tables: index.add_table.clone(),
-            nv: index.num_variables,
-            num_multiplicands: index.max_multiplicands,
+            randomness: Vec::with_capacity(polynomial.num_variables),
+            list_of_products: polynomial.products.clone(),
+            num_vars: polynomial.num_variables,
+            num_multiplicands: polynomial.max_multiplicands,
             round: 0,
         }
     }
 
     /// receive message from verifier, generate prover message, and proceed to next round
+    ///
+    /// Main algorithm used is from section 3.2 of [XZZPS19](https://eprint.iacr.org/2019/317.pdf#subsection.3.2).
     pub fn prove_round(
         mut prover_state: ProverState<F>,
         v_msg: &Option<VerifierMsg<F>>,
@@ -52,7 +53,7 @@ impl<F: Field> AHPForMLSumcheck<F> {
             // fix argument
             let i = prover_state.round;
             let r = prover_state.randomness[i - 1];
-            for pmf in &mut prover_state.tables {
+            for pmf in &mut prover_state.list_of_products {
                 let num_multiplicands = pmf.len();
                 for j in 0..num_multiplicands {
                     pmf[j] = pmf[j].fix_variables(&[r]);
@@ -66,12 +67,12 @@ impl<F: Field> AHPForMLSumcheck<F> {
 
         prover_state.round += 1;
 
-        if prover_state.round > prover_state.nv {
+        if prover_state.round > prover_state.num_vars {
             panic!("Prover is not active");
         }
 
         let i = prover_state.round;
-        let nv = prover_state.nv;
+        let nv = prover_state.num_vars;
         let num_multiplicands = prover_state.num_multiplicands;
 
         let mut products_sum = Vec::with_capacity(num_multiplicands + 1);
@@ -81,7 +82,7 @@ impl<F: Field> AHPForMLSumcheck<F> {
         for b in 0..1 << (nv - i) {
             let mut t_as_field = F::zero();
             for t in 0..num_multiplicands + 1 {
-                for pmf in &prover_state.tables {
+                for pmf in &prover_state.list_of_products {
                     let num_multiplicands = pmf.len();
                     let mut product = F::one();
                     for j in 0..num_multiplicands {
