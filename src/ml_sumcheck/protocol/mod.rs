@@ -15,7 +15,11 @@ pub struct IPForMLSumcheck<F: Field> {
     _marker: PhantomData<F>,
 }
 
-/// Stores a list of products of polynomials that is meant to be added together.
+/// Stores a list of products of `DenseMultilinearExtension` that is meant to be added together.
+///
+/// This data structure is a list of list of `DenseMultilinearExtension`, and the resulting polynomial is
+/// $$\sum_{i=0}^{`self.products.len()`}\prod_{j=0}^{`self.products[i].len()`}P_{ij}$$
+///
 /// The result polynomial is used as the prover key.
 #[derive(CanonicalSerialize, CanonicalDeserialize)]
 pub struct ListOfProductsOfPolynomials<F: Field> {

@@ -23,7 +23,13 @@ pub struct ProverState<F: Field> {
 }
 
 impl<F: Field> IPForMLSumcheck<F> {
-    /// initialize the prover
+    /// initialize the prover to argue for the sum of polynomial over {0,1}^`num_vars`
+    ///
+    /// The polynomial is represented by a list of products of polynomials that is meant to be added together.
+    ///
+    /// This data structure of the polynomial is a list of list of `DenseMultilinearExtension`, and the resulting polynomial is
+    /// $$\sum_{i=0}^{`polynomial.products.len()`}\prod_{j=0}^{`polynomial.products[i].len()`}P_{ij}$$
+    ///
     pub fn prover_init(polynomial: &ListOfProductsOfPolynomials<F>) -> ProverState<F> {
         if polynomial.num_variables == 0 {
             panic!("Attempt to prove a constant.")
