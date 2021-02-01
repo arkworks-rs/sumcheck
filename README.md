@@ -72,3 +72,6 @@ Unless you explicitly state otherwise, any contribution that you submit to this 
 ## Reference Paper
 [Libra: Succinct Zero-Knowledge Proofs with Optimal Prover Computation](https://eprint.iacr.org/2019/317)     
 Tiancheng Xie, Jiaheng Zhang, Yupeng Zhang, Charalampos Papamanthou, Dawn Song
+
+[Time-Optimal Interactive Proofs for Circuit Evaluation](https://arxiv.org/abs/1304.3812)
+Justin Thaler
