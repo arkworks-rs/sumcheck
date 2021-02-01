@@ -1,4 +1,4 @@
-//! GKR Round Sumcheck as described in [XZZPS19](https://eprint.iacr.org/2019/317.pdf#subsection.3.3) (Section 3.3)
+//! Implementation of GKR Round Sumcheck algorithm as described in [XZZPS19](https://eprint.iacr.org/2019/317.pdf#subsection.3.3) (Section 3.3)
 //!
 //! GKR Round Sumcheck will use `ml_sumcheck` as a subroutine.
 
