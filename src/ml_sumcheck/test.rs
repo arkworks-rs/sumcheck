@@ -47,16 +47,17 @@ fn random_list_of_products<F: Field, R: RngCore>(
 ) -> (ListOfProductsOfPolynomials<F>, F) {
     let mut max_num_multiplicands = 0;
     let mut sum = F::zero();
-    let mut comb = ListOfProductsOfPolynomials::new(nv);
+    let mut poly = ListOfProductsOfPolynomials::new(nv);
     for _ in 0..num_products {
         let num_multiplicands = rng.gen_range(num_multiplicands_range.0, num_multiplicands_range.1);
         max_num_multiplicands = max(num_multiplicands, max_num_multiplicands);
-        let result = random_product(nv, num_multiplicands, rng);
-        comb.add_product(result.0.into_iter());
-        sum += result.1;
+        let (product, product_sum) = random_product(nv, num_multiplicands, rng);
+        let coefficient = F::rand(rng);
+        poly.add_product(product.into_iter(), coefficient);
+        sum += product_sum * coefficient;
     }
 
-    (comb, sum)
+    (poly, sum)
 }
 
 fn test_polynomial(nv: usize, num_multiplicands_range: (usize, usize), num_products: usize) {

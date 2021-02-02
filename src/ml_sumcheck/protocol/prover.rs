@@ -16,19 +16,25 @@ pub struct ProverMsg<F: Field> {
 pub struct ProverState<F: Field> {
     /// sampled randomness given by the verifier
     pub randomness: Vec<F>,
-    list_of_products: Vec<Vec<DenseMultilinearExtension<F>>>,
+    list_of_products: Vec<(F, Vec<DenseMultilinearExtension<F>>)>,
     num_vars: usize,
-    num_multiplicands: usize,
+    max_multiplicands: usize,
     round: usize,
 }
 
 impl<F: Field> IPForMLSumcheck<F> {
     /// initialize the prover to argue for the sum of polynomial over {0,1}^`num_vars`
     ///
-    /// The polynomial is represented by a list of products of polynomials that is meant to be added together.
+    /// The polynomial is represented by a list of products of polynomials along with its coefficient that is meant to be added together.
     ///
-    /// This data structure of the polynomial is a list of list of `DenseMultilinearExtension`, and the resulting polynomial is
-    /// $$\sum_{i=0}^{`polynomial.products.len()`}\prod_{j=0}^{`polynomial.products[i].len()`}P_{ij}$$
+    /// This data structure of the polynomial is a list of list of `(coefficient, DenseMultilinearExtension)`.
+    /// * Number of products n = `polynomial.products.len()`,
+    /// * Number of multiplicands of ith product m_i = `polynomial.products[i].1.len()`,
+    /// * Coefficient of ith product c_i = `polynomial.products[i].0`
+    ///
+    /// The resulting polynomial is
+    ///
+    /// $$\sum_{i=0}^{n}C_i\cdot\prod_{j=0}^{m_i}P_{ij}$$
     ///
     pub fn prover_init(polynomial: &ListOfProductsOfPolynomials<F>) -> ProverState<F> {
         if polynomial.num_variables == 0 {
@@ -38,7 +44,7 @@ impl<F: Field> IPForMLSumcheck<F> {
             randomness: Vec::with_capacity(polynomial.num_variables),
             list_of_products: polynomial.products.clone(),
             num_vars: polynomial.num_variables,
-            num_multiplicands: polynomial.max_multiplicands,
+            max_multiplicands: polynomial.max_multiplicands,
             round: 0,
         }
     }
@@ -59,10 +65,10 @@ impl<F: Field> IPForMLSumcheck<F> {
             // fix argument
             let i = prover_state.round;
             let r = prover_state.randomness[i - 1];
-            for pmf in &mut prover_state.list_of_products {
-                let num_multiplicands = pmf.len();
+            for (_, products) in &mut prover_state.list_of_products {
+                let num_multiplicands = products.len();
                 for j in 0..num_multiplicands {
-                    pmf[j] = pmf[j].fix_variables(&[r]);
+                    products[j] = products[j].fix_variables(&[r]);
                 }
             }
         } else {
@@ -79,20 +85,21 @@ impl<F: Field> IPForMLSumcheck<F> {
 
         let i = prover_state.round;
         let nv = prover_state.num_vars;
-        let num_multiplicands = prover_state.num_multiplicands;
+        let degree = prover_state.max_multiplicands; // the degree of univariate polynomial sent by prover at this round
 
-        let mut products_sum = Vec::with_capacity(num_multiplicands + 1);
-        products_sum.resize(num_multiplicands + 1, F::zero());
+        let mut products_sum = Vec::with_capacity(degree + 1);
+        products_sum.resize(degree + 1, F::zero());
 
         // generate sum
         for b in 0..1 << (nv - i) {
             let mut t_as_field = F::zero();
-            for t in 0..num_multiplicands + 1 {
-                for pmf in &prover_state.list_of_products {
-                    let num_multiplicands = pmf.len();
-                    let mut product = F::one();
+            for t in 0..degree + 1 {
+                // evaluate P_round(t)
+                for (coefficient, products) in &prover_state.list_of_products {
+                    let num_multiplicands = products.len();
+                    let mut product = *coefficient;
                     for j in 0..num_multiplicands {
-                        let table = &pmf[j]; // j's range is checked in init
+                        let table = &products[j]; // j's range is checked in init
                         product *= table[b << 1] * (F::one() - t_as_field)
                             + table[(b << 1) + 1] * t_as_field;
                     }

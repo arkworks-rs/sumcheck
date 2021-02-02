@@ -17,8 +17,16 @@ pub struct IPForMLSumcheck<F: Field> {
 
 /// Stores a list of products of `DenseMultilinearExtension` that is meant to be added together.
 ///
-/// This data structure is a list of list of `DenseMultilinearExtension`, and the resulting polynomial is
-/// $$\sum_{i=0}^{`self.products.len()`}\prod_{j=0}^{`self.products[i].len()`}P_{ij}$$
+/// The polynomial is represented by a list of products of polynomials along with its coefficient that is meant to be added together.
+///
+/// This data structure of the polynomial is a list of list of `(coefficient, DenseMultilinearExtension)`.
+/// * Number of products n = `self.products.len()`,
+/// * Number of multiplicands of ith product m_i = `self.products[i].1.len()`,
+/// * Coefficient of ith product c_i = `self.products[i].0`
+///
+/// The resulting polynomial is
+///
+/// $$\sum_{i=0}^{n}C_i\cdot\prod_{j=0}^{m_i}P_{ij}$$
 ///
 /// The result polynomial is used as the prover key.
 #[derive(CanonicalSerialize, CanonicalDeserialize)]
@@ -28,7 +36,7 @@ pub struct ListOfProductsOfPolynomials<F: Field> {
     /// number of variables of the polynomial
     pub num_variables: usize,
     /// list of products of multilinear extension
-    pub products: Vec<Vec<DenseMultilinearExtension<F>>>,
+    pub products: Vec<(F, Vec<DenseMultilinearExtension<F>>)>,
 }
 
 impl<F: Field> ListOfProductsOfPolynomials<F> {
@@ -61,8 +69,13 @@ impl<F: Field> ListOfProductsOfPolynomials<F> {
         }
     }
 
-    /// Add one product of multilinear extensions to the polynomial
-    pub fn add_product(&mut self, product: impl IntoIterator<Item = DenseMultilinearExtension<F>>) {
+    /// Add a list of multilinear extensions that is meant to be multiplied together.
+    /// The resulting polynomial will be multiplied by the scalar `coefficient`.
+    pub fn add_product(
+        &mut self,
+        product: impl IntoIterator<Item = DenseMultilinearExtension<F>>,
+        coefficient: F,
+    ) {
         let product: Vec<DenseMultilinearExtension<F>> = product.into_iter().collect();
         assert!(product.len() > 0);
         product
@@ -70,14 +83,14 @@ impl<F: Field> ListOfProductsOfPolynomials<F> {
             .map(|p| assert_eq!(p.num_vars, self.num_variables))
             .last();
         self.max_multiplicands = max(self.max_multiplicands, product.len());
-        self.products.push(product);
+        self.products.push((coefficient, product));
     }
 
     /// Evaluate the polynomial at point `point`
     pub fn evaluate(&self, point: &[F]) -> F {
         self.products
             .iter()
-            .map(|p| p.iter().map(|f| f.evaluate(point).unwrap()).product::<F>())
+            .map(|(c, p)| *c * p.iter().map(|f| f.evaluate(point).unwrap()).product::<F>())
             .sum()
     }
 }

@@ -27,10 +27,16 @@ impl<F: Field> MLSumcheck<F> {
 
     /// generate proof of the sum of polynomial over {0,1}^`num_vars`
     ///
-    /// The polynomial is represented by a list of products of polynomials that is meant to be added together.
+    /// The polynomial is represented by a list of products of polynomials along with its coefficient that is meant to be added together.
     ///
-    /// This data structure of the polynomial is a list of list of `DenseMultilinearExtension`, and the resulting polynomial is
-    /// $$\sum_{i=0}^{`polynomial.products.len()`}\prod_{j=0}^{`polynomial.products[i].len()`}P_{ij}$$
+    /// This data structure of the polynomial is a list of list of `(coefficient, DenseMultilinearExtension)`.
+    /// * Number of products n = `polynomial.products.len()`,
+    /// * Number of multiplicands of ith product m_i = `polynomial.products[i].1.len()`,
+    /// * Coefficient of ith product c_i = `polynomial.products[i].0`
+    ///
+    /// The resulting polynomial is
+    ///
+    /// $$\sum_{i=0}^{n}C_i\cdot\prod_{j=0}^{m_i}P_{ij}$$
     pub fn prove(polynomial: &ListOfProductsOfPolynomials<F>) -> Result<Proof<F>, crate::Error> {
         let mut fs_rng = Blake2s512Rng::setup();
         fs_rng.feed(&polynomial.info())?;
