@@ -17,11 +17,17 @@ fn prove_bench<F: Field>(c: &mut Criterion) {
     let mut group = c.benchmark_group("Prove");
     for nv in NUM_VARIABLES_RANGE {
         group.bench_with_input(BenchmarkId::new("ML", nv), &nv, |b, &nv| {
-            let polys: Vec<_> = (0..3)
+            let product_1: Vec<_> = (0..3)
                 .map(|_| DenseMultilinearExtension::<F>::rand(nv, &mut rng))
                 .collect();
+            let product_2: Vec<_> = (0..3)
+                .map(|_| DenseMultilinearExtension::<F>::rand(nv, &mut rng))
+                .collect();
+            let coefficient_1 = F::rand(&mut rng);
+            let coefficient_2 = F::rand(&mut rng);
             let mut products = ListOfProductsOfPolynomials::new(nv);
-            products.add_product(polys);
+            products.add_product(product_1, coefficient_1);
+            products.add_product(product_2, coefficient_2);
             b.iter(|| MLSumcheck::prove(black_box(&products)));
         });
     }
@@ -33,31 +39,25 @@ fn verify_bench<F: Field>(c: &mut Criterion) {
     let mut group = c.benchmark_group("Verify");
     for nv in NUM_VARIABLES_RANGE {
         group.bench_with_input(BenchmarkId::new("ML", nv), &nv, |b, &nv| {
-            let polys: Vec<_> = (0..3)
+            let product_1: Vec<_> = (0..3)
                 .map(|_| DenseMultilinearExtension::<F>::rand(nv, &mut rng))
                 .collect();
+            let product_2: Vec<_> = (0..3)
+                .map(|_| DenseMultilinearExtension::<F>::rand(nv, &mut rng))
+                .collect();
+            let coefficient_1 = F::rand(&mut rng);
+            let coefficient_2 = F::rand(&mut rng);
             // calculate expected sum
-            let expected_sum = expected_sum(&polys);
             let mut products = ListOfProductsOfPolynomials::new(nv);
-            products.add_product(polys);
+            products.add_product(product_1, coefficient_1);
+            products.add_product(product_2, coefficient_2);
             let proof = MLSumcheck::prove(&products).unwrap();
-            b.iter(|| MLSumcheck::verify(&products.info(), black_box(expected_sum), &proof));
+            let expected_sum = MLSumcheck::extract_sum(&proof);
+            b.iter(|| {
+                MLSumcheck::verify(&products.info(), black_box(expected_sum), &proof).unwrap()
+            });
         });
     }
-}
-
-fn expected_sum<F: Field>(poly: &[DenseMultilinearExtension<F>]) -> F {
-    let mut sum = F::zero();
-    let nv = poly[0].num_vars;
-    for x in 0..(1 << nv) {
-        let mut product = F::one();
-        for i in 0..poly.len() {
-            let val = poly[i][x];
-            product *= val;
-        }
-        sum += product;
-    }
-    sum
 }
 
 fn bench_bls_381(c: &mut Criterion) {

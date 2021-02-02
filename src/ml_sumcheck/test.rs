@@ -2,7 +2,6 @@ use crate::ml_sumcheck::protocol::{IPForMLSumcheck, ListOfProductsOfPolynomials}
 use crate::ml_sumcheck::MLSumcheck;
 use ark_ff::Field;
 use ark_poly::DenseMultilinearExtension;
-use ark_std::cmp::max;
 use ark_std::test_rng;
 use ark_std::vec::Vec;
 use ark_test_curves::bls12_381::Fr;
@@ -45,12 +44,10 @@ fn random_list_of_products<F: Field, R: RngCore>(
     num_products: usize,
     rng: &mut R,
 ) -> (ListOfProductsOfPolynomials<F>, F) {
-    let mut max_num_multiplicands = 0;
     let mut sum = F::zero();
     let mut poly = ListOfProductsOfPolynomials::new(nv);
     for _ in 0..num_products {
         let num_multiplicands = rng.gen_range(num_multiplicands_range.0, num_multiplicands_range.1);
-        max_num_multiplicands = max(num_multiplicands, max_num_multiplicands);
         let (product, product_sum) = random_product(nv, num_multiplicands, rng);
         let coefficient = F::rand(rng);
         poly.add_product(product.into_iter(), coefficient);
