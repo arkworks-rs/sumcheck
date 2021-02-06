@@ -70,7 +70,7 @@ fn test_polynomial(nv: usize, num_multiplicands_range: (usize, usize), num_produ
     );
 }
 
-fn test_ahp(nv: usize, num_multiplicands_range: (usize, usize), num_products: usize) {
+fn test_protocol(nv: usize, num_multiplicands_range: (usize, usize), num_products: usize) {
     let mut rng = test_rng();
     let (poly, asserted_sum) =
         random_list_of_products::<Fr, _>(nv, num_multiplicands_range, num_products, &mut rng);
@@ -101,7 +101,7 @@ fn test_trivial_polynomial() {
     let num_products = 5;
 
     test_polynomial(nv, num_multiplicands_range, num_products);
-    test_ahp(nv, num_multiplicands_range, num_products);
+    test_protocol(nv, num_multiplicands_range, num_products);
 }
 #[test]
 fn test_normal_polynomial() {
@@ -110,7 +110,7 @@ fn test_normal_polynomial() {
     let num_products = 5;
 
     test_polynomial(nv, num_multiplicands_range, num_products);
-    test_ahp(nv, num_multiplicands_range, num_products);
+    test_protocol(nv, num_multiplicands_range, num_products);
 }
 #[test]
 #[should_panic]
@@ -120,7 +120,7 @@ fn zero_polynomial_should_error() {
     let num_products = 5;
 
     test_polynomial(nv, num_multiplicands_range, num_products);
-    test_ahp(nv, num_multiplicands_range, num_products);
+    test_protocol(nv, num_multiplicands_range, num_products);
 }
 
 #[test]

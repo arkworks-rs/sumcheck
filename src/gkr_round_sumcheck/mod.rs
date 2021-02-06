@@ -179,7 +179,7 @@ impl<F: Field> GKRRoundSumcheck<F> {
         let v = phase2_subclaim.point;
 
         let expected_evaluation = phase2_subclaim.expected_evaluation;
-        // // The following code was used to evaluate the subclaim, which now we assume is user's responsibility.
+        // The following code was used to evaluate the subclaim, which now we assume is user's responsibility.
         // let guv: Vec<_> = g
         //     .iter()
         //     .chain(u.iter())

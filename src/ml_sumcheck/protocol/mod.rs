@@ -1,4 +1,4 @@
-//! Interactive Protocol used for Multilinear Sumcheck
+//! Interactive Proof Protocol used for Multilinear Sumcheck
 
 use ark_ff::Field;
 use ark_poly::{DenseMultilinearExtension, MultilinearExtension};
@@ -9,7 +9,7 @@ use ark_std::vec::Vec;
 pub mod prover;
 pub mod verifier;
 
-/// Interactive Protocol for Multilinear Sumcheck
+/// Interactive Proof for Multilinear Sumcheck
 pub struct IPForMLSumcheck<F: Field> {
     #[doc(hidden)]
     _marker: PhantomData<F>,
