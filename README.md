@@ -1,4 +1,4 @@
-<h1 align="center">linear-sumcheck</h1>
+<h1 align="center">Linear-Time Sumcheck</h1>
 
 <p align="center">
 <a href="https://github.com/arkworks-rs/sumcheck/actions?query=workflow%3ACI"><img src="https://github.com/arkworks-rs/sumcheck/workflows/CI/badge.svg"></a>
