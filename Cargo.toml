@@ -1,0 +1,50 @@
+[package]
+name = "ark-linear-sumcheck"
+version = "0.1.0"
+authors = [
+    "Tom Shen <tomshen@berkeley.edu>",
+    "arkworks contributors"
+]
+description = "A library for efficient sumcheck protocols"
+homepage = "https://arkworks.rs"
+repository = "https://github.com/arkworks-rs/sumcheck/"
+keywords = ["cryptography", "finite fields", "polynomials", "sumcheck"]
+categories = ["cryptography"]
+include = ["Cargo.toml", "src", "README.md", "LICENSE-APACHE", "LICENSE-MIT"]
+license = "MIT/Apache-2.0"
+edition = "2018"
+
+
+[dependencies]
+ark-ff = { git = "https://github.com/arkworks-rs/algebra/", default-features = false }
+ark-serialize = { git = "https://github.com/arkworks-rs/algebra/", default-features = false, features = ["derive"] }
+rand_core = { version = "0.5", default-features = false }
+rand = { version = "0.7.3", default-features = false }
+blake2 = { version = "0.9", default-features = false }
+ark-std = { git = "https://github.com/arkworks-rs/utils/", default-features = false }
+hashbrown = { version = "0.9.1" }
+ark-poly = { git = "https://github.com/arkworks-rs/algebra/", default-features = false}
+rayon = { version = "1", optional = true }
+criterion = {version = "0.3.1", optional = true}
+
+[dev-dependencies]
+ark-test-curves = { git = "https://github.com/arkworks-rs/algebra/", default-features = false, features = ["bls12_381_scalar_field", "bls12_381_curve"] }
+
+[features]
+default = ["std"]
+std = ["ark-ff/std", "ark-serialize/std", "rand/std", "rand_core/std", "blake2/std", "ark-std/std", "ark-poly/std"]
+parallel = ["std", "ark-ff/parallel", "ark-poly/parallel", "ark-std/parallel", "rayon"]
+bench = ["criterion"]
+
+[[bench]]
+name = "ml_sumcheck"
+path = "benches/ml_sumcheck_bench.rs"
+harness = false
+
+[[bench]]
+name = "gkr_round_sumcheck"
+path = "benches/gkr_round_sumcheck_bench.rs"
+harness = false
+
+[lib]
+bench = false
