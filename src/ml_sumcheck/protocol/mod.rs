@@ -6,6 +6,10 @@ use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, Read, Serializatio
 use ark_std::cmp::max;
 use ark_std::marker::PhantomData;
 use ark_std::vec::Vec;
+use ark_std::rc::Rc;
+use ark_std::cell::RefCell;
+use hashbrown::{HashSet, HashMap};
+
 pub mod prover;
 pub mod verifier;
 
@@ -29,14 +33,17 @@ pub struct IPForMLSumcheck<F: Field> {
 /// $$\sum_{i=0}^{n}C_i\cdot\prod_{j=0}^{m_i}P_{ij}$$
 ///
 /// The result polynomial is used as the prover key.
-#[derive(CanonicalSerialize, CanonicalDeserialize)]
+#[derive(Clone)]
 pub struct ListOfProductsOfPolynomials<F: Field> {
     /// max number of multiplicands in each product
     pub max_multiplicands: usize,
     /// number of variables of the polynomial
     pub num_variables: usize,
-    /// list of products of multilinear extension
-    pub products: Vec<(F, Vec<DenseMultilinearExtension<F>>)>,
+    /// list of reference to products (as usize) of multilinear extension
+    pub products: Vec<(F, Vec<usize>)>,
+    /// Stores multilinear extensions in which product multiplicand can refer to.
+    pub flattened_ml_extensions: Vec<Rc<DenseMultilinearExtension<F>>>,
+    raw_pointers_lookup_table: HashMap<*const DenseMultilinearExtension<F>, usize>
 }
 
 impl<F: Field> ListOfProductsOfPolynomials<F> {
@@ -66,6 +73,8 @@ impl<F: Field> ListOfProductsOfPolynomials<F> {
             max_multiplicands: 0,
             num_variables,
             products: Vec::new(),
+            flattened_ml_extensions: Vec::new(),
+            raw_pointers_lookup_table: HashMap::new()
         }
     }
 
@@ -73,24 +82,33 @@ impl<F: Field> ListOfProductsOfPolynomials<F> {
     /// The resulting polynomial will be multiplied by the scalar `coefficient`.
     pub fn add_product(
         &mut self,
-        product: impl IntoIterator<Item = DenseMultilinearExtension<F>>,
+        product: impl IntoIterator<Item = Rc<DenseMultilinearExtension<F>>>,
         coefficient: F,
     ) {
-        let product: Vec<DenseMultilinearExtension<F>> = product.into_iter().collect();
+        let product: Vec<Rc<DenseMultilinearExtension<F>>> = product.into_iter().collect();
+        let mut indexed_product = Vec::with_capacity(product.len());
         assert!(product.len() > 0);
-        product
-            .iter()
-            .map(|p| assert_eq!(p.num_vars, self.num_variables))
-            .last();
+        for m in product{
+            assert_eq!(m.num_vars, self.num_variables, "product has a multiplicand with wrong number of variables");
+            let m_ptr: *const DenseMultilinearExtension<F> = Rc::as_ptr(&m);
+            if let Some(index) = self.raw_pointers_lookup_table.get(&m_ptr){
+                indexed_product.push(*index)
+            }else{
+                let curr_index = self.flattened_ml_extensions.len();
+                self.flattened_ml_extensions.push(m.clone());
+                self.raw_pointers_lookup_table.insert(m_ptr, curr_index);
+            }
+        }
         self.max_multiplicands = max(self.max_multiplicands, product.len());
-        self.products.push((coefficient, product));
+        self.products.push((coefficient, indexed_product));
     }
 
     /// Evaluate the polynomial at point `point`
     pub fn evaluate(&self, point: &[F]) -> F {
         self.products
             .iter()
-            .map(|(c, p)| *c * p.iter().map(|f| f.evaluate(point).unwrap()).product::<F>())
+            .map(|(c, p)| *c * p.iter().map(|&i|
+                self.flattened_ml_extensions[i].evaluate(point).unwrap()).product::<F>())
             .sum()
     }
 }

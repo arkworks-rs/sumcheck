@@ -5,6 +5,8 @@ use ark_ff::Field;
 use ark_poly::{DenseMultilinearExtension, MultilinearExtension};
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, Read, SerializationError, Write};
 use ark_std::vec::Vec;
+use std::cell::RefCell;
+use hashbrown::HashMap;
 
 /// Prover Message
 #[derive(Clone, CanonicalSerialize, CanonicalDeserialize)]
@@ -17,6 +19,7 @@ pub struct ProverState<F: Field> {
     /// sampled randomness given by the verifier
     pub randomness: Vec<F>,
     list_of_products: Vec<(F, Vec<DenseMultilinearExtension<F>>)>,
+    // flattened_ml_polys: HashMap<>
     num_vars: usize,
     max_multiplicands: usize,
     round: usize,
@@ -40,6 +43,7 @@ impl<F: Field> IPForMLSumcheck<F> {
         if polynomial.num_variables == 0 {
             panic!("Attempt to prove a constant.")
         }
+
         ProverState {
             randomness: Vec::with_capacity(polynomial.num_variables),
             list_of_products: polynomial.products.clone(),
