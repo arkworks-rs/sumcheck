@@ -2,6 +2,7 @@ use crate::ml_sumcheck::protocol::{IPForMLSumcheck, ListOfProductsOfPolynomials}
 use crate::ml_sumcheck::MLSumcheck;
 use ark_ff::Field;
 use ark_poly::DenseMultilinearExtension;
+use ark_std::rc::Rc;
 use ark_std::test_rng;
 use ark_std::vec::Vec;
 use ark_test_curves::bls12_381::Fr;
@@ -12,7 +13,7 @@ fn random_product<F: Field, R: RngCore>(
     nv: usize,
     num_multiplicands: usize,
     rng: &mut R,
-) -> (Vec<DenseMultilinearExtension<F>>, F) {
+) -> (Vec<Rc<DenseMultilinearExtension<F>>>, F) {
     let mut multiplicands = Vec::with_capacity(num_multiplicands);
     for _ in 0..num_multiplicands {
         multiplicands.push(Vec::with_capacity(1 << nv))
@@ -32,7 +33,7 @@ fn random_product<F: Field, R: RngCore>(
     return (
         multiplicands
             .into_iter()
-            .map(|x| DenseMultilinearExtension::from_evaluations_vec(nv, x))
+            .map(|x| Rc::new(DenseMultilinearExtension::from_evaluations_vec(nv, x)))
             .collect(),
         sum,
     );

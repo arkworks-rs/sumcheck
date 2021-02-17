@@ -5,8 +5,6 @@ use ark_ff::Field;
 use ark_poly::{DenseMultilinearExtension, MultilinearExtension};
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, Read, SerializationError, Write};
 use ark_std::vec::Vec;
-use std::cell::RefCell;
-use hashbrown::HashMap;
 
 /// Prover Message
 #[derive(Clone, CanonicalSerialize, CanonicalDeserialize)]
@@ -18,8 +16,10 @@ pub struct ProverMsg<F: Field> {
 pub struct ProverState<F: Field> {
     /// sampled randomness given by the verifier
     pub randomness: Vec<F>,
-    list_of_products: Vec<(F, Vec<DenseMultilinearExtension<F>>)>,
-    // flattened_ml_polys: HashMap<>
+    /// Stores the list of products that is meant to be added together. Each multiplicand is represented by
+    /// the index in flattened_ml_extensions
+    list_of_products: Vec<(F, Vec<usize>)>,
+    flattened_ml_extensions: Vec<DenseMultilinearExtension<F>>,
     num_vars: usize,
     max_multiplicands: usize,
     round: usize,
@@ -44,9 +44,17 @@ impl<F: Field> IPForMLSumcheck<F> {
             panic!("Attempt to prove a constant.")
         }
 
+        // create a deep copy of all unique MLExtensions
+        let flattened_ml_extensions = polynomial
+            .flattened_ml_extensions
+            .iter()
+            .map(|x| x.as_ref().clone())
+            .collect();
+
         ProverState {
             randomness: Vec::with_capacity(polynomial.num_variables),
             list_of_products: polynomial.products.clone(),
+            flattened_ml_extensions,
             num_vars: polynomial.num_variables,
             max_multiplicands: polynomial.max_multiplicands,
             round: 0,
@@ -69,11 +77,14 @@ impl<F: Field> IPForMLSumcheck<F> {
             // fix argument
             let i = prover_state.round;
             let r = prover_state.randomness[i - 1];
-            for (_, products) in &mut prover_state.list_of_products {
-                let num_multiplicands = products.len();
-                for j in 0..num_multiplicands {
-                    products[j] = products[j].fix_variables(&[r]);
-                }
+            // for (_, products) in &mut prover_state.list_of_products {
+            //     let num_multiplicands = products.len();
+            //     for j in 0..num_multiplicands {
+            //         products[j] = products[j].fix_variables(&[r]);
+            //     }
+            // }
+            for multiplicand in prover_state.flattened_ml_extensions.iter_mut() {
+                *multiplicand = multiplicand.fix_variables(&[r]);
             }
         } else {
             if prover_state.round > 0 {
@@ -103,7 +114,7 @@ impl<F: Field> IPForMLSumcheck<F> {
                     let num_multiplicands = products.len();
                     let mut product = *coefficient;
                     for j in 0..num_multiplicands {
-                        let table = &products[j]; // j's range is checked in init
+                        let table = &prover_state.flattened_ml_extensions[products[j]]; // j's range is checked in init
                         product *= table[b << 1] * (F::one() - t_as_field)
                             + table[(b << 1) + 1] * t_as_field;
                     }

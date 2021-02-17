@@ -5,10 +5,9 @@ use ark_poly::{DenseMultilinearExtension, MultilinearExtension};
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, Read, SerializationError, Write};
 use ark_std::cmp::max;
 use ark_std::marker::PhantomData;
-use ark_std::vec::Vec;
 use ark_std::rc::Rc;
-use ark_std::cell::RefCell;
-use hashbrown::{HashSet, HashMap};
+use ark_std::vec::Vec;
+use hashbrown::HashMap;
 
 pub mod prover;
 pub mod verifier;
@@ -43,7 +42,7 @@ pub struct ListOfProductsOfPolynomials<F: Field> {
     pub products: Vec<(F, Vec<usize>)>,
     /// Stores multilinear extensions in which product multiplicand can refer to.
     pub flattened_ml_extensions: Vec<Rc<DenseMultilinearExtension<F>>>,
-    raw_pointers_lookup_table: HashMap<*const DenseMultilinearExtension<F>, usize>
+    raw_pointers_lookup_table: HashMap<*const DenseMultilinearExtension<F>, usize>,
 }
 
 impl<F: Field> ListOfProductsOfPolynomials<F> {
@@ -74,7 +73,7 @@ impl<F: Field> ListOfProductsOfPolynomials<F> {
             num_variables,
             products: Vec::new(),
             flattened_ml_extensions: Vec::new(),
-            raw_pointers_lookup_table: HashMap::new()
+            raw_pointers_lookup_table: HashMap::new(),
         }
     }
 
@@ -88,18 +87,22 @@ impl<F: Field> ListOfProductsOfPolynomials<F> {
         let product: Vec<Rc<DenseMultilinearExtension<F>>> = product.into_iter().collect();
         let mut indexed_product = Vec::with_capacity(product.len());
         assert!(product.len() > 0);
-        for m in product{
-            assert_eq!(m.num_vars, self.num_variables, "product has a multiplicand with wrong number of variables");
+        self.max_multiplicands = max(self.max_multiplicands, product.len());
+        for m in product {
+            assert_eq!(
+                m.num_vars, self.num_variables,
+                "product has a multiplicand with wrong number of variables"
+            );
             let m_ptr: *const DenseMultilinearExtension<F> = Rc::as_ptr(&m);
-            if let Some(index) = self.raw_pointers_lookup_table.get(&m_ptr){
+            if let Some(index) = self.raw_pointers_lookup_table.get(&m_ptr) {
                 indexed_product.push(*index)
-            }else{
+            } else {
                 let curr_index = self.flattened_ml_extensions.len();
                 self.flattened_ml_extensions.push(m.clone());
                 self.raw_pointers_lookup_table.insert(m_ptr, curr_index);
+                indexed_product.push(curr_index);
             }
         }
-        self.max_multiplicands = max(self.max_multiplicands, product.len());
         self.products.push((coefficient, indexed_product));
     }
 
@@ -107,8 +110,12 @@ impl<F: Field> ListOfProductsOfPolynomials<F> {
     pub fn evaluate(&self, point: &[F]) -> F {
         self.products
             .iter()
-            .map(|(c, p)| *c * p.iter().map(|&i|
-                self.flattened_ml_extensions[i].evaluate(point).unwrap()).product::<F>())
+            .map(|(c, p)| {
+                *c * p
+                    .iter()
+                    .map(|&i| self.flattened_ml_extensions[i].evaluate(point).unwrap())
+                    .product::<F>()
+            })
             .sum()
     }
 }
