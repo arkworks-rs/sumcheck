@@ -78,12 +78,6 @@ impl<F: Field> IPForMLSumcheck<F> {
             // fix argument
             let i = prover_state.round;
             let r = prover_state.randomness[i - 1];
-            // for (_, products) in &mut prover_state.list_of_products {
-            //     let num_multiplicands = products.len();
-            //     for j in 0..num_multiplicands {
-            //         products[j] = products[j].fix_variables(&[r]);
-            //     }
-            // }
             for multiplicand in prover_state.flattened_ml_extensions.iter_mut() {
                 *multiplicand = multiplicand.fix_variables(&[r]);
             }
