@@ -7,7 +7,7 @@ The main feature of this release are:
 ### Breaking Changes
 
 - #41 `ListOfProductsOfPolynomial::add_product` takes iterators of `Rc<DenseMultilinearExtension<F>>` instead of `DenseMultilinearExtension<F>`.
-
+- #41 `ListOfProductsOfPolynomial` has been moved to `ml_sumcheck::data_structures`, but no actions required.
 ### Features
 
 

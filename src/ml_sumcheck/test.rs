@@ -1,4 +1,5 @@
-use crate::ml_sumcheck::protocol::{IPForMLSumcheck, ListOfProductsOfPolynomials};
+use crate::ml_sumcheck::data_structures::ListOfProductsOfPolynomials;
+use crate::ml_sumcheck::protocol::IPForMLSumcheck;
 use crate::ml_sumcheck::MLSumcheck;
 use ark_ff::Field;
 use ark_poly::{DenseMultilinearExtension, MultilinearExtension};
