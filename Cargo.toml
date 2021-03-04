@@ -18,8 +18,6 @@ edition = "2018"
 [dependencies]
 ark-ff = { git = "https://github.com/arkworks-rs/algebra/", default-features = false }
 ark-serialize = { git = "https://github.com/arkworks-rs/algebra/", default-features = false, features = ["derive"] }
-rand_core = { version = "0.5", default-features = false }
-rand = { version = "0.7.3", default-features = false }
 blake2 = { version = "0.9", default-features = false }
 ark-std = { git = "https://github.com/arkworks-rs/utils/", default-features = false }
 hashbrown = { version = "0.9.1" }
@@ -32,7 +30,7 @@ ark-test-curves = { git = "https://github.com/arkworks-rs/algebra/", default-fea
 
 [features]
 default = ["std"]
-std = ["ark-ff/std", "ark-serialize/std", "rand/std", "rand_core/std", "blake2/std", "ark-std/std", "ark-poly/std"]
+std = ["ark-ff/std", "ark-serialize/std", "blake2/std", "ark-std/std", "ark-poly/std"]
 parallel = ["std", "ark-ff/parallel", "ark-poly/parallel", "ark-std/parallel", "rayon"]
 bench = ["criterion"]
 

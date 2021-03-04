@@ -1,9 +1,9 @@
 use crate::gkr_round_sumcheck::GKRRoundSumcheck;
 use ark_ff::Field;
 use ark_poly::{DenseMultilinearExtension, MultilinearExtension, SparseMultilinearExtension};
+use ark_std::rand::RngCore;
 use ark_std::{test_rng, UniformRand};
 use ark_test_curves::bls12_381::Fr;
-use rand_core::RngCore;
 
 fn random_gkr_instance<F: Field, R: RngCore>(
     dim: usize,

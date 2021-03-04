@@ -1,8 +1,8 @@
 //! Fiat-Shamir Random Generator
 use ark_serialize::CanonicalSerialize;
+use ark_std::rand::RngCore;
 use ark_std::vec::Vec;
 use blake2::{Blake2s, Digest};
-use rand_core::RngCore;
 /// Random Field Element Generator where randomness `feed` adds entropy for the output.
 ///
 /// Implementation should support all types of input that has `ToBytes` trait.
@@ -58,7 +58,7 @@ impl RngCore for Blake2s512Rng {
         self.try_fill_bytes(dest).unwrap()
     }
 
-    fn try_fill_bytes(&mut self, dest: &mut [u8]) -> Result<(), rand_core::Error> {
+    fn try_fill_bytes(&mut self, dest: &mut [u8]) -> Result<(), ark_std::rand::Error> {
         let mut digest = self.current_digest.clone();
         let mut output = digest.finalize();
         let output_size = Blake2s::output_size();
@@ -83,8 +83,8 @@ impl RngCore for Blake2s512Rng {
 #[cfg(test)]
 mod tests {
     use ark_ff::Field;
-    use rand::Rng;
-    use rand_core::RngCore;
+    use ark_std::rand::Rng;
+    use ark_std::rand::RngCore;
 
     use crate::rng::{Blake2s512Rng, FeedableRNG};
     use ark_serialize::{CanonicalSerialize, SerializationError, Write};
