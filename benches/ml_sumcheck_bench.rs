@@ -6,6 +6,7 @@ use ark_linear_sumcheck::ml_sumcheck::protocol::ListOfProductsOfPolynomials;
 use ark_linear_sumcheck::ml_sumcheck::MLSumcheck;
 use ark_poly::{DenseMultilinearExtension, MultilinearExtension};
 use ark_std::ops::Range;
+use ark_std::rc::Rc;
 use ark_std::test_rng;
 use criterion::{black_box, BenchmarkId, Criterion};
 
@@ -18,10 +19,10 @@ fn prove_bench<F: Field>(c: &mut Criterion) {
     for nv in NUM_VARIABLES_RANGE {
         group.bench_with_input(BenchmarkId::new("ML", nv), &nv, |b, &nv| {
             let product_1: Vec<_> = (0..3)
-                .map(|_| DenseMultilinearExtension::<F>::rand(nv, &mut rng))
+                .map(|_| Rc::new(DenseMultilinearExtension::<F>::rand(nv, &mut rng)))
                 .collect();
             let product_2: Vec<_> = (0..3)
-                .map(|_| DenseMultilinearExtension::<F>::rand(nv, &mut rng))
+                .map(|_| Rc::new(DenseMultilinearExtension::<F>::rand(nv, &mut rng)))
                 .collect();
             let coefficient_1 = F::rand(&mut rng);
             let coefficient_2 = F::rand(&mut rng);
@@ -40,10 +41,10 @@ fn verify_bench<F: Field>(c: &mut Criterion) {
     for nv in NUM_VARIABLES_RANGE {
         group.bench_with_input(BenchmarkId::new("ML", nv), &nv, |b, &nv| {
             let product_1: Vec<_> = (0..3)
-                .map(|_| DenseMultilinearExtension::<F>::rand(nv, &mut rng))
+                .map(|_| Rc::new(DenseMultilinearExtension::<F>::rand(nv, &mut rng)))
                 .collect();
             let product_2: Vec<_> = (0..3)
-                .map(|_| DenseMultilinearExtension::<F>::rand(nv, &mut rng))
+                .map(|_| Rc::new(DenseMultilinearExtension::<F>::rand(nv, &mut rng)))
                 .collect();
             let coefficient_1 = F::rand(&mut rng);
             let coefficient_2 = F::rand(&mut rng);

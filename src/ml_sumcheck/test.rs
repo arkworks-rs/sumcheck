@@ -1,9 +1,11 @@
-use crate::ml_sumcheck::protocol::{IPForMLSumcheck, ListOfProductsOfPolynomials};
+use crate::ml_sumcheck::data_structures::ListOfProductsOfPolynomials;
+use crate::ml_sumcheck::protocol::IPForMLSumcheck;
 use crate::ml_sumcheck::MLSumcheck;
 use ark_ff::Field;
-use ark_poly::DenseMultilinearExtension;
-use ark_std::test_rng;
+use ark_poly::{DenseMultilinearExtension, MultilinearExtension};
+use ark_std::rc::Rc;
 use ark_std::vec::Vec;
+use ark_std::{test_rng, UniformRand};
 use ark_test_curves::bls12_381::Fr;
 use rand::Rng;
 use rand_core::RngCore;
@@ -12,7 +14,7 @@ fn random_product<F: Field, R: RngCore>(
     nv: usize,
     num_multiplicands: usize,
     rng: &mut R,
-) -> (Vec<DenseMultilinearExtension<F>>, F) {
+) -> (Vec<Rc<DenseMultilinearExtension<F>>>, F) {
     let mut multiplicands = Vec::with_capacity(num_multiplicands);
     for _ in 0..num_multiplicands {
         multiplicands.push(Vec::with_capacity(1 << nv))
@@ -32,7 +34,7 @@ fn random_product<F: Field, R: RngCore>(
     return (
         multiplicands
             .into_iter()
-            .map(|x| DenseMultilinearExtension::from_evaluations_vec(nv, x))
+            .map(|x| Rc::new(DenseMultilinearExtension::from_evaluations_vec(nv, x)))
             .collect(),
         sum,
     );
@@ -130,4 +132,60 @@ fn test_extract_sum() {
 
     let proof = MLSumcheck::prove(&poly).expect("fail to prove");
     assert_eq!(MLSumcheck::extract_sum(&proof), asserted_sum);
+}
+
+#[test]
+/// Test that the memory usage of shared-reference is linear to number of unique MLExtensions
+/// instead of total number of multiplicands.
+fn test_shared_reference() {
+    let mut rng = test_rng();
+    let ml_extensions: Vec<_> = (0..5)
+        .map(|_| Rc::new(DenseMultilinearExtension::<Fr>::rand(8, &mut rng)))
+        .collect();
+    let mut poly = ListOfProductsOfPolynomials::new(8);
+    poly.add_product(
+        vec![
+            ml_extensions[2].clone(),
+            ml_extensions[3].clone(),
+            ml_extensions[0].clone(),
+        ],
+        Fr::rand(&mut rng),
+    );
+    poly.add_product(
+        vec![
+            ml_extensions[1].clone(),
+            ml_extensions[4].clone(),
+            ml_extensions[4].clone(),
+        ],
+        Fr::rand(&mut rng),
+    );
+    poly.add_product(
+        vec![
+            ml_extensions[3].clone(),
+            ml_extensions[2].clone(),
+            ml_extensions[1].clone(),
+        ],
+        Fr::rand(&mut rng),
+    );
+    poly.add_product(
+        vec![ml_extensions[0].clone(), ml_extensions[0].clone()],
+        Fr::rand(&mut rng),
+    );
+    poly.add_product(vec![ml_extensions[4].clone()], Fr::rand(&mut rng));
+
+    assert_eq!(poly.flattened_ml_extensions.len(), 5);
+
+    // test memory usage for prover
+    let prover = IPForMLSumcheck::prover_init(&poly);
+    assert_eq!(prover.flattened_ml_extensions.len(), 5);
+    drop(prover);
+
+    let poly_info = poly.info();
+    let proof = MLSumcheck::prove(&poly).expect("fail to prove");
+    let asserted_sum = MLSumcheck::extract_sum(&proof);
+    let subclaim = MLSumcheck::verify(&poly_info, asserted_sum, &proof).expect("fail to verify");
+    assert!(
+        poly.evaluate(&subclaim.point) == subclaim.expected_evaluation,
+        "wrong subclaim"
+    );
 }

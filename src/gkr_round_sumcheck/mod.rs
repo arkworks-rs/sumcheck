@@ -13,6 +13,7 @@ use crate::rng::{Blake2s512Rng, FeedableRNG};
 use ark_ff::{Field, Zero};
 use ark_poly::{DenseMultilinearExtension, MultilinearExtension, SparseMultilinearExtension};
 use ark_std::marker::PhantomData;
+use ark_std::rc::Rc;
 use ark_std::vec::Vec;
 
 /// Takes multilinear f1, f3, and input g = g1,...,gl. Returns h_g, and f1 fixed at g.
@@ -44,7 +45,7 @@ pub fn start_phase1_sumcheck<F: Field>(
     let dim = h_g.num_vars;
     assert_eq!(f2.num_vars, dim);
     let mut poly = ListOfProductsOfPolynomials::new(dim);
-    poly.add_product(vec![h_g.clone(), f2.clone()], F::one());
+    poly.add_product(vec![Rc::new(h_g.clone()), Rc::new(f2.clone())], F::one());
     IPForMLSumcheck::prover_init(&poly)
 }
 
@@ -72,7 +73,7 @@ pub fn start_phase2_sumcheck<F: Field>(
     let dim = f1_gu.num_vars;
     assert_eq!(f3.num_vars, dim);
     let mut poly = ListOfProductsOfPolynomials::new(dim);
-    poly.add_product(vec![f1_gu.clone(), f3_f2u], F::one());
+    poly.add_product(vec![Rc::new(f1_gu.clone()), Rc::new(f3_f2u)], F::one());
     IPForMLSumcheck::prover_init(&poly)
 }
 

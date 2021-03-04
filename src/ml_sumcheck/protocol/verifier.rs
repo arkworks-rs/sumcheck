@@ -1,7 +1,7 @@
 //! Verifier
+use crate::ml_sumcheck::data_structures::PolynomialInfo;
 use crate::ml_sumcheck::protocol::prover::ProverMsg;
 use crate::ml_sumcheck::protocol::IPForMLSumcheck;
-use crate::ml_sumcheck::protocol::PolynomialInfo;
 use ark_ff::Field;
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, Read, SerializationError, Write};
 use ark_std::vec::Vec;

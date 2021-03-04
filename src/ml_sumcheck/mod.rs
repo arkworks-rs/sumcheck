@@ -1,8 +1,9 @@
 //! Sumcheck Protocol for multilinear extension
 
+use crate::ml_sumcheck::data_structures::{ListOfProductsOfPolynomials, PolynomialInfo};
 use crate::ml_sumcheck::protocol::prover::ProverMsg;
 use crate::ml_sumcheck::protocol::verifier::SubClaim;
-use crate::ml_sumcheck::protocol::{IPForMLSumcheck, ListOfProductsOfPolynomials, PolynomialInfo};
+use crate::ml_sumcheck::protocol::IPForMLSumcheck;
 use crate::rng::{Blake2s512Rng, FeedableRNG};
 use ark_ff::Field;
 use ark_std::marker::PhantomData;
@@ -10,6 +11,7 @@ use ark_std::vec::Vec;
 
 pub mod protocol;
 
+pub mod data_structures;
 #[cfg(test)]
 mod test;
 
