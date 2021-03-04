@@ -3,12 +3,12 @@ use crate::ml_sumcheck::protocol::IPForMLSumcheck;
 use crate::ml_sumcheck::MLSumcheck;
 use ark_ff::Field;
 use ark_poly::{DenseMultilinearExtension, MultilinearExtension};
+use ark_std::rand::Rng;
+use ark_std::rand::RngCore;
 use ark_std::rc::Rc;
 use ark_std::vec::Vec;
 use ark_std::{test_rng, UniformRand};
 use ark_test_curves::bls12_381::Fr;
-use rand::Rng;
-use rand_core::RngCore;
 
 fn random_product<F: Field, R: RngCore>(
     nv: usize,

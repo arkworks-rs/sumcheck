@@ -4,8 +4,8 @@ use crate::ml_sumcheck::protocol::prover::ProverMsg;
 use crate::ml_sumcheck::protocol::IPForMLSumcheck;
 use ark_ff::Field;
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, Read, SerializationError, Write};
+use ark_std::rand::RngCore;
 use ark_std::vec::Vec;
-use rand_core::RngCore;
 
 #[derive(Clone, CanonicalSerialize, CanonicalDeserialize)]
 /// Verifier Message

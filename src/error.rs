@@ -40,8 +40,8 @@ impl From<ark_serialize::SerializationError> for Error {
         Self::SerializationError
     }
 }
-impl From<rand::Error> for Error {
-    fn from(_: rand::Error) -> Self {
+impl From<ark_std::rand::Error> for Error {
+    fn from(_: ark_std::rand::Error) -> Self {
         Self::RNGError
     }
 }
