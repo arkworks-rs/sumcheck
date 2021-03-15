@@ -20,7 +20,7 @@ ark-ff = { git = "https://github.com/arkworks-rs/algebra/", default-features = f
 ark-serialize = { git = "https://github.com/arkworks-rs/algebra/", default-features = false, features = ["derive"] }
 blake2 = { version = "0.9", default-features = false }
 ark-std = { git = "https://github.com/arkworks-rs/utils/", default-features = false }
-hashbrown = { version = "0.9.1" }
+hashbrown = { version = "0.11.0" }
 ark-poly = { git = "https://github.com/arkworks-rs/algebra/", default-features = false}
 rayon = { version = "1", optional = true }
 criterion = {version = "0.3.1", optional = true}
