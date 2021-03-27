@@ -1,4 +1,4 @@
-## Pending
+## v0.2.0
 
 The main feature of this release are: 
 
@@ -6,8 +6,10 @@ The main feature of this release are:
 
 ### Breaking Changes
 
+- #46 Update to hashbrown version 0.11.2
 - #41 `ListOfProductsOfPolynomial::add_product` takes iterators of `Rc<DenseMultilinearExtension<F>>` instead of `DenseMultilinearExtension<F>`.
 - #41 `ListOfProductsOfPolynomial` has been moved to `ml_sumcheck::data_structures`, but no actions required.
+
 ### Features
 
 
