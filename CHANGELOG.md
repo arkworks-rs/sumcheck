@@ -22,9 +22,9 @@ The main feature of this release are:
 
 ### Breaking Changes
 
-- [\#46](https://github.com/arkworks-rs/sumcheck/pull/46) Update to hashbrown version 0.11.2
 - [\#41](https://github.com/arkworks-rs/sumcheck/pull/41) `ListOfProductsOfPolynomial::add_product` takes iterators of `Rc<DenseMultilinearExtension<F>>` instead of `DenseMultilinearExtension<F>`.
 - [\#41](https://github.com/arkworks-rs/sumcheck/pull/41) `ListOfProductsOfPolynomial` has been moved to `ml_sumcheck::data_structures`, but no actions required.
+- [\#46](https://github.com/arkworks-rs/sumcheck/pull/46) Update to hashbrown version 0.11.2.
 
 ### Features
 
