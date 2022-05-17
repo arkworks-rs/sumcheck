@@ -1,17 +1,17 @@
 //! Data structures used by GKR Round Sumcheck
 
 use crate::ml_sumcheck::protocol::prover::ProverMsg;
-use ark_ff::Field;
+use ark_ff::PrimeField;
 use ark_poly::{DenseMultilinearExtension, MultilinearExtension, SparseMultilinearExtension};
 use ark_std::vec::Vec;
 
 /// Proof for GKR Round Function
-pub struct GKRProof<F: Field> {
+pub struct GKRProof<F: PrimeField> {
     pub(crate) phase1_sumcheck_msgs: Vec<ProverMsg<F>>,
     pub(crate) phase2_sumcheck_msgs: Vec<ProverMsg<F>>,
 }
 
-impl<F: Field> GKRProof<F> {
+impl<F: PrimeField> GKRProof<F> {
     /// Extract the witness (i.e. the sum of GKR)
     pub fn extract_sum(&self) -> F {
         self.phase1_sumcheck_msgs[0].evaluations[0] + self.phase1_sumcheck_msgs[0].evaluations[1]
@@ -19,7 +19,7 @@ impl<F: Field> GKRProof<F> {
 }
 
 /// Subclaim for GKR Round Function
-pub struct GKRRoundSumcheckSubClaim<F: Field> {
+pub struct GKRRoundSumcheckSubClaim<F: PrimeField> {
     /// u
     pub u: Vec<F>,
     /// v
@@ -28,7 +28,7 @@ pub struct GKRRoundSumcheckSubClaim<F: Field> {
     pub expected_evaluation: F,
 }
 
-impl<F: Field> GKRRoundSumcheckSubClaim<F> {
+impl<F: PrimeField> GKRRoundSumcheckSubClaim<F> {
     /// Verify that the subclaim is true by evaluating the GKR Round function.
     pub fn verify_subclaim(
         &self,

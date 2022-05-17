@@ -22,11 +22,23 @@ ark-poly = { version = "^0.3.0", default-features = false }
 blake2 = { version = "0.9", default-features = false }
 hashbrown = { version = "0.11.2" }
 rayon = { version = "1", optional = true }
+ark-sponge = { version = "^0.3.0", default-features = false }
 
 [dev-dependencies]
-ark-test-curves = { version = "^0.3.0", default-features = false, features = ["bls12_381_scalar_field", "bls12_381_curve"] }
-
+#ark-test-curves = { version = "^0.3.0", default-features = false, features = ["bls12_381_scalar_field", "bls12_381_curve"] }
+ark-bls12-381 = { version = "^0.3.0", default-features = false, features = ["scalar_field"] }
 [features]
 default = ["std"]
-std = ["ark-ff/std", "ark-serialize/std", "blake2/std", "ark-std/std", "ark-poly/std"]
+std = ["ark-ff/std", "ark-serialize/std", "blake2/std", "ark-std/std", "ark-poly/std", "ark-sponge/std", "ark-bls12-381/std"]
 parallel = ["std", "ark-ff/parallel", "ark-poly/parallel", "ark-std/parallel", "rayon"]
+
+# To be removed in the new release.
+[patch.crates-io]
+ark-sponge = { git = "https://github.com/arkworks-rs/sponge" }
+ark-std = { git = "https://github.com/arkworks-rs/std" }
+ark-ff = { git = "https://github.com/arkworks-rs/algebra" }
+ark-ec = { git = "https://github.com/arkworks-rs/algebra" }
+ark-serialize = { git = "https://github.com/arkworks-rs/algebra" }
+ark-poly = { git = "https://github.com/arkworks-rs/algebra" }
+ark-bls12-381 = { git = "https://github.com/arkworks-rs/curves" }
+ark-r1cs-std = { git = "https://github.com/arkworks-rs/r1cs-std" }
