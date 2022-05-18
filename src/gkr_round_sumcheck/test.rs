@@ -1,11 +1,11 @@
 use crate::gkr_round_sumcheck::GKRRoundSumcheck;
-use ark_ff::Field;
+use ark_ff::{Field, PrimeField};
 use ark_poly::{DenseMultilinearExtension, MultilinearExtension, SparseMultilinearExtension};
 use ark_std::rand::RngCore;
 use ark_std::{test_rng, UniformRand};
 use ark_test_curves::bls12_381::Fr;
 
-fn random_gkr_instance<F: Field, R: RngCore>(
+fn random_gkr_instance<F: PrimeField, R: RngCore>(
     dim: usize,
     rng: &mut R,
 ) -> (
@@ -20,7 +20,7 @@ fn random_gkr_instance<F: Field, R: RngCore>(
     )
 }
 
-fn calculate_sum_naive<F: Field>(
+fn calculate_sum_naive<F: PrimeField>(
     f1: &SparseMultilinearExtension<F>,
     f2: &DenseMultilinearExtension<F>,
     f3: &DenseMultilinearExtension<F>,

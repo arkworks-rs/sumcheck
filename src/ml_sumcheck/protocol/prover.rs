@@ -1,46 +1,63 @@
 //! Prover
-use crate::ml_sumcheck::data_structures::ListOfProductsOfPolynomials;
-use crate::ml_sumcheck::protocol::verifier::VerifierMsg;
-use crate::ml_sumcheck::protocol::IPForMLSumcheck;
-use ark_ff::Field;
+use crate::ml_sumcheck::{
+    data_structures::ListOfProductsOfPolynomials,
+    protocol::{verifier::VerifierMsg, IPForMLSumcheck},
+};
+use ark_ff::PrimeField;
 use ark_poly::{DenseMultilinearExtension, MultilinearExtension};
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, Read, SerializationError, Write};
+use ark_sponge::Absorb;
 use ark_std::vec::Vec;
 
 /// Prover Message
 #[derive(Clone, CanonicalSerialize, CanonicalDeserialize)]
-pub struct ProverMsg<F: Field> {
+pub struct ProverMsg<F: PrimeField> {
     /// evaluations on P(0), P(1), P(2), ...
     pub(crate) evaluations: Vec<F>,
 }
+
+impl<F: PrimeField + Absorb> Absorb for ProverMsg<F> {
+    fn to_sponge_bytes(&self, dest: &mut Vec<u8>) {
+        self.evaluations.to_sponge_bytes(dest);
+    }
+
+    fn to_sponge_field_elements<TF: PrimeField>(&self, dest: &mut Vec<TF>) {
+        self.evaluations.to_sponge_field_elements(dest);
+    }
+}
+
 /// Prover State
-pub struct ProverState<F: Field> {
+pub struct ProverState<F: PrimeField> {
     /// sampled randomness given by the verifier
     pub randomness: Vec<F>,
-    /// Stores the list of products that is meant to be added together. Each multiplicand is represented by
-    /// the index in flattened_ml_extensions
+    /// Stores the list of products that is meant to be added together. Each
+    /// multiplicand is represented by the index in flattened_ml_extensions
     pub list_of_products: Vec<(F, Vec<usize>)>,
-    /// Stores a list of multilinear extensions in which `self.list_of_products` points to
+    /// Stores a list of multilinear extensions in which `self.list_of_products`
+    /// points to
     pub flattened_ml_extensions: Vec<DenseMultilinearExtension<F>>,
     num_vars: usize,
     max_multiplicands: usize,
     round: usize,
 }
 
-impl<F: Field> IPForMLSumcheck<F> {
-    /// initialize the prover to argue for the sum of polynomial over {0,1}^`num_vars`
+impl<F: PrimeField> IPForMLSumcheck<F> {
+    /// initialize the prover to argue for the sum of polynomial over
+    /// {0,1}^`num_vars`
     ///
-    /// The polynomial is represented by a list of products of polynomials along with its coefficient that is meant to be added together.
+    /// The polynomial is represented by a list of products of polynomials along
+    /// with its coefficient that is meant to be added together.
     ///
-    /// This data structure of the polynomial is a list of list of `(coefficient, DenseMultilinearExtension)`.
+    /// This data structure of the polynomial is a list of list of
+    /// `(coefficient, DenseMultilinearExtension)`.
     /// * Number of products n = `polynomial.products.len()`,
-    /// * Number of multiplicands of ith product m_i = `polynomial.products[i].1.len()`,
+    /// * Number of multiplicands of ith product m_i =
+    ///   `polynomial.products[i].1.len()`,
     /// * Coefficient of ith product c_i = `polynomial.products[i].0`
     ///
     /// The resulting polynomial is
     ///
     /// $$\sum_{i=0}^{n}C_i\cdot\prod_{j=0}^{m_i}P_{ij}$$
-    ///
     pub fn prover_init(polynomial: &ListOfProductsOfPolynomials<F>) -> ProverState<F> {
         if polynomial.num_variables == 0 {
             panic!("Attempt to prove a constant.")
@@ -63,7 +80,8 @@ impl<F: Field> IPForMLSumcheck<F> {
         }
     }
 
-    /// receive message from verifier, generate prover message, and proceed to next round
+    /// receive message from verifier, generate prover message, and proceed to
+    /// next round
     ///
     /// Main algorithm used is from section 3.2 of [XZZPS19](https://eprint.iacr.org/2019/317.pdf#subsection.3.2).
     pub fn prove_round(
@@ -82,10 +100,8 @@ impl<F: Field> IPForMLSumcheck<F> {
             for multiplicand in prover_state.flattened_ml_extensions.iter_mut() {
                 *multiplicand = multiplicand.fix_variables(&[r]);
             }
-        } else {
-            if prover_state.round > 0 {
-                panic!("verifier message is empty");
-            }
+        } else if prover_state.round > 0 {
+            panic!("verifier message is empty");
         }
 
         prover_state.round += 1;
@@ -98,8 +114,7 @@ impl<F: Field> IPForMLSumcheck<F> {
         let nv = prover_state.num_vars;
         let degree = prover_state.max_multiplicands; // the degree of univariate polynomial sent by prover at this round
 
-        let mut products_sum = Vec::with_capacity(degree + 1);
-        products_sum.resize(degree + 1, F::zero());
+        let mut products_sum = vec![F::zero(); degree + 1];
 
         // generate sum
         for b in 0..1 << (nv - i) {

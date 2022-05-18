@@ -3,21 +3,23 @@
 //! GKR Round Sumcheck will use `ml_sumcheck` as a subroutine.
 
 pub mod data_structures;
-#[cfg(test)]
-mod test;
+// #[cfg(test)]
+// mod test;
 
-use crate::gkr_round_sumcheck::data_structures::{GKRProof, GKRRoundSumcheckSubClaim};
-use crate::ml_sumcheck::protocol::prover::ProverState;
-use crate::ml_sumcheck::protocol::{IPForMLSumcheck, ListOfProductsOfPolynomials, PolynomialInfo};
-use crate::rng::{Blake2s512Rng, FeedableRNG};
-use ark_ff::{Field, Zero};
+use crate::{
+    gkr_round_sumcheck::data_structures::{GKRProof, GKRRoundSumcheckSubClaim},
+    ml_sumcheck::protocol::{
+        prover::ProverState, IPForMLSumcheck, ListOfProductsOfPolynomials, PolynomialInfo,
+    },
+};
+use ark_ff::{PrimeField, Zero};
 use ark_poly::{DenseMultilinearExtension, MultilinearExtension, SparseMultilinearExtension};
-use ark_std::marker::PhantomData;
-use ark_std::rc::Rc;
-use ark_std::vec::Vec;
+use ark_sponge::{Absorb, CryptographicSponge};
+use ark_std::{marker::PhantomData, rc::Rc, vec::Vec};
 
-/// Takes multilinear f1, f3, and input g = g1,...,gl. Returns h_g, and f1 fixed at g.
-pub fn initialize_phase_one<F: Field>(
+/// Takes multilinear f1, f3, and input g = g1,...,gl. Returns h_g, and f1 fixed
+/// at g.
+pub fn initialize_phase_one<F: PrimeField + Absorb>(
     f1: &SparseMultilinearExtension<F>,
     f3: &DenseMultilinearExtension<F>,
     g: &[F],
@@ -38,7 +40,7 @@ pub fn initialize_phase_one<F: Field>(
 }
 
 /// Takes h_g and returns a sumcheck state
-pub fn start_phase1_sumcheck<F: Field>(
+pub fn start_phase1_sumcheck<F: PrimeField + Absorb>(
     h_g: &DenseMultilinearExtension<F>,
     f2: &DenseMultilinearExtension<F>,
 ) -> ProverState<F> {
@@ -49,8 +51,9 @@ pub fn start_phase1_sumcheck<F: Field>(
     IPForMLSumcheck::prover_init(&poly)
 }
 
-/// Takes multilinear f1 fixed at g, phase one randomness u. Returns f1 fixed at g||u
-pub fn initialize_phase_two<F: Field>(
+/// Takes multilinear f1 fixed at g, phase one randomness u. Returns f1 fixed at
+/// g||u
+pub fn initialize_phase_two<F: PrimeField + Absorb>(
     f1_g: &SparseMultilinearExtension<F>,
     u: &[F],
 ) -> DenseMultilinearExtension<F> {
@@ -59,7 +62,7 @@ pub fn initialize_phase_two<F: Field>(
 }
 
 /// Takes f1 fixed at g||u, f3, and f2 evaluated at u.
-pub fn start_phase2_sumcheck<F: Field>(
+pub fn start_phase2_sumcheck<F: PrimeField + Absorb>(
     f1_gu: &DenseMultilinearExtension<F>,
     f3: &DenseMultilinearExtension<F>,
     f2_u: F,
@@ -78,15 +81,16 @@ pub fn start_phase2_sumcheck<F: Field>(
 }
 
 /// Sumcheck Argument for GKR Round Function
-pub struct GKRRoundSumcheck<F: Field> {
+pub struct GKRRoundSumcheck<F: PrimeField + Absorb> {
     _marker: PhantomData<F>,
 }
 
-impl<F: Field> GKRRoundSumcheck<F> {
+impl<F: PrimeField + Absorb> GKRRoundSumcheck<F> {
     /// Takes a GKR Round Function and input, prove the sum.
     /// * `f1`,`f2`,`f3`: represents the GKR round function
     /// * `g`: represents the fixed input.
-    pub fn prove(
+    pub fn prove<S: CryptographicSponge>(
+        sponge: &mut S,
         f1: &SparseMultilinearExtension<F>,
         f2: &DenseMultilinearExtension<F>,
         f3: &DenseMultilinearExtension<F>,
@@ -98,8 +102,6 @@ impl<F: Field> GKRRoundSumcheck<F> {
         let dim = f2.num_vars;
         let g = g.to_vec();
 
-        let mut rng = Blake2s512Rng::setup();
-
         let (h_g, f1_g) = initialize_phase_one(f1, f3, &g);
         let mut phase1_ps = start_phase1_sumcheck(&h_g, f2);
         let mut phase1_vm = None;
@@ -108,9 +110,9 @@ impl<F: Field> GKRRoundSumcheck<F> {
         for _ in 0..dim {
             let (pm, ps) = IPForMLSumcheck::prove_round(phase1_ps, &phase1_vm);
             phase1_ps = ps;
-            rng.feed(&pm).unwrap();
+            sponge.absorb(&pm);
             phase1_prover_msgs.push(pm);
-            let vm = IPForMLSumcheck::sample_round(&mut rng);
+            let vm = IPForMLSumcheck::sample_round(sponge);
             phase1_vm = Some(vm.clone());
             u.push(vm.randomness);
         }
@@ -123,9 +125,9 @@ impl<F: Field> GKRRoundSumcheck<F> {
         for _ in 0..dim {
             let (pm, ps) = IPForMLSumcheck::prove_round(phase2_ps, &phase2_vm);
             phase2_ps = ps;
-            rng.feed(&pm).unwrap();
+            sponge.absorb(&pm);
             phase2_prover_msgs.push(pm);
-            let vm = IPForMLSumcheck::sample_round(&mut rng);
+            let vm = IPForMLSumcheck::sample_round(sponge);
             phase2_vm = Some(vm.clone());
             v.push(vm.randomness);
         }
@@ -138,19 +140,19 @@ impl<F: Field> GKRRoundSumcheck<F> {
 
     /// Takes a GKR Round Function, input, and proof, and returns a subclaim.
     ///
-    /// If the `claimed_sum` is correct, then it is `subclaim.verify_subclaim` will return true.
-    /// Otherwise, it is very likely that `subclaim.verify_subclaim` will return false.
-    /// Larger field size guarantees smaller soundness error.
+    /// If the `claimed_sum` is correct, then it is `subclaim.verify_subclaim`
+    /// will return true. Otherwise, it is very likely that
+    /// `subclaim.verify_subclaim` will return false. Larger field size
+    /// guarantees smaller soundness error.
     /// * `f2_num_vars`: represents number of variables of f2
-    pub fn verify(
+    pub fn verify<S: CryptographicSponge>(
+        sponge: &mut S,
         f2_num_vars: usize,
         proof: &GKRProof<F>,
         claimed_sum: F,
     ) -> Result<GKRRoundSumcheckSubClaim<F>, crate::Error> {
         // verify first sumcheck
         let dim = f2_num_vars;
-
-        let mut rng = Blake2s512Rng::setup();
 
         let mut phase1_vs = IPForMLSumcheck::verifier_init(&PolynomialInfo {
             max_multiplicands: 2,
@@ -159,8 +161,8 @@ impl<F: Field> GKRRoundSumcheck<F> {
 
         for i in 0..dim {
             let pm = &proof.phase1_sumcheck_msgs[i];
-            rng.feed(pm).unwrap();
-            let result = IPForMLSumcheck::verify_round((*pm).clone(), phase1_vs, &mut rng);
+            sponge.absorb(&pm);
+            let result = IPForMLSumcheck::verify_round((*pm).clone(), phase1_vs, sponge);
             phase1_vs = result.1;
         }
         let phase1_subclaim = IPForMLSumcheck::check_and_generate_subclaim(phase1_vs, claimed_sum)?;
@@ -172,8 +174,8 @@ impl<F: Field> GKRRoundSumcheck<F> {
         });
         for i in 0..dim {
             let pm = &proof.phase2_sumcheck_msgs[i];
-            rng.feed(pm).unwrap();
-            let result = IPForMLSumcheck::verify_round((*pm).clone(), phase2_vs, &mut rng);
+            sponge.absorb(&pm);
+            let result = IPForMLSumcheck::verify_round((*pm).clone(), phase2_vs, sponge);
             phase2_vs = result.1;
         }
         let phase2_subclaim = IPForMLSumcheck::check_and_generate_subclaim(
