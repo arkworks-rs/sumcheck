@@ -79,9 +79,9 @@ impl<F: PrimeField + Absorb> MLSumcheck<F> {
             verifier_state = result.1;
         }
 
-        Ok(IPForMLSumcheck::check_and_generate_subclaim(
+        IPForMLSumcheck::check_and_generate_subclaim(
             verifier_state,
             claimed_sum,
-        )?)
+        )
     }
 }

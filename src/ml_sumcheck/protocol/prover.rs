@@ -114,8 +114,7 @@ impl<F: PrimeField> IPForMLSumcheck<F> {
         let nv = prover_state.num_vars;
         let degree = prover_state.max_multiplicands; // the degree of univariate polynomial sent by prover at this round
 
-        let mut products_sum = Vec::with_capacity(degree + 1);
-        products_sum.resize(degree + 1, F::zero());
+        let mut products_sum = vec![F::zero(); degree + 1];
 
         // generate sum
         for b in 0..1 << (nv - i) {
