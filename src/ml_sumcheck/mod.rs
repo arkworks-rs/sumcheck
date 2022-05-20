@@ -47,9 +47,7 @@ impl<F: Field> MLSumcheck<F> {
         let mut verifier_msg = None;
         let mut prover_msgs = Vec::with_capacity(polynomial.num_variables);
         for _ in 0..polynomial.num_variables {
-            let (prover_msg, prover_state_new) =
-                IPForMLSumcheck::prove_round(prover_state, &verifier_msg);
-            prover_state = prover_state_new;
+            let prover_msg = IPForMLSumcheck::prove_round(&mut prover_state, &verifier_msg);
             fs_rng.feed(&prover_msg)?;
             prover_msgs.push(prover_msg);
             verifier_msg = Some(IPForMLSumcheck::sample_round(&mut fs_rng));
@@ -70,9 +68,11 @@ impl<F: Field> MLSumcheck<F> {
         for i in 0..polynomial_info.num_variables {
             let prover_msg = proof.get(i).expect("proof is incomplete");
             fs_rng.feed(prover_msg)?;
-            let result =
-                IPForMLSumcheck::verify_round((*prover_msg).clone(), verifier_state, &mut fs_rng);
-            verifier_state = result.1;
+            let _verifier_msg = IPForMLSumcheck::verify_round(
+                (*prover_msg).clone(),
+                &mut verifier_state,
+                &mut fs_rng,
+            );
         }
 
         Ok(IPForMLSumcheck::check_and_generate_subclaim(

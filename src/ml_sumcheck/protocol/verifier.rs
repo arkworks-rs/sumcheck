@@ -53,9 +53,9 @@ impl<F: Field> IPForMLSumcheck<F> {
     /// the last step.
     pub fn verify_round<R: RngCore>(
         prover_msg: ProverMsg<F>,
-        mut verifier_state: VerifierState<F>,
+        verifier_state: &mut VerifierState<F>,
         rng: &mut R,
-    ) -> (Option<VerifierMsg<F>>, VerifierState<F>) {
+    ) -> Option<VerifierMsg<F>> {
         if verifier_state.finished {
             panic!("Incorrect verifier state: Verifier is already finished.");
         }
@@ -79,7 +79,7 @@ impl<F: Field> IPForMLSumcheck<F> {
         } else {
             verifier_state.round += 1;
         }
-        (Some(msg), verifier_state)
+        Some(msg)
     }
 
     /// verify the sumcheck phase, and generate the subclaim
@@ -132,22 +132,80 @@ impl<F: Field> IPForMLSumcheck<F> {
     }
 }
 
-/// interpolate a uni-variate degree-`p_i.len()-1` polynomial and evaluate this polynomial at `eval_at`.
+/// Interpolate a uni-variate degree-`p_i.len()-1` polynomial and evaluate this
+/// polynomial at `eval_at`:
+///   \sum_{i=0}^len p_i * (\prod_{j!=i} (eval_at - j)/(i-j) )
+///
+/// This implementation is linear in number of inputs in terms of field
+/// operations. It also has a quadratic term in primitive operations (for pi.len()<=33) which is
+/// negligible compared to field operations.
 pub(crate) fn interpolate_uni_poly<F: Field>(p_i: &[F], eval_at: F) -> F {
-    let mut result = F::zero();
-    let mut i = F::zero();
-    for term in p_i.iter() {
-        let mut term = *term;
-        let mut j = F::zero();
-        for _ in 0..p_i.len() {
-            if j != i {
-                term = term * (eval_at - j) / (i - j)
-            }
-            j += F::one();
-        }
-        i += F::one();
-        result += term;
+    let mut res = F::zero();
+
+    // prod = \prod_{j!=i} (eval_at - j)
+    let mut evals = vec![];
+    let len = p_i.len();
+    let mut prod = eval_at;
+    evals.push(eval_at);
+
+    for e in 1..len {
+        let tmp = eval_at - F::from(e as u64);
+        evals.push(tmp);
+        prod *= tmp;
     }
 
-    result
+    for i in 0..len {
+        let divisor = get_divisor::<F>(i, len);
+        res += p_i[i] * prod / (divisor * evals[i]);
+    }
+
+    res
+}
+
+/// Compute \prod_{j!=i)^len (i-j). This function takes O(n^2) number of
+/// primitive operations which is negligible compared to field operations.
+// We know
+//  - factorial(20) ~ 2^61
+//  - factorial(33) ~ 2^123
+// so we will be able to store the result for len<=20 with i64;
+// for len<=33 with i128; and we do not currently support len>33.
+#[inline]
+fn get_divisor<F: Field>(i: usize, len: usize) -> F {
+    if len <= 20 {
+        let mut res = 1i64;
+        for j in 0..len {
+            if j != i {
+                res *= i as i64 - j as i64;
+            }
+        }
+        if res > 0 {
+            F::from(res as u64)
+        } else {
+            -F::from((-res) as u64)
+        }
+    } else if len <= 33 {
+        let mut res = 1i128;
+        for j in 0..len {
+            if j != i {
+                res *= i as i128 - j as i128;
+            }
+        }
+        if res > 0 {
+            F::from(res as u128)
+        } else {
+            -F::from((-res) as u128)
+        }
+    } else {
+        let mut res = F::one();
+        for j in 0..len {
+            if j != i {
+                res *= if i > j {
+                    F::from((i as i64 - j as i64) as u64)
+                } else {
+                    -F::from((j as i64 - i as i64) as u64)
+                };
+            }
+        }
+        res
+    }
 }

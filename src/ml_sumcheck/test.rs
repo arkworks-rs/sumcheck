@@ -81,12 +81,10 @@ fn test_protocol(nv: usize, num_multiplicands_range: (usize, usize), num_product
     let mut verifier_state = IPForMLSumcheck::verifier_init(&poly_info);
     let mut verifier_msg = None;
     for _ in 0..poly.num_variables {
-        let result = IPForMLSumcheck::prove_round(prover_state, &verifier_msg);
-        prover_state = result.1;
-        let (verifier_msg2, verifier_state2) =
-            IPForMLSumcheck::verify_round(result.0, verifier_state, &mut rng);
+        let prover_message = IPForMLSumcheck::prove_round(&mut prover_state, &verifier_msg);
+        let verifier_msg2 =
+            IPForMLSumcheck::verify_round(prover_message, &mut verifier_state, &mut rng);
         verifier_msg = verifier_msg2;
-        verifier_state = verifier_state2;
     }
     let subclaim = IPForMLSumcheck::check_and_generate_subclaim(verifier_state, asserted_sum)
         .expect("fail to generate subclaim");

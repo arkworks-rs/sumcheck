@@ -106,8 +106,8 @@ impl<F: Field> GKRRoundSumcheck<F> {
         let mut phase1_prover_msgs = Vec::with_capacity(dim);
         let mut u = Vec::with_capacity(dim);
         for _ in 0..dim {
-            let (pm, ps) = IPForMLSumcheck::prove_round(phase1_ps, &phase1_vm);
-            phase1_ps = ps;
+            let pm = IPForMLSumcheck::prove_round(&mut phase1_ps, &phase1_vm);
+
             rng.feed(&pm).unwrap();
             phase1_prover_msgs.push(pm);
             let vm = IPForMLSumcheck::sample_round(&mut rng);
@@ -121,8 +121,7 @@ impl<F: Field> GKRRoundSumcheck<F> {
         let mut phase2_prover_msgs = Vec::with_capacity(dim);
         let mut v = Vec::with_capacity(dim);
         for _ in 0..dim {
-            let (pm, ps) = IPForMLSumcheck::prove_round(phase2_ps, &phase2_vm);
-            phase2_ps = ps;
+            let pm = IPForMLSumcheck::prove_round(&mut phase2_ps, &phase2_vm);
             rng.feed(&pm).unwrap();
             phase2_prover_msgs.push(pm);
             let vm = IPForMLSumcheck::sample_round(&mut rng);
@@ -160,8 +159,7 @@ impl<F: Field> GKRRoundSumcheck<F> {
         for i in 0..dim {
             let pm = &proof.phase1_sumcheck_msgs[i];
             rng.feed(pm).unwrap();
-            let result = IPForMLSumcheck::verify_round((*pm).clone(), phase1_vs, &mut rng);
-            phase1_vs = result.1;
+            let _result = IPForMLSumcheck::verify_round((*pm).clone(), &mut phase1_vs, &mut rng);
         }
         let phase1_subclaim = IPForMLSumcheck::check_and_generate_subclaim(phase1_vs, claimed_sum)?;
         let u = phase1_subclaim.point;
@@ -173,8 +171,7 @@ impl<F: Field> GKRRoundSumcheck<F> {
         for i in 0..dim {
             let pm = &proof.phase2_sumcheck_msgs[i];
             rng.feed(pm).unwrap();
-            let result = IPForMLSumcheck::verify_round((*pm).clone(), phase2_vs, &mut rng);
-            phase2_vs = result.1;
+            let _result = IPForMLSumcheck::verify_round((*pm).clone(), &mut phase2_vs, &mut rng);
         }
         let phase2_subclaim = IPForMLSumcheck::check_and_generate_subclaim(
             phase2_vs,
