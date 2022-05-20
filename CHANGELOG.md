@@ -2,6 +2,8 @@
 
 ## Pending
 
+- \#55: improve sumcheck verifier complexity; improve internal APIs
+
 ### Breaking changes
 
 ### Features
