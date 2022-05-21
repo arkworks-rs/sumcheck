@@ -2,13 +2,13 @@
 
 ## Pending
 
-- \#55: improve sumcheck verifier complexity; improve internal APIs
-
 ### Breaking changes
 
 ### Features
 
 ### Improvements
+
+- [\#55](https://github.com/arkworks-rs/sumcheck/pull/55) Reduce the interpolation complexity and avoid unnecessary state clones.
 
 ### Bug fixes
 
