@@ -132,43 +132,48 @@ impl<F: Field> IPForMLSumcheck<F> {
     }
 }
 
-/// Interpolate a uni-variate degree-`p_i.len()-1` polynomial and evaluate this
+/// interpolate a uni-variate degree-`p_i.len()-1` polynomial and evaluate this
 /// polynomial at `eval_at`:
 ///   \sum_{i=0}^len p_i * (\prod_{j!=i} (eval_at - j)/(i-j) )
-///
-/// This implementation is linear in number of inputs in terms of field
-/// operations. It also has a quadratic term in primitive operations (for pi.len()<=33) which is
-/// negligible compared to field operations.
 pub(crate) fn interpolate_uni_poly<F: Field>(p_i: &[F], eval_at: F) -> F {
-    let mut res = F::zero();
-
-    // prod = \prod_{j!=i} (eval_at - j)
-    let mut evals = vec![];
     let len = p_i.len();
+
+    let mut evals = vec![];
+
     let mut prod = eval_at;
     evals.push(eval_at);
 
+    // `prod = \prod_{j} (eval_at - j)`
     for e in 1..len {
         let tmp = eval_at - F::from(e as u64);
         evals.push(tmp);
         prod *= tmp;
     }
 
+    let mut res = F::zero();
     for i in 0..len {
+        // `divisor = \prod_{j!=i} (i - j)`
         let divisor = get_divisor::<F>(i, len);
+
+        // It should read `p_i[i] * (prod / evals[i]) / divisor`,
+        // and therefore `prod / evals[i] = \prod_{j!=i} (eval_at - j)`.
+        //
+        // To reduce the number of inversion (as in division), it is
+        // rewritten as `p_i[i] * prod / (divisor * evals[i])`.
         res += p_i[i] * prod / (divisor * evals[i]);
     }
-
     res
 }
 
-/// Compute \prod_{j!=i)^len (i-j). This function takes O(n^2) number of
-/// primitive operations which is negligible compared to field operations.
-// We know
-//  - factorial(20) ~ 2^61
-//  - factorial(33) ~ 2^123
-// so we will be able to store the result for len<=20 with i64;
-// for len<=33 with i128; and we do not currently support len>33.
+/// compute \prod_{j!=i) (i-j).
+///
+/// We know
+///  - 2^61 < factorial(20) < 2^62
+///  - 2^122 < factorial(33) < 2^123
+/// so we will be able to compute the result
+///  - for len<=20 with i64
+///  - for 20<len<=33 with i128
+///  - for len>33 with BigInt
 #[inline]
 fn get_divisor<F: Field>(i: usize, len: usize) -> F {
     if len <= 20 {

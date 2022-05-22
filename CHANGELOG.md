@@ -8,7 +8,7 @@
 
 ### Improvements
 
-- [\#55](https://github.com/arkworks-rs/sumcheck/pull/55) Reduce the interpolation complexity and avoid unnecessary state clones.
+- [\#55](https://github.com/arkworks-rs/sumcheck/pull/55) Improve the interpolation performance and avoid unnecessary state clones.
 
 ### Bug fixes
 
