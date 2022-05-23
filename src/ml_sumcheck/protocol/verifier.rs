@@ -149,68 +149,111 @@ pub(crate) fn interpolate_uni_poly<F: Field>(p_i: &[F], eval_at: F) -> F {
         evals.push(tmp);
         prod *= tmp;
     }
-
     let mut res = F::zero();
-    for i in 0..len {
-        // `divisor = \prod_{j!=i} (i - j)`
-        let divisor = get_divisor::<F>(i, len);
+    // we want to compute \prod (j!=i) (i-j) for a given i
+    //
+    // we start from the last step, which is
+    //  denom[len-1] = (len-1) * (len-2) *... * 2 * 1
+    // the step before that is
+    //  denom[len-2] = (len-2) * (len-3) * ... * 2 * 1 * -1
+    // and the step before that is
+    //  denom[len-3] = (len-3) * (len-4) * ... * 2 * 1 * -1 * -2
+    //
+    // that is, we only need to store the current denom[i] (as a fraction number), and
+    // the one before this will be derived from
+    //  denom[i-1] = denom[i] * (len-i) / i
+    //
 
-        // It should read `p_i[i] * (prod / evals[i]) / divisor`,
-        // and therefore `prod / evals[i] = \prod_{j!=i} (eval_at - j)`.
-        //
-        // To reduce the number of inversion (as in division), it is
-        // rewritten as `p_i[i] * prod / (divisor * evals[i])`.
-        res += p_i[i] * prod / (divisor * evals[i]);
+    //
+    // We know
+    //  - 2^61 < factorial(20) < 2^62
+    //  - 2^122 < factorial(33) < 2^123
+    // so we will be able to compute the denom
+    //  - for len<=20 with i64
+    //  - for 20<len<=33 with i128
+    //  - for len>33 with BigInt
+    if p_i.len() < 20 {
+        let mut denom_up = u64_factorial(len - 1) as i64;
+        let mut denom_down = 1u64;
+
+        for i in (0..len).rev() {
+            let demon_up_f = if denom_up < 0 {
+                -F::from((-denom_up) as u64)
+            } else {
+                F::from(denom_up as u64)
+            };
+
+            res += p_i[i] * prod * F::from(denom_down) / (demon_up_f * evals[i]);
+
+            // compute denom for the next step is current_denom * (len-i)/i
+            if i != 0 {
+                denom_up *= -(len as i64 - i as i64);
+                denom_down *= i as u64;
+            }
+        }
+    } else if p_i.len() < 33 {
+        let mut denom_up = u128_factorial(len - 1) as i128;
+        let mut denom_down = 1u128;
+
+        for i in (0..len).rev() {
+            let demon_up_f = if denom_up < 0 {
+                -F::from((-denom_up) as u128)
+            } else {
+                F::from(denom_up as u128)
+            };
+
+            res += p_i[i] * prod * F::from(denom_down) / (demon_up_f * evals[i]);
+
+            // compute denom for the next step is current_denom * (len-i)/i
+            if i != 0 {
+                denom_up *= -(len as i128 - i as i128);
+                denom_down *= i as u128;
+            }
+        }
+    } else {
+        let mut denom_up = field_factorial::<F>(len - 1);
+        let mut denom_down = F::one();
+
+        for i in (0..len).rev() {
+            res += p_i[i] * prod * denom_down / (denom_up * evals[i]);
+
+            // compute denom for the next step is current_denom * (len-i)/i
+            if i != 0 {
+                denom_up *= -F::from((len - i) as u64);
+                denom_down *= F::from(i as u64);
+            }
+        }
+    }
+
+    res
+}
+
+/// compute the factorial(a) = 1 * 2 * ... * a
+#[inline]
+fn field_factorial<F: Field>(a: usize) -> F {
+    let mut res = 1u64;
+    for i in 1..=a {
+        res *= i as u64;
+    }
+    F::from(res)
+}
+
+/// compute the factorial(a) = 1 * 2 * ... * a
+#[inline]
+fn u128_factorial(a: usize) -> u128 {
+    let mut res = 1u128;
+    for i in 1..=a {
+        res *= i as u128;
     }
     res
 }
 
-/// compute \prod_{j!=i) (i-j).
-///
-/// We know
-///  - 2^61 < factorial(20) < 2^62
-///  - 2^122 < factorial(33) < 2^123
-/// so we will be able to compute the result
-///  - for len<=20 with i64
-///  - for 20<len<=33 with i128
-///  - for len>33 with BigInt
+/// compute the factorial(a) = 1 * 2 * ... * a
 #[inline]
-fn get_divisor<F: Field>(i: usize, len: usize) -> F {
-    if len <= 20 {
-        let mut res = 1i64;
-        for j in 0..len {
-            if j != i {
-                res *= i as i64 - j as i64;
-            }
-        }
-        if res > 0 {
-            F::from(res as u64)
-        } else {
-            -F::from((-res) as u64)
-        }
-    } else if len <= 33 {
-        let mut res = 1i128;
-        for j in 0..len {
-            if j != i {
-                res *= i as i128 - j as i128;
-            }
-        }
-        if res > 0 {
-            F::from(res as u128)
-        } else {
-            -F::from((-res) as u128)
-        }
-    } else {
-        let mut res = F::one();
-        for j in 0..len {
-            if j != i {
-                res *= if i > j {
-                    F::from((i as i64 - j as i64) as u64)
-                } else {
-                    -F::from((j as i64 - i as i64) as u64)
-                };
-            }
-        }
-        res
+fn u64_factorial(a: usize) -> u64 {
+    let mut res = 1u64;
+    for i in 1..=a {
+        res *= i as u64;
     }
+    res
 }
