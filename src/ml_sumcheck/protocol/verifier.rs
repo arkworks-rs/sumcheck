@@ -160,12 +160,12 @@ pub(crate) fn interpolate_uni_poly<F: Field>(p_i: &[F], eval_at: F) -> F {
     //  denom[len-3] = (len-3) * (len-4) * ... * 2 * 1 * -1 * -2
     //
     // i.e., for any i, the one before this will be derived from
-    //  denom[i-1] = denom[i] * (len-i) / i
+    //  denom[i-1] = - denom[i] * (len-i) / i
     //
     // that is, we only need to store
     // - the last denom for i = len-1, and
     // - the ratio between current step and fhe last step, which is the
-    //   product of (len-i) / i from all previous steps and we store
+    //   product of -(len-i) / i from all previous steps and we store
     //   this product as a fraction number to reduce field divisions.
 
     // We know
@@ -176,7 +176,7 @@ pub(crate) fn interpolate_uni_poly<F: Field>(p_i: &[F], eval_at: F) -> F {
     //  - for len <= 33 with i128
     //  - for len >  33 with BigInt
     if p_i.len() <= 20 {
-        let denom = F::from(u64_factorial(len - 1));
+        let last_denom = F::from(u64_factorial(len - 1));
         let mut ratio_numerator = 1i64;
         let mut ratio_enumerator = 1u64;
 
@@ -187,17 +187,17 @@ pub(crate) fn interpolate_uni_poly<F: Field>(p_i: &[F], eval_at: F) -> F {
                 F::from(ratio_numerator as u64)
             };
 
-            res +=
-                p_i[i] * prod * F::from(ratio_enumerator) / (denom * ratio_numerator_f * evals[i]);
+            res += p_i[i] * prod * F::from(ratio_enumerator)
+                / (last_denom * ratio_numerator_f * evals[i]);
 
-            // compute denom for the next step is current_denom * (len-i)/i
+            // compute ratio for the next step which is current_ratio * -(len-i)/i
             if i != 0 {
                 ratio_numerator *= -(len as i64 - i as i64);
                 ratio_enumerator *= i as u64;
             }
         }
     } else if p_i.len() <= 33 {
-        let denom = F::from(u128_factorial(len - 1));
+        let last_denom = F::from(u128_factorial(len - 1));
         let mut ratio_numerator = 1i128;
         let mut ratio_enumerator = 1u128;
 
@@ -208,23 +208,25 @@ pub(crate) fn interpolate_uni_poly<F: Field>(p_i: &[F], eval_at: F) -> F {
                 F::from(ratio_numerator as u128)
             };
 
-            res +=
-                p_i[i] * prod * F::from(ratio_enumerator) / (denom * ratio_numerator_f * evals[i]);
+            res += p_i[i] * prod * F::from(ratio_enumerator)
+                / (last_denom * ratio_numerator_f * evals[i]);
 
-            // compute denom for the next step is current_denom * (len-i)/i
+            // compute ratio for the next step which is current_ratio * -(len-i)/i
             if i != 0 {
                 ratio_numerator *= -(len as i128 - i as i128);
                 ratio_enumerator *= i as u128;
             }
         }
     } else {
+        // since we are using field operations, we can merge
+        // `last_denom` and `ratio_numerator` into a single field element.
         let mut denom_up = field_factorial::<F>(len - 1);
         let mut denom_down = F::one();
 
         for i in (0..len).rev() {
             res += p_i[i] * prod * denom_down / (denom_up * evals[i]);
 
-            // compute denom for the next step is current_denom * (len-i)/i
+            // compute denom for the next step is -current_denom * (len-i)/i
             if i != 0 {
                 denom_up *= -F::from((len - i) as u64);
                 denom_down *= F::from(i as u64);

@@ -35,7 +35,7 @@ name = "ml_sumcheck"
 path = "benches/ml_sumcheck_bench.rs"
 harness = false
 
-# [[bench]]
-# name = "gkr_round_sumcheck"
-# path = "benches/gkr_round_sumcheck_bench.rs"
-# harness = false
+[[bench]]
+name = "gkr_round_sumcheck"
+path = "benches/gkr_round_sumcheck_bench.rs"
+harness = false
