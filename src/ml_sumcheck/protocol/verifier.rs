@@ -166,13 +166,13 @@ pub(crate) fn interpolate_uni_poly<F: Field>(p_i: &[F], eval_at: F) -> F {
 
     //
     // We know
-    //  - 2^61 < factorial(20) < 2^62
-    //  - 2^122 < factorial(33) < 2^123
+    //  - 2^57 < (factorial(12))^2 < 2^58
+    //  - 2^122 < (factorial(20))^2 < 2^123
     // so we will be able to compute the denom
-    //  - for len<=20 with i64
-    //  - for 20<len<=33 with i128
-    //  - for len>33 with BigInt
-    if p_i.len() < 20 {
+    //  - for len <= 12 with i64
+    //  - for len <= 20 with i128
+    //  - for len >  20 with BigInt
+    if p_i.len() <= 12 {
         let mut denom_up = u64_factorial(len - 1) as i64;
         let mut denom_down = 1u64;
 
@@ -191,7 +191,7 @@ pub(crate) fn interpolate_uni_poly<F: Field>(p_i: &[F], eval_at: F) -> F {
                 denom_down *= i as u64;
             }
         }
-    } else if p_i.len() < 33 {
+    } else if p_i.len() <= 20 {
         let mut denom_up = u128_factorial(len - 1) as i128;
         let mut denom_down = 1u128;
 

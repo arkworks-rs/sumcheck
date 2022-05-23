@@ -10,7 +10,7 @@ use ark_std::rc::Rc;
 use ark_std::test_rng;
 use criterion::{black_box, BenchmarkId, Criterion};
 
-const NUM_VARIABLES_RANGE: Range<usize> = 10..21;
+const NUM_VARIABLES_RANGE: Range<usize> = 10..22;
 
 fn prove_bench<F: Field>(c: &mut Criterion) {
     let mut rng = test_rng();
@@ -62,7 +62,7 @@ fn verify_bench<F: Field>(c: &mut Criterion) {
 }
 
 fn bench_bls_381(c: &mut Criterion) {
-    prove_bench::<ark_test_curves::bls12_381::Fr>(c);
+    // prove_bench::<ark_test_curves::bls12_381::Fr>(c);
     verify_bench::<ark_test_curves::bls12_381::Fr>(c);
 }
 
