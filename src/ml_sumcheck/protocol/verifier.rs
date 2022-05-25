@@ -240,11 +240,11 @@ pub(crate) fn interpolate_uni_poly<F: Field>(p_i: &[F], eval_at: F) -> F {
 /// compute the factorial(a) = 1 * 2 * ... * a
 #[inline]
 fn field_factorial<F: Field>(a: usize) -> F {
-    let mut res = 1u64;
+    let mut res = F::one();
     for i in 1..=a {
-        res *= i as u64;
+        res *= F::from(i as u64);
     }
-    F::from(res)
+    res
 }
 
 /// compute the factorial(a) = 1 * 2 * ... * a
