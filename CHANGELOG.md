@@ -4,7 +4,7 @@
 
 ### Breaking changes
 
-- [\#55](https://github.com/arkworks-rs/sumcheck/pull/55) Changes of function signatures of `IPForMLSumcheck::verify_round` and `IPForMLSumcheck::prove_round`. Instead of taking ownership of state, they now take a mutable reference of it.  
+- [\#55](https://github.com/arkworks-rs/sumcheck/pull/55) Change the function signatures of `IPForMLSumcheck::verify_round` and `IPForMLSumcheck::prove_round`. 
 
 ### Features
 
