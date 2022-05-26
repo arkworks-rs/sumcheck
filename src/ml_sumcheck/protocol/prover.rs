@@ -67,9 +67,9 @@ impl<F: Field> IPForMLSumcheck<F> {
     ///
     /// Main algorithm used is from section 3.2 of [XZZPS19](https://eprint.iacr.org/2019/317.pdf#subsection.3.2).
     pub fn prove_round(
-        mut prover_state: ProverState<F>,
+        prover_state: &mut ProverState<F>,
         v_msg: &Option<VerifierMsg<F>>,
-    ) -> (ProverMsg<F>, ProverState<F>) {
+    ) -> ProverMsg<F> {
         if let Some(msg) = v_msg {
             if prover_state.round == 0 {
                 panic!("first round should be prover first.");
@@ -120,11 +120,8 @@ impl<F: Field> IPForMLSumcheck<F> {
             }
         }
 
-        (
-            ProverMsg {
-                evaluations: products_sum,
-            },
-            prover_state,
-        )
+        ProverMsg {
+            evaluations: products_sum,
+        }
     }
 }
