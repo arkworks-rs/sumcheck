@@ -5,7 +5,6 @@ use crate::ml_sumcheck::protocol::IPForMLSumcheck;
 use ark_ff::Field;
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, Read, SerializationError, Write};
 use ark_std::rand::RngCore;
-use ark_std::vec::Vec;
 
 #[derive(Clone, CanonicalSerialize, CanonicalDeserialize)]
 /// Verifier Message
@@ -265,4 +264,48 @@ fn u64_factorial(a: usize) -> u64 {
         res *= i as u64;
     }
     res
+}
+
+#[cfg(test)]
+mod test {
+    use crate::ml_sumcheck::protocol::verifier::interpolate_uni_poly;
+    use ark_poly::univariate::DensePolynomial;
+    use ark_poly::Polynomial;
+    use ark_poly::UVPolynomial;
+    use ark_std::vec::Vec;
+    use ark_std::UniformRand;
+
+    type F = ark_test_curves::bls12_381::Fr;
+
+    #[test]
+    fn test_interpolation() {
+        let mut prng = ark_std::test_rng();
+
+        // test a polynomial with 20 known points, i.e., with degree 19
+        let poly = DensePolynomial::<F>::rand(20 - 1, &mut prng);
+        let evals = (0..20)
+            .map(|i| poly.evaluate(&F::from(i)))
+            .collect::<Vec<F>>();
+        let query = F::rand(&mut prng);
+
+        assert_eq!(poly.evaluate(&query), interpolate_uni_poly(&evals, query));
+
+        // test a polynomial with 33 known points, i.e., with degree 32
+        let poly = DensePolynomial::<F>::rand(33 - 1, &mut prng);
+        let evals = (0..33)
+            .map(|i| poly.evaluate(&F::from(i)))
+            .collect::<Vec<F>>();
+        let query = F::rand(&mut prng);
+
+        assert_eq!(poly.evaluate(&query), interpolate_uni_poly(&evals, query));
+
+        // test a polynomial with 64 known points, i.e., with degree 63
+        let poly = DensePolynomial::<F>::rand(64 - 1, &mut prng);
+        let evals = (0..64)
+            .map(|i| poly.evaluate(&F::from(i)))
+            .collect::<Vec<F>>();
+        let query = F::rand(&mut prng);
+
+        assert_eq!(poly.evaluate(&query), interpolate_uni_poly(&evals, query));
+    }
 }
