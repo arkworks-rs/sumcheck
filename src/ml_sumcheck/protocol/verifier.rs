@@ -164,7 +164,7 @@ pub(crate) fn interpolate_uni_poly<F: Field>(p_i: &[F], eval_at: F) -> F {
     //
     // that is, we only need to store
     // - the last denom for i = len-1, and
-    // - the ratio between current step and fhe last step, which is the
+    // - the ratio between the current step and the last step, which is the
     //   product of -(len-i) / i from all previous steps and we store
     //   this product as a fraction number to reduce field divisions.
 
