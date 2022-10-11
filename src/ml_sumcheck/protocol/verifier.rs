@@ -3,7 +3,7 @@ use crate::ml_sumcheck::data_structures::PolynomialInfo;
 use crate::ml_sumcheck::protocol::prover::ProverMsg;
 use crate::ml_sumcheck::protocol::IPForMLSumcheck;
 use ark_ff::Field;
-use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, Read, SerializationError, Write};
+use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
 use ark_std::rand::RngCore;
 use ark_std::vec::Vec;
 
@@ -271,8 +271,8 @@ fn u64_factorial(a: usize) -> u64 {
 mod test {
     use crate::ml_sumcheck::protocol::verifier::interpolate_uni_poly;
     use ark_poly::univariate::DensePolynomial;
+    use ark_poly::DenseUVPolynomial;
     use ark_poly::Polynomial;
-    use ark_poly::UVPolynomial;
     use ark_std::vec::Vec;
     use ark_std::UniformRand;
 

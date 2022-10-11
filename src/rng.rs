@@ -35,7 +35,7 @@ impl FeedableRNG for Blake2s512Rng {
 
     fn feed<M: CanonicalSerialize>(&mut self, msg: &M) -> Result<(), Self::Error> {
         let mut buf = Vec::new();
-        msg.serialize(&mut buf)?;
+        msg.serialize_uncompressed(&mut buf)?;
         self.current_digest.update(&buf);
         Ok(())
     }
@@ -87,7 +87,7 @@ mod tests {
     use ark_std::rand::RngCore;
 
     use crate::rng::{Blake2s512Rng, FeedableRNG};
-    use ark_serialize::{CanonicalSerialize, SerializationError, Write};
+    use ark_serialize::CanonicalSerialize;
     use ark_std::test_rng;
     use ark_std::vec::Vec;
     use ark_test_curves::bls12_381::Fr;
