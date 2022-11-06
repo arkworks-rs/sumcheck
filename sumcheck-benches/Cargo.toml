@@ -19,6 +19,7 @@ edition = "2018"
 ark-ff = { version = "^0.3.0", default-features = false }
 ark-std = { version = "^0.3.0", default-features = false }
 ark-poly = { version = "^0.3.0", default-features = false }
+blake2 = { version = "0.9", default-features = false }
 ark-test-curves = { version = "^0.3.0", default-features = false, features = ["bls12_381_scalar_field", "bls12_381_curve"] }
 
 criterion = { version = "0.3.1" }
@@ -39,3 +40,12 @@ harness = false
 name = "gkr_round_sumcheck"
 path = "benches/gkr_round_sumcheck_bench.rs"
 harness = false
+
+# To be removed in the new release.
+[patch.crates-io]
+ark-ec = { git = "https://github.com/arkworks-rs/algebra" }
+ark-ff = { git = "https://github.com/arkworks-rs/algebra" }
+ark-poly = { git = "https://github.com/arkworks-rs/algebra" }
+ark-serialize = { git = "https://github.com/arkworks-rs/algebra" }
+ark-test-curves = { git = "https://github.com/arkworks-rs/algebra" }
+ark-std = { git = "https://github.com/arkworks-rs/std" }
