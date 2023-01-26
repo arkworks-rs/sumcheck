@@ -2,7 +2,7 @@
 
 use ark_ff::Field;
 use ark_poly::{DenseMultilinearExtension, MultilinearExtension};
-use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
+use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, Read, SerializationError, Write};
 use ark_std::cmp::max;
 use ark_std::rc::Rc;
 use ark_std::vec::Vec;

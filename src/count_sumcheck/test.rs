@@ -9,6 +9,7 @@ use ark_poly::{
     univariate::DensePolynomial, EvaluationDomain, GeneralEvaluationDomain, UVPolynomial,
 };
 
+#[test]
 fn test_count_end_to_end() {
     let rng = &mut ark_std::test_rng();
 

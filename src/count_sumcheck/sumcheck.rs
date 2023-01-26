@@ -4,8 +4,12 @@ use ark_poly::univariate::{DensePolynomial, SparsePolynomial};
 use ark_std::One;
 use std::ops::Mul;
 
-use crate::count_sumcheck::{utils::{commit, compute_s_poly}, data_structures::{Proof, ProverKey, VerifierKey}};
+use crate::count_sumcheck::{
+    data_structures::{Proof, ProverKey, VerifierKey},
+    utils::{commit, compute_s_poly},
+};
 
+/// Generates Proof to be spent to verifier by computing and commitmitting f_ipc to G1
 pub fn prove<E: PairingEngine>(
     ek: &ProverKey<E>,
     f: &DensePolynomial<E::Fr>,
@@ -21,6 +25,7 @@ pub fn prove<E: PairingEngine>(
     Proof { f_ipc_commitment }
 }
 
+/// Verifies Proof sent from Prover
 pub fn verify<E: PairingEngine>(
     vk: &VerifierKey<E>,
     proof: &Proof<E>,

@@ -6,6 +6,7 @@ use ark_poly::{
     Polynomial,
 };
 
+/// Commits a Polynomial to a Elliptiv Curve Group Element via VariableBaseMSM
 pub fn commit<F: PrimeField, G: AffineCurve<ScalarField = F>>(
     powers: &[G],
     poly: &DensePolynomial<F>,
@@ -22,11 +23,13 @@ pub fn commit<F: PrimeField, G: AffineCurve<ScalarField = F>>(
     VariableBaseMSM::multi_scalar_mul(powers, &coeffs).into_affine()
 }
 
+/// Computes S polynomial in Sparse format
 pub fn compute_s_poly<F: PrimeField>(n_h: usize, d_gap: usize, d: usize) -> SparsePolynomial<F> {
     let coeffs = (0..d / n_h).map(|i| (d_gap - n_h * i, F::one())).collect();
     SparsePolynomial::from_coefficients_vec(coeffs)
 }
 
+/// Converts a slice of PrimeField Elements into a vector of BigInt
 fn convert_to_bigints<F: PrimeField>(p: &[F]) -> Vec<F::BigInt> {
     ark_std::cfg_iter!(p).map(|s| s.into_repr()).collect()
 }

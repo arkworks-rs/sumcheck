@@ -3,6 +3,7 @@ use ark_ec::{msm::FixedBaseMSM, PairingEngine, ProjectiveCurve};
 use ark_ff::PrimeField;
 use ark_std::rand::RngCore;
 
+/// Generates Prover and Verifier Keys
 pub fn derive_keys<E: PairingEngine>(srs: &SRS<E>) -> (ProverKey<E>, VerifierKey<E>) {
     let s = compute_s_poly(srs.n_h, srs.d_gap, srs.d);
     let s_commitment = commit(&srs.s2_g2, &s.into());
@@ -16,6 +17,7 @@ pub fn derive_keys<E: PairingEngine>(srs: &SRS<E>) -> (ProverKey<E>, VerifierKey
     (ek, vk)
 }
 
+/// Generates protocol Structured Reference String
 pub fn kgen<E: PairingEngine, R: RngCore>(
     n_h: usize,
     d: usize,
@@ -38,6 +40,7 @@ pub fn kgen<E: PairingEngine, R: RngCore>(
     }
 }
 
+/// Performs Multi-Scalar Multiplication on a Vector of PrimeField Coefficients
 fn mul_gen<F: PrimeField, G: ProjectiveCurve<ScalarField = F>>(
     coeffs: &Vec<F>,
     g: G,
@@ -51,6 +54,7 @@ fn mul_gen<F: PrimeField, G: ProjectiveCurve<ScalarField = F>>(
     G::batch_normalization_into_affine(&sigma_1_times_g1_projective)
 }
 
+/// Computes S_1 and S_2 for SRS
 fn get_s1_s2<F: PrimeField, R: RngCore>(
     d: usize,
     d_gap: usize,

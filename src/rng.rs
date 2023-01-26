@@ -87,7 +87,7 @@ mod tests {
     use ark_std::rand::RngCore;
 
     use crate::rng::{Blake2s512Rng, FeedableRNG};
-    use ark_serialize::CanonicalSerialize;
+    use ark_serialize::{CanonicalSerialize, SerializationError, Write};
     use ark_std::test_rng;
     use ark_std::vec::Vec;
     use ark_test_curves::bls12_381::Fr;
