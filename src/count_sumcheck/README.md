@@ -1,10 +1,16 @@
 <h1 align="center">Count-Sumcheck</h1>
 
-This crate implements the Count-Sumcheck argument for univariate polynomials. 
+An Implementation of the Count sumcheck argument for univariate polynomials. 
 
 ## Sumcheck Protocol
 
-<img src="./count_sumcheck_protocol.png" alt="count_sumcheck_protocol"  width="50%" />
+<img src="./count_sumcheck_protocol.png" alt="count_sumcheck_protocol"  width="100%" />
+
+## Authors
+- Michal Zajac <michal@nethermind.io>
+- Isaac Villalobos <isaac@nethermind.io>
+- Aleksander Misztal <aleksander@nethermind.io>
+- Patrick Stiles <patrick.stiles@nethermind.io>
 
 ## Reference Paper:
 
