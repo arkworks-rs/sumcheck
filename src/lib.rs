@@ -1,6 +1,6 @@
 #![forbid(unsafe_code)]
 #![cfg_attr(not(feature = "std"), no_std)]
-//! A crate for sumcheck protocol of GKR functions
+//! A crate for GKR and Count Sumcheck Protocols
 #![deny(unused_import_braces, unused_qualifications, trivial_casts)]
 #![deny(trivial_numeric_casts, private_in_public, variant_size_differences)]
 #![deny(stable_features, unreachable_pub, non_shorthand_field_patterns)]
@@ -19,6 +19,7 @@ extern crate ark_std;
 /// error for this crate
 mod error;
 
+pub mod count_sumcheck;
 pub mod gkr_round_sumcheck;
 pub mod ml_sumcheck;
 

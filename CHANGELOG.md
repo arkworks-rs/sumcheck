@@ -8,11 +8,15 @@
 
 ### Features
 
+- [\#65](https://github.com/arkworks-rs/sumcheck/pull/55) Adding an implementation of the Count Sumcheck Protocol. 
+
 ### Improvements
 
 - [\#55](https://github.com/arkworks-rs/sumcheck/pull/55) Improve the interpolation performance and avoid unnecessary state clones.
 
 ### Bug fixes
+
+- [\#65](https://github.com/arkworks-rs/sumcheck/pull/65) Added missing `ark_serialization` imports in `ml_sumcheck` and `rng`. 
 
 ## v0.3.0
 

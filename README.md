@@ -15,6 +15,7 @@ This crate implements the following protocols:
   products of multilinear polynomials in evaluation form over boolean hypercube.
 - [`GKRRoundSumcheck`](src/gkr_round_sumcheck/mod.rs#L83): The sumcheck protocol for GKR Round Function. 
   This protocol takes `MLSumcheck` as a subroutine.
+- [`Count Sumcheck`](src/count_sumcheck/mod.rs#L1): The Count Sumcheck Protocol
 
 **WARNING**: This is an academic proof-of-concept prototype, and in particular has not received careful code review. This implementation is NOT ready for production use.
 
