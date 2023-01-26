@@ -1,10 +1,7 @@
 [package]
 name = "sumcheck-benches"
 version = "0.3.0"
-authors = [
-    "Tom Shen <tomshen@berkeley.edu>",
-    "arkworks contributors"
-]
+authors = ["Tom Shen <tomshen@berkeley.edu>", "arkworks contributors"]
 description = "Benchmarks for ark-linear-sumcheck"
 homepage = "https://arkworks.rs"
 repository = "https://github.com/arkworks-rs/sumcheck/"
@@ -20,16 +17,27 @@ ark-ff = { version = "^0.3.0", default-features = false }
 ark-std = { version = "^0.3.0", default-features = false }
 ark-poly = { version = "^0.3.0", default-features = false }
 blake2 = { version = "0.9", default-features = false }
-ark-test-curves = { version = "^0.3.0", default-features = false, features = ["bls12_381_scalar_field", "bls12_381_curve"] }
+ark-test-curves = { version = "^0.3.0", default-features = false, features = [
+  "bls12_381_scalar_field",
+  "bls12_381_curve",
+] }
+ark-bls12-381 = { version = "0.3", features = ["curve"] }
 
 criterion = { version = "0.3.1" }
 ark-linear-sumcheck = { path = "../" }
 rayon = { version = "1", optional = true }
+rand = "0.8.5"
 
 [features]
-default = [ "std" ]
+default = ["std"]
 std = ["ark-ff/std", "ark-std/std", "ark-poly/std"]
-parallel = ["std", "ark-ff/parallel", "ark-poly/parallel", "ark-std/parallel", "rayon"]
+parallel = [
+  "std",
+  "ark-ff/parallel",
+  "ark-poly/parallel",
+  "ark-std/parallel",
+  "rayon",
+]
 
 [[bench]]
 name = "ml_sumcheck"
@@ -41,6 +49,11 @@ name = "gkr_round_sumcheck"
 path = "benches/gkr_round_sumcheck_bench.rs"
 harness = false
 
+[[bench]]
+name = "count_sumcheck"
+path = "benches/count_sumcheck_bench.rs"
+harness = false
+
 # To be removed in the new release.
 [patch.crates-io]
 ark-ec = { git = "https://github.com/arkworks-rs/algebra" }
@@ -49,3 +62,4 @@ ark-poly = { git = "https://github.com/arkworks-rs/algebra" }
 ark-serialize = { git = "https://github.com/arkworks-rs/algebra" }
 ark-test-curves = { git = "https://github.com/arkworks-rs/algebra" }
 ark-std = { git = "https://github.com/arkworks-rs/std" }
+

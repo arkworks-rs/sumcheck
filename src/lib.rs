@@ -19,6 +19,7 @@ extern crate ark_std;
 /// error for this crate
 mod error;
 
+pub mod count_sumcheck;
 pub mod gkr_round_sumcheck;
 pub mod ml_sumcheck;
 
