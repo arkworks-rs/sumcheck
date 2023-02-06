@@ -13,6 +13,8 @@
 - [\#55](https://github.com/arkworks-rs/sumcheck/pull/55) Improve the interpolation performance and avoid unnecessary state clones.
 
 ### Bug fixes
+## v0.4.0
+- Change dependency to version `0.4.0` of other arkworks-rs crates.
 
 ## v0.3.0
 
