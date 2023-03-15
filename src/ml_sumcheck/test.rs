@@ -23,9 +23,9 @@ fn random_product<F: Field, R: RngCore>(
 
     for _ in 0..(1 << nv) {
         let mut product = F::one();
-        for i in 0..num_multiplicands {
+        for multiplicand in &mut multiplicands {
             let val = F::rand(rng);
-            multiplicands[i].push(val);
+            multiplicand.push(val);
             product *= val;
         }
         sum += product;
