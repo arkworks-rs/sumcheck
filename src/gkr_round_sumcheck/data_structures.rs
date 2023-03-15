@@ -50,8 +50,8 @@ impl<F: Field> GKRRoundSumcheckSubClaim<F> {
             .chain(self.v.iter()).copied()
             .collect();
         let actual_evaluation = f1.evaluate(&guv).unwrap()
-            * &f2.evaluate(&self.u).unwrap()
-            * &f3.evaluate(&self.v).unwrap();
+            * f2.evaluate(&self.u).unwrap()
+            * f3.evaluate(&self.v).unwrap();
 
         actual_evaluation == self.expected_evaluation
     }
