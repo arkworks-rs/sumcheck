@@ -114,10 +114,10 @@ impl<F: Field> IPForMLSumcheck<F> {
             expected = interpolate_uni_poly(evaluations, verifier_state.randomness[i]);
         }
 
-        return Ok(SubClaim {
+        Ok(SubClaim {
             point: verifier_state.randomness,
             expected_evaluation: expected,
-        });
+        })
     }
 
     /// simulate a verifier message without doing verification

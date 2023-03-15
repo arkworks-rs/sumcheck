@@ -82,10 +82,8 @@ impl<F: Field> IPForMLSumcheck<F> {
             for multiplicand in prover_state.flattened_ml_extensions.iter_mut() {
                 *multiplicand = multiplicand.fix_variables(&[r]);
             }
-        } else {
-            if prover_state.round > 0 {
-                panic!("verifier message is empty");
-            }
+        } else if prover_state.round > 0 {
+            panic!("verifier message is empty");
         }
 
         prover_state.round += 1;

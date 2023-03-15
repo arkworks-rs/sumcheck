@@ -22,7 +22,7 @@ impl fmt::Display for Error {
         if let Self::OtherError(s) = self {
             f.write_str(s)
         } else {
-            f.write_fmt(format_args!("{:?}", self))
+            f.write_fmt(format_args!("{self:?}"))
         }
     }
 }

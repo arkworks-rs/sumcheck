@@ -31,13 +31,13 @@ fn random_product<F: Field, R: RngCore>(
         sum += product;
     }
 
-    return (
+    (
         multiplicands
             .into_iter()
             .map(|x| Rc::new(DenseMultilinearExtension::from_evaluations_vec(nv, x)))
             .collect(),
         sum,
-    );
+    )
 }
 
 fn random_list_of_products<F: Field, R: RngCore>(
