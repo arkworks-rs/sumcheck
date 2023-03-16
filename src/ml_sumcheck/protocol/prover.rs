@@ -105,8 +105,8 @@ impl<F: Field> IPForMLSumcheck<F> {
             for old_product in products_sum.iter_mut().take(degree + 1) {
                 for (coefficient, products) in &prover_state.list_of_products {
                     let mut product = *coefficient;
-                    for jth_product in products.iter() {
-                        let table = &prover_state.flattened_ml_extensions[*jth_product]; 
+                    for &jth_product in products {
+                        let table = &prover_state.flattened_ml_extensions[jth_product]; 
                         product *= table[b << 1] * (F::one() - t_as_field)
                             + table[(b << 1) + 1] * t_as_field;
                     }
