@@ -75,7 +75,7 @@ impl<F: Field> ListOfProductsOfPolynomials<F> {
     ) {
         let product: Vec<Rc<DenseMultilinearExtension<F>>> = product.into_iter().collect();
         let mut indexed_product = Vec::with_capacity(product.len());
-        assert!(product.len() > 0);
+        assert!(!product.is_empty());
         self.max_multiplicands = max(self.max_multiplicands, product.len());
         for m in product {
             assert_eq!(

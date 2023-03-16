@@ -82,10 +82,8 @@ impl<F: Field> IPForMLSumcheck<F> {
             for multiplicand in prover_state.flattened_ml_extensions.iter_mut() {
                 *multiplicand = multiplicand.fix_variables(&[r]);
             }
-        } else {
-            if prover_state.round > 0 {
-                panic!("verifier message is empty");
-            }
+        } else if prover_state.round > 0 {
+            panic!("verifier message is empty");
         }
 
         prover_state.round += 1;
@@ -104,17 +102,15 @@ impl<F: Field> IPForMLSumcheck<F> {
         // generate sum
         for b in 0..1 << (nv - i) {
             let mut t_as_field = F::zero();
-            for t in 0..degree + 1 {
-                // evaluate P_round(t)
+            for old_product in products_sum.iter_mut().take(degree + 1) {
                 for (coefficient, products) in &prover_state.list_of_products {
-                    let num_multiplicands = products.len();
                     let mut product = *coefficient;
-                    for j in 0..num_multiplicands {
-                        let table = &prover_state.flattened_ml_extensions[products[j]]; // j's range is checked in init
+                    for &jth_product in products {
+                        let table = &prover_state.flattened_ml_extensions[jth_product];
                         product *= table[b << 1] * (F::one() - t_as_field)
                             + table[(b << 1) + 1] * t_as_field;
                     }
-                    products_sum[t] += product;
+                    *old_product += product;
                 }
                 t_as_field += F::one();
             }

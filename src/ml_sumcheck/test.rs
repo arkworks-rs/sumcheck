@@ -23,21 +23,21 @@ fn random_product<F: Field, R: RngCore>(
 
     for _ in 0..(1 << nv) {
         let mut product = F::one();
-        for i in 0..num_multiplicands {
+        for multiplicand in &mut multiplicands {
             let val = F::rand(rng);
-            multiplicands[i].push(val);
+            multiplicand.push(val);
             product *= val;
         }
         sum += product;
     }
 
-    return (
+    (
         multiplicands
             .into_iter()
             .map(|x| Rc::new(DenseMultilinearExtension::from_evaluations_vec(nv, x)))
             .collect(),
         sum,
-    );
+    )
 }
 
 fn random_list_of_products<F: Field, R: RngCore>(

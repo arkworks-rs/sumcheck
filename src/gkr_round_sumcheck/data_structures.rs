@@ -48,12 +48,12 @@ impl<F: Field> GKRRoundSumcheckSubClaim<F> {
             .iter()
             .chain(self.u.iter())
             .chain(self.v.iter())
-            .map(|x| *x)
+            .copied()
             .collect();
         let actual_evaluation = f1.evaluate(&guv).unwrap()
-            * &f2.evaluate(&self.u).unwrap()
-            * &f3.evaluate(&self.v).unwrap();
+            * f2.evaluate(&self.u).unwrap()
+            * f3.evaluate(&self.v).unwrap();
 
-        return actual_evaluation == self.expected_evaluation;
+        actual_evaluation == self.expected_evaluation
     }
 }

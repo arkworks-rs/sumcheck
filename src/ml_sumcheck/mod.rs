@@ -43,7 +43,7 @@ impl<F: Field> MLSumcheck<F> {
         let mut fs_rng = Blake2s512Rng::setup();
         fs_rng.feed(&polynomial.info())?;
 
-        let mut prover_state = IPForMLSumcheck::prover_init(&polynomial);
+        let mut prover_state = IPForMLSumcheck::prover_init(polynomial);
         let mut verifier_msg = None;
         let mut prover_msgs = Vec::with_capacity(polynomial.num_variables);
         for _ in 0..polynomial.num_variables {
@@ -75,9 +75,6 @@ impl<F: Field> MLSumcheck<F> {
             );
         }
 
-        Ok(IPForMLSumcheck::check_and_generate_subclaim(
-            verifier_state,
-            claimed_sum,
-        )?)
+        IPForMLSumcheck::check_and_generate_subclaim(verifier_state, claimed_sum)
     }
 }
