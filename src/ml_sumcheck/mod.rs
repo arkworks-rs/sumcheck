@@ -75,9 +75,6 @@ impl<F: Field> MLSumcheck<F> {
             );
         }
 
-        IPForMLSumcheck::check_and_generate_subclaim(
-            verifier_state,
-            claimed_sum,
-        )
+        IPForMLSumcheck::check_and_generate_subclaim(verifier_state, claimed_sum)
     }
 }
