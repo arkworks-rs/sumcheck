@@ -98,21 +98,25 @@ impl<F: Field> IPForMLSumcheck<F> {
 
         let mut products_sum = Vec::with_capacity(degree + 1);
         products_sum.resize(degree + 1, F::zero());
+        let mut product = Vec::with_capacity(degree + 1);
+        product.resize(degree + 1, F::zero());
 
         // generate sum
         for b in 0..1 << (nv - i) {
-            let mut t_as_field = F::zero();
-            for old_product in products_sum.iter_mut().take(degree + 1) {
-                for (coefficient, products) in &prover_state.list_of_products {
-                    let mut product = *coefficient;
-                    for &jth_product in products {
-                        let table = &prover_state.flattened_ml_extensions[jth_product];
-                        product *= table[b << 1] * (F::one() - t_as_field)
-                            + table[(b << 1) + 1] * t_as_field;
+            for (coefficient, products) in &prover_state.list_of_products {
+                product.fill(*coefficient);
+                for &jth_product in products {
+                    let table = &prover_state.flattened_ml_extensions[jth_product];
+                    let mut start = table[b << 1];
+                    let step = table[(b << 1) + 1] - start;
+                    for p in product.iter_mut() {
+                        *p *= start;
+                        start += step;
                     }
-                    *old_product += product;
                 }
-                t_as_field += F::one();
+                for t in 0..degree + 1 {
+                    products_sum[t] += product[t];
+                }
             }
         }
 

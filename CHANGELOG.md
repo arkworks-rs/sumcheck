@@ -10,6 +10,8 @@
 
 ### Improvements
 
+- [\#71](https://github.com/arkworks-rs/sumcheck/pull/71) Improve prover performance by using an arithmetic sequence rather than interpolation inside of the `prove_round` loop.
+
 - [\#55](https://github.com/arkworks-rs/sumcheck/pull/55) Improve the interpolation performance and avoid unnecessary state clones.
 
 ### Bug fixes
