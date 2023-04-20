@@ -102,6 +102,28 @@ impl<F: Field> IPForMLSumcheck<F> {
     }
 }
 
+#[cfg(not(feature = "parallel"))]
+fn compute_sum<F: Field>(prover_state: &mut ProverState<F>) -> Vec<F> {
+    let i = prover_state.round;
+    let nv = prover_state.num_vars;
+    let degree = prover_state.max_multiplicands; // the degree of univariate polynomial sent by prover at this round
+
+    let mut products_sum = vec![F::zero(); degree + 1];
+    let mut product_scratch = vec![F::zero(); degree + 1];
+
+    // generate sum
+    for b in 0..1 << (nv - i) {
+        sum_over_list_of_products(
+            prover_state,
+            degree,
+            b,
+            &mut products_sum,
+            &mut product_scratch,
+        );
+    }
+    products_sum
+}
+
 fn sum_over_list_of_products<F: Field>(
     prover_state: &ProverState<F>,
     degree: usize,
@@ -126,28 +148,6 @@ fn sum_over_list_of_products<F: Field>(
     }
 }
 
-#[cfg(not(feature = "parallel"))]
-fn compute_sum<F: Field>(prover_state: &mut ProverState<F>) -> Vec<F> {
-    let i = prover_state.round;
-    let nv = prover_state.num_vars;
-    let degree = prover_state.max_multiplicands; // the degree of univariate polynomial sent by prover at this round
-
-    let mut products_sum = vec![F::zero(); degree + 1];
-    let mut product_scratch = vec![F::zero(); degree + 1];
-
-    // generate sum
-    for b in 0..1 << (nv - i) {
-        sum_over_list_of_products(
-            prover_state,
-            degree,
-            b,
-            &mut products_sum,
-            &mut product_scratch,
-        );
-    }
-    products_sum
-}
-
 #[cfg(feature = "parallel")]
 fn compute_sum<F: Field>(prover_state: &ProverState<F>) -> Vec<F> {
     let i = prover_state.round;
@@ -163,19 +163,21 @@ fn compute_sum<F: Field>(prover_state: &ProverState<F>) -> Vec<F> {
         .fold(
             || (vec![F::zero(); degree + 1], vec![F::zero(); degree + 1]),
             |mut scratch, b| {
+                // The first vec in this `scratch` tuple is the running sum in this fold sublist.
+                // The second vec is the `product_scratch` parameter for `sum_over_list_of_products`.
                 sum_over_list_of_products(prover_state, degree, b, &mut scratch.0, &mut scratch.1);
                 scratch
             },
         )
-        .map(|sub_sum_product| sub_sum_product.0)
+        .map(|scratch| scratch.0) // We really only care able the first element: the sum of the fold sublist.
         .reduce(
             || vec![F::zero(); degree + 1],
-            |mut products_sum, sub_products_sum| {
-                products_sum
+            |mut full_products_sum: Vec<F>, sublist_sum| {
+                full_products_sum
                     .iter_mut()
-                    .zip(sub_products_sum.iter())
-                    .for_each(|(s, a)| *s += a);
-                products_sum
+                    .zip(sublist_sum.iter())
+                    .for_each(|(f, s)| *f += s);
+                full_products_sum
             },
         )
 }
