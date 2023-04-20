@@ -6,6 +6,8 @@ use ark_ff::Field;
 use ark_poly::{DenseMultilinearExtension, MultilinearExtension};
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
 use ark_std::vec::Vec;
+#[cfg(feature = "parallel")]
+use rayon::prelude::*;
 
 /// Prover Message
 #[derive(Clone, CanonicalSerialize, CanonicalDeserialize)]
@@ -92,36 +94,88 @@ impl<F: Field> IPForMLSumcheck<F> {
             panic!("Prover is not active");
         }
 
-        let i = prover_state.round;
-        let nv = prover_state.num_vars;
-        let degree = prover_state.max_multiplicands; // the degree of univariate polynomial sent by prover at this round
-
-        let mut products_sum = Vec::with_capacity(degree + 1);
-        products_sum.resize(degree + 1, F::zero());
-        let mut product = Vec::with_capacity(degree + 1);
-        product.resize(degree + 1, F::zero());
-
-        // generate sum
-        for b in 0..1 << (nv - i) {
-            for (coefficient, products) in &prover_state.list_of_products {
-                product.fill(*coefficient);
-                for &jth_product in products {
-                    let table = &prover_state.flattened_ml_extensions[jth_product];
-                    let mut start = table[b << 1];
-                    let step = table[(b << 1) + 1] - start;
-                    for p in product.iter_mut() {
-                        *p *= start;
-                        start += step;
-                    }
-                }
-                for t in 0..degree + 1 {
-                    products_sum[t] += product[t];
-                }
-            }
-        }
+        let products_sum = compute_sum(prover_state);
 
         ProverMsg {
             evaluations: products_sum,
         }
     }
+}
+
+fn sum_over_list_of_products<F: Field>(
+    prover_state: &ProverState<F>,
+    degree: usize,
+    b: usize,
+    products_sum: &mut [F],
+    product_scratch: &mut [F],
+) {
+    for (coefficient, products) in &prover_state.list_of_products {
+        product_scratch.fill(*coefficient);
+        for &jth_product in products {
+            let table = &prover_state.flattened_ml_extensions[jth_product];
+            let mut start = table[b << 1];
+            let step = table[(b << 1) + 1] - start;
+            for p in product_scratch.iter_mut() {
+                *p *= start;
+                start += step;
+            }
+        }
+        for t in 0..degree + 1 {
+            products_sum[t] += product_scratch[t];
+        }
+    }
+}
+
+#[cfg(not(feature = "parallel"))]
+fn compute_sum<F: Field>(prover_state: &mut ProverState<F>) -> Vec<F> {
+    let i = prover_state.round;
+    let nv = prover_state.num_vars;
+    let degree = prover_state.max_multiplicands; // the degree of univariate polynomial sent by prover at this round
+
+    let mut products_sum = vec![F::zero(); degree + 1];
+    let mut product_scratch = vec![F::zero(); degree + 1];
+
+    // generate sum
+    for b in 0..1 << (nv - i) {
+        sum_over_list_of_products(
+            prover_state,
+            degree,
+            b,
+            &mut products_sum,
+            &mut product_scratch,
+        );
+    }
+    products_sum
+}
+
+#[cfg(feature = "parallel")]
+fn compute_sum<F: Field>(prover_state: &ProverState<F>) -> Vec<F> {
+    let i = prover_state.round;
+    let nv = prover_state.num_vars;
+    let degree = prover_state.max_multiplicands; // the degree of univariate polynomial sent by prover at this round
+
+    let min_par_len = 1 << 10; // the minimum length for which we should actually parallelize
+
+    // generate sum
+    (0..1 << (nv - i))
+        .into_par_iter()
+        .with_min_len(min_par_len)
+        .fold(
+            || (vec![F::zero(); degree + 1], vec![F::zero(); degree + 1]),
+            |mut scratch, b| {
+                sum_over_list_of_products(prover_state, degree, b, &mut scratch.0, &mut scratch.1);
+                scratch
+            },
+        )
+        .map(|sub_sum_product| sub_sum_product.0)
+        .reduce(
+            || vec![F::zero(); degree + 1],
+            |mut products_sum, sub_products_sum| {
+                products_sum
+                    .iter_mut()
+                    .zip(sub_products_sum.iter())
+                    .for_each(|(s, a)| *s += a);
+                products_sum
+            },
+        )
 }
