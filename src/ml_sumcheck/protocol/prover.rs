@@ -81,9 +81,13 @@ impl<F: Field> IPForMLSumcheck<F> {
             // fix argument
             let i = prover_state.round;
             let r = prover_state.randomness[i - 1];
-            for multiplicand in prover_state.flattened_ml_extensions.iter_mut() {
+            #[cfg(not(feature = "parallel"))]
+            let iter_mut = prover_state.flattened_ml_extensions.iter_mut();
+            #[cfg(feature = "parallel")]
+            let iter_mut = prover_state.flattened_ml_extensions.par_iter_mut();
+            iter_mut.for_each(|multiplicand| {
                 *multiplicand = multiplicand.fix_variables(&[r]);
-            }
+            });
         } else if prover_state.round > 0 {
             panic!("verifier message is empty");
         }
