@@ -124,6 +124,10 @@ fn compute_sum<F: Field>(prover_state: &mut ProverState<F>) -> Vec<F> {
     products_sum
 }
 
+/// `products_sum` is the cumulative sum
+/// `product_scratch` is a vector to use to compute the product with
+///     - it prevents extra allocation for every iteration of the loop
+///     - the values in it are not used outside this function
 fn sum_over_list_of_products<F: Field>(
     prover_state: &ProverState<F>,
     degree: usize,
@@ -156,7 +160,8 @@ fn compute_sum<F: Field>(prover_state: &ProverState<F>) -> Vec<F> {
 
     let min_par_len = 1 << 10; // the minimum length for which we should actually parallelize
 
-    // generate sum
+    // this works by using fold to compute partial sums within each rayon thread/block/sublist
+    // then, we use reduce to compute the overall sum
     (0..1 << (nv - i))
         .into_par_iter()
         .with_min_len(min_par_len)
@@ -172,12 +177,12 @@ fn compute_sum<F: Field>(prover_state: &ProverState<F>) -> Vec<F> {
         .map(|scratch| scratch.0) // We really only care able the first element: the sum of the fold sublist.
         .reduce(
             || vec![F::zero(); degree + 1],
-            |mut full_products_sum: Vec<F>, sublist_sum| {
-                full_products_sum
+            |mut overall_products_sum: Vec<F>, sublist_sum| {
+                overall_products_sum
                     .iter_mut()
                     .zip(sublist_sum.iter())
                     .for_each(|(f, s)| *f += s);
-                full_products_sum
+                overall_products_sum
             },
         )
 }
