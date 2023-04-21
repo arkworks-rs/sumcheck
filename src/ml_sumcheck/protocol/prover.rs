@@ -104,10 +104,11 @@ impl<F: Field> IPForMLSumcheck<F> {
         let zeros = || (vec![F::zero(); degree + 1], vec![F::zero(); degree + 1]);
 
         // generate sum
-
         let fold_result = ark_std::cfg_into_iter!(0..1 << (nv - i), 1 << 10).fold(
             zeros,
             |(mut products_sum, mut product), b| {
+                // In effect, this fold is essentially doing simply:
+                // for b in 0..1 << (nv - i) {
                 for (coefficient, products) in &prover_state.list_of_products {
                     product.fill(*coefficient);
                     for &jth_product in products {
@@ -130,10 +131,11 @@ impl<F: Field> IPForMLSumcheck<F> {
         #[cfg(not(feature = "parallel"))]
         let products_sum = fold_result.0;
 
+        // When rayon is used, the `fold` operation results in a iterator of `Vec<F>` rather than a single `Vec<F>`. In this case, we simply need to sum them.
         #[cfg(feature = "parallel")]
         let products_sum = fold_result.map(|scratch| scratch.0).reduce(
             || vec![F::zero(); degree + 1],
-            |mut overall_products_sum: Vec<F>, sublist_sum| {
+            |mut overall_products_sum, sublist_sum| {
                 overall_products_sum
                     .iter_mut()
                     .zip(sublist_sum.iter())
