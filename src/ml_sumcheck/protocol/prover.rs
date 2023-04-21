@@ -5,7 +5,7 @@ use crate::ml_sumcheck::protocol::IPForMLSumcheck;
 use ark_ff::Field;
 use ark_poly::{DenseMultilinearExtension, MultilinearExtension};
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
-use ark_std::vec::Vec;
+use ark_std::{cfg_iter_mut, vec::Vec};
 #[cfg(feature = "parallel")]
 use rayon::prelude::*;
 
@@ -81,11 +81,7 @@ impl<F: Field> IPForMLSumcheck<F> {
             // fix argument
             let i = prover_state.round;
             let r = prover_state.randomness[i - 1];
-            #[cfg(not(feature = "parallel"))]
-            let iter_mut = prover_state.flattened_ml_extensions.iter_mut();
-            #[cfg(feature = "parallel")]
-            let iter_mut = prover_state.flattened_ml_extensions.par_iter_mut();
-            iter_mut.for_each(|multiplicand| {
+            cfg_iter_mut!(prover_state.flattened_ml_extensions).for_each(|multiplicand| {
                 *multiplicand = multiplicand.fix_variables(&[r]);
             });
         } else if prover_state.round > 0 {
