@@ -106,8 +106,6 @@ impl<F: Field> IPForMLSumcheck<F> {
         let fold_result = ark_std::cfg_into_iter!((0..1 << (nv - i)), 1 << 10).fold(
             zeros,
             |(mut products_sum, mut product), b| {
-                // `scratch.0` is the running sum in this fold.
-                // `scratch.1` is a scratch vector that is only used inside this lambda
                 for (coefficient, products) in &prover_state.list_of_products {
                     product.fill(*coefficient);
                     for &jth_product in products {
