@@ -103,10 +103,9 @@ impl<F: Field> IPForMLSumcheck<F> {
         #[cfg(feature = "parallel")]
         let zeros = || (vec![F::zero(); degree + 1], vec![F::zero(); degree + 1]);
 
-        let fold_result =
-            ark_std::cfg_into_iter!((0..1 << (nv - i)), 1 << 10).fold(zeros, |mut scratch, b| {
-                let products_sum = &mut scratch.0;
-                let product = &mut scratch.1;
+        let fold_result = ark_std::cfg_into_iter!((0..1 << (nv - i)), 1 << 10).fold(
+            zeros,
+            |(mut products_sum, mut product), b| {
                 // `scratch.0` is the running sum in this fold.
                 // `scratch.1` is a scratch vector that is only used inside this lambda
                 for (coefficient, products) in &prover_state.list_of_products {
@@ -124,8 +123,9 @@ impl<F: Field> IPForMLSumcheck<F> {
                         products_sum[t] += product[t];
                     }
                 }
-                scratch
-            });
+                (products_sum, product)
+            },
+        );
 
         #[cfg(not(feature = "parallel"))]
         let products_sum = fold_result.0;
