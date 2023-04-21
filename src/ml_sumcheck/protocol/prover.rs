@@ -103,6 +103,8 @@ impl<F: Field> IPForMLSumcheck<F> {
         #[cfg(feature = "parallel")]
         let zeros = || (vec![F::zero(); degree + 1], vec![F::zero(); degree + 1]);
 
+        // generate sum
+
         let fold_result = ark_std::cfg_into_iter!(0..1 << (nv - i), 1 << 10).fold(
             zeros,
             |(mut products_sum, mut product), b| {
