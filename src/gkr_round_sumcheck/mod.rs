@@ -28,9 +28,11 @@ pub fn initialize_phase_one<F: Field>(
     let mut a_hg: Vec<_> = (0..(1 << dim)).map(|_| F::zero()).collect();
     let f1_at_g = f1.fix_variables(g);
     for (xy, v) in f1_at_g.evaluations.iter() {
-        let x = xy & ((1 << dim) - 1);
-        let y = xy >> dim;
-        a_hg[x] += *v * f3[y];
+        if v != &F::zero() {
+            let x = xy & ((1 << dim) - 1);
+            let y = xy >> dim;
+            a_hg[x] += *v * f3[y];
+        }
     }
 
     let hg = DenseMultilinearExtension::from_evaluations_vec(dim, a_hg);
