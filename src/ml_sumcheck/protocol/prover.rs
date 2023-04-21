@@ -94,88 +94,42 @@ impl<F: Field> IPForMLSumcheck<F> {
             panic!("Prover is not active");
         }
 
-        let products_sum = compute_sum(prover_state);
+        let i = prover_state.round;
+        let nv = prover_state.num_vars;
+        let degree = prover_state.max_multiplicands; // the degree of univariate polynomial sent by prover at this round
 
-        ProverMsg {
-            evaluations: products_sum,
-        }
-    }
-}
+        #[cfg(not(feature = "parallel"))]
+        let zeros = (vec![F::zero(); degree + 1], vec![F::zero(); degree + 1]);
+        #[cfg(feature = "parallel")]
+        let zeros = || (vec![F::zero(); degree + 1], vec![F::zero(); degree + 1]);
 
-#[cfg(not(feature = "parallel"))]
-fn compute_sum<F: Field>(prover_state: &mut ProverState<F>) -> Vec<F> {
-    let i = prover_state.round;
-    let nv = prover_state.num_vars;
-    let degree = prover_state.max_multiplicands; // the degree of univariate polynomial sent by prover at this round
-
-    let mut products_sum = vec![F::zero(); degree + 1];
-    let mut product_scratch = vec![F::zero(); degree + 1];
-
-    // generate sum
-    for b in 0..1 << (nv - i) {
-        sum_over_list_of_products(
-            prover_state,
-            degree,
-            b,
-            &mut products_sum,
-            &mut product_scratch,
-        );
-    }
-    products_sum
-}
-
-/// `products_sum` is the cumulative sum
-/// `product_scratch` is a vector to use to compute the product with
-///     - it prevents extra allocation for every iteration of the loop
-///     - the values in it are not used outside this function
-fn sum_over_list_of_products<F: Field>(
-    prover_state: &ProverState<F>,
-    degree: usize,
-    b: usize,
-    products_sum: &mut [F],
-    product_scratch: &mut [F],
-) {
-    for (coefficient, products) in &prover_state.list_of_products {
-        product_scratch.fill(*coefficient);
-        for &jth_product in products {
-            let table = &prover_state.flattened_ml_extensions[jth_product];
-            let mut start = table[b << 1];
-            let step = table[(b << 1) + 1] - start;
-            for p in product_scratch.iter_mut() {
-                *p *= start;
-                start += step;
-            }
-        }
-        for t in 0..degree + 1 {
-            products_sum[t] += product_scratch[t];
-        }
-    }
-}
-
-#[cfg(feature = "parallel")]
-fn compute_sum<F: Field>(prover_state: &ProverState<F>) -> Vec<F> {
-    let i = prover_state.round;
-    let nv = prover_state.num_vars;
-    let degree = prover_state.max_multiplicands; // the degree of univariate polynomial sent by prover at this round
-
-    let min_par_len = 1 << 10; // the minimum length for which we should actually parallelize
-
-    // this works by using fold to compute partial sums within each rayon thread/block/sublist
-    // then, we use reduce to compute the overall sum
-    (0..1 << (nv - i))
-        .into_par_iter()
-        .with_min_len(min_par_len)
-        .fold(
-            || (vec![F::zero(); degree + 1], vec![F::zero(); degree + 1]),
-            |mut scratch, b| {
-                // The first vec in this `scratch` tuple is the running sum in this fold sublist.
-                // The second vec is the `product_scratch` parameter for `sum_over_list_of_products`.
-                sum_over_list_of_products(prover_state, degree, b, &mut scratch.0, &mut scratch.1);
+        let fold_result =
+            ark_std::cfg_into_iter!((0..1 << (nv - i)), 1 << 10).fold(zeros, |mut scratch, b| {
+                // `scratch.0` is the running sum in this fold.
+                // `scratch.1` is a scratch vector that is only used inside this lambda
+                for (coefficient, products) in &prover_state.list_of_products {
+                    scratch.1.fill(*coefficient);
+                    for &jth_product in products {
+                        let table = &prover_state.flattened_ml_extensions[jth_product];
+                        let mut start = table[b << 1];
+                        let step = table[(b << 1) + 1] - start;
+                        for p in scratch.1.iter_mut() {
+                            *p *= start;
+                            start += step;
+                        }
+                    }
+                    for t in 0..degree + 1 {
+                        scratch.0[t] += (&mut scratch.1)[t];
+                    }
+                }
                 scratch
-            },
-        )
-        .map(|scratch| scratch.0) // We really only care able the first element: the sum of the fold sublist.
-        .reduce(
+            });
+
+        #[cfg(not(feature = "parallel"))]
+        let products_sum = fold_result.0;
+
+        #[cfg(feature = "parallel")]
+        let products_sum = fold_result.map(|scratch| scratch.0).reduce(
             || vec![F::zero(); degree + 1],
             |mut overall_products_sum: Vec<F>, sublist_sum| {
                 overall_products_sum
@@ -184,5 +138,10 @@ fn compute_sum<F: Field>(prover_state: &ProverState<F>) -> Vec<F> {
                     .for_each(|(f, s)| *f += s);
                 overall_products_sum
             },
-        )
+        );
+
+        ProverMsg {
+            evaluations: products_sum,
+        }
+    }
 }
