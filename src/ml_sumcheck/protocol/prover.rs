@@ -105,21 +105,23 @@ impl<F: Field> IPForMLSumcheck<F> {
 
         let fold_result =
             ark_std::cfg_into_iter!((0..1 << (nv - i)), 1 << 10).fold(zeros, |mut scratch, b| {
+                let products_sum = &mut scratch.0;
+                let product = &mut scratch.1;
                 // `scratch.0` is the running sum in this fold.
                 // `scratch.1` is a scratch vector that is only used inside this lambda
                 for (coefficient, products) in &prover_state.list_of_products {
-                    scratch.1.fill(*coefficient);
+                    product.fill(*coefficient);
                     for &jth_product in products {
                         let table = &prover_state.flattened_ml_extensions[jth_product];
                         let mut start = table[b << 1];
                         let step = table[(b << 1) + 1] - start;
-                        for p in scratch.1.iter_mut() {
+                        for p in product.iter_mut() {
                             *p *= start;
                             start += step;
                         }
                     }
                     for t in 0..degree + 1 {
-                        scratch.0[t] += (&mut scratch.1)[t];
+                        products_sum[t] += product[t];
                     }
                 }
                 scratch
