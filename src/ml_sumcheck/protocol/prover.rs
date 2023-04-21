@@ -5,7 +5,9 @@ use crate::ml_sumcheck::protocol::IPForMLSumcheck;
 use ark_ff::Field;
 use ark_poly::{DenseMultilinearExtension, MultilinearExtension};
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
-use ark_std::vec::Vec;
+use ark_std::{cfg_iter_mut, vec::Vec};
+#[cfg(feature = "parallel")]
+use rayon::prelude::*;
 
 /// Prover Message
 #[derive(Clone, CanonicalSerialize, CanonicalDeserialize)]
@@ -79,9 +81,9 @@ impl<F: Field> IPForMLSumcheck<F> {
             // fix argument
             let i = prover_state.round;
             let r = prover_state.randomness[i - 1];
-            for multiplicand in prover_state.flattened_ml_extensions.iter_mut() {
+            cfg_iter_mut!(prover_state.flattened_ml_extensions).for_each(|multiplicand| {
                 *multiplicand = multiplicand.fix_variables(&[r]);
-            }
+            });
         } else if prover_state.round > 0 {
             panic!("verifier message is empty");
         }
@@ -96,29 +98,51 @@ impl<F: Field> IPForMLSumcheck<F> {
         let nv = prover_state.num_vars;
         let degree = prover_state.max_multiplicands; // the degree of univariate polynomial sent by prover at this round
 
-        let mut products_sum = Vec::with_capacity(degree + 1);
-        products_sum.resize(degree + 1, F::zero());
-        let mut product = Vec::with_capacity(degree + 1);
-        product.resize(degree + 1, F::zero());
+        #[cfg(not(feature = "parallel"))]
+        let zeros = (vec![F::zero(); degree + 1], vec![F::zero(); degree + 1]);
+        #[cfg(feature = "parallel")]
+        let zeros = || (vec![F::zero(); degree + 1], vec![F::zero(); degree + 1]);
 
         // generate sum
-        for b in 0..1 << (nv - i) {
-            for (coefficient, products) in &prover_state.list_of_products {
-                product.fill(*coefficient);
-                for &jth_product in products {
-                    let table = &prover_state.flattened_ml_extensions[jth_product];
-                    let mut start = table[b << 1];
-                    let step = table[(b << 1) + 1] - start;
-                    for p in product.iter_mut() {
-                        *p *= start;
-                        start += step;
+        let fold_result = ark_std::cfg_into_iter!(0..1 << (nv - i), 1 << 10).fold(
+            zeros,
+            |(mut products_sum, mut product), b| {
+                // In effect, this fold is essentially doing simply:
+                // for b in 0..1 << (nv - i) {
+                for (coefficient, products) in &prover_state.list_of_products {
+                    product.fill(*coefficient);
+                    for &jth_product in products {
+                        let table = &prover_state.flattened_ml_extensions[jth_product];
+                        let mut start = table[b << 1];
+                        let step = table[(b << 1) + 1] - start;
+                        for p in product.iter_mut() {
+                            *p *= start;
+                            start += step;
+                        }
+                    }
+                    for t in 0..degree + 1 {
+                        products_sum[t] += product[t];
                     }
                 }
-                for t in 0..degree + 1 {
-                    products_sum[t] += product[t];
-                }
-            }
-        }
+                (products_sum, product)
+            },
+        );
+
+        #[cfg(not(feature = "parallel"))]
+        let products_sum = fold_result.0;
+
+        // When rayon is used, the `fold` operation results in a iterator of `Vec<F>` rather than a single `Vec<F>`. In this case, we simply need to sum them.
+        #[cfg(feature = "parallel")]
+        let products_sum = fold_result.map(|scratch| scratch.0).reduce(
+            || vec![F::zero(); degree + 1],
+            |mut overall_products_sum, sublist_sum| {
+                overall_products_sum
+                    .iter_mut()
+                    .zip(sublist_sum.iter())
+                    .for_each(|(f, s)| *f += s);
+                overall_products_sum
+            },
+        );
 
         ProverMsg {
             evaluations: products_sum,
