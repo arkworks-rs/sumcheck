@@ -1,6 +1,8 @@
 use crate::ml_sumcheck::data_structures::ListOfProductsOfPolynomials;
 use crate::ml_sumcheck::protocol::IPForMLSumcheck;
 use crate::ml_sumcheck::MLSumcheck;
+use crate::rng::Blake2s512Rng;
+use crate::rng::FeedableRNG;
 use ark_ff::Field;
 use ark_poly::{DenseMultilinearExtension, MultilinearExtension};
 use ark_std::rand::Rng;
@@ -94,14 +96,50 @@ fn test_protocol(nv: usize, num_multiplicands_range: (usize, usize), num_product
     );
 }
 
+fn test_polynomial_as_subprotocol(
+    nv: usize,
+    num_multiplicands_range: (usize, usize),
+    num_products: usize,
+    prover_rng: &mut impl FeedableRNG<Error = crate::Error>,
+    verifier_rng: &mut impl FeedableRNG<Error = crate::Error>,
+) {
+    let mut rng = test_rng();
+    let (poly, asserted_sum) =
+        random_list_of_products::<Fr, _>(nv, num_multiplicands_range, num_products, &mut rng);
+    let poly_info = poly.info();
+    let (proof, _prover_state) =
+        MLSumcheck::prove_as_subprotocol(prover_rng, &poly).expect("fail to prove");
+    let subclaim =
+        MLSumcheck::verify_as_subprotocol(verifier_rng, &poly_info, asserted_sum, &proof)
+            .expect("fail to verify");
+    assert!(
+        poly.evaluate(&subclaim.point) == subclaim.expected_evaluation,
+        "wrong subclaim"
+    );
+}
+
 #[test]
 fn test_trivial_polynomial() {
     let nv = 1;
     let num_multiplicands_range = (4, 13);
     let num_products = 5;
 
-    test_polynomial(nv, num_multiplicands_range, num_products);
-    test_protocol(nv, num_multiplicands_range, num_products);
+    for _ in 0..10 {
+        test_polynomial(nv, num_multiplicands_range, num_products);
+        test_protocol(nv, num_multiplicands_range, num_products);
+
+        let mut prover_rng = Blake2s512Rng::setup();
+        prover_rng.feed(b"Test Trivial Works").unwrap();
+        let mut verifier_rng = Blake2s512Rng::setup();
+        verifier_rng.feed(b"Test Trivial Works").unwrap();
+        test_polynomial_as_subprotocol(
+            nv,
+            num_multiplicands_range,
+            num_products,
+            &mut prover_rng,
+            &mut verifier_rng,
+        )
+    }
 }
 #[test]
 fn test_normal_polynomial() {
@@ -109,8 +147,41 @@ fn test_normal_polynomial() {
     let num_multiplicands_range = (4, 9);
     let num_products = 5;
 
-    test_polynomial(nv, num_multiplicands_range, num_products);
-    test_protocol(nv, num_multiplicands_range, num_products);
+    for _ in 0..10 {
+        test_polynomial(nv, num_multiplicands_range, num_products);
+        test_protocol(nv, num_multiplicands_range, num_products);
+
+        let mut prover_rng = Blake2s512Rng::setup();
+        prover_rng.feed(b"Test Trivial Works").unwrap();
+        let mut verifier_rng = Blake2s512Rng::setup();
+        verifier_rng.feed(b"Test Trivial Works").unwrap();
+        test_polynomial_as_subprotocol(
+            nv,
+            num_multiplicands_range,
+            num_products,
+            &mut prover_rng,
+            &mut verifier_rng,
+        )
+    }
+}
+#[test]
+#[should_panic]
+fn test_normal_polynomial_different_transcripts_fails() {
+    let nv = 12;
+    let num_multiplicands_range = (4, 9);
+    let num_products = 5;
+
+    let mut prover_rng = Blake2s512Rng::setup();
+    prover_rng.feed(b"Test Trivial Works").unwrap();
+    let mut verifier_rng = Blake2s512Rng::setup();
+    verifier_rng.feed(b"Test Trivial Fails").unwrap();
+    test_polynomial_as_subprotocol(
+        nv,
+        num_multiplicands_range,
+        num_products,
+        &mut prover_rng,
+        &mut verifier_rng,
+    )
 }
 #[test]
 #[should_panic]
@@ -120,6 +191,14 @@ fn zero_polynomial_should_error() {
     let num_products = 5;
 
     test_polynomial(nv, num_multiplicands_range, num_products);
+}
+#[test]
+#[should_panic]
+fn zero_polynomial_protocol_should_error() {
+    let nv = 0;
+    let num_multiplicands_range = (4, 13);
+    let num_products = 5;
+
     test_protocol(nv, num_multiplicands_range, num_products);
 }
 

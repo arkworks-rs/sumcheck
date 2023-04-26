@@ -1,7 +1,7 @@
 //! Sumcheck Protocol for multilinear extension
 
 use crate::ml_sumcheck::data_structures::{ListOfProductsOfPolynomials, PolynomialInfo};
-use crate::ml_sumcheck::protocol::prover::ProverMsg;
+use crate::ml_sumcheck::protocol::prover::{ProverMsg, ProverState};
 use crate::ml_sumcheck::protocol::verifier::SubClaim;
 use crate::ml_sumcheck::protocol::IPForMLSumcheck;
 use crate::rng::{Blake2s512Rng, FeedableRNG};
@@ -41,6 +41,16 @@ impl<F: Field> MLSumcheck<F> {
     /// $$\sum_{i=0}^{n}C_i\cdot\prod_{j=0}^{m_i}P_{ij}$$
     pub fn prove(polynomial: &ListOfProductsOfPolynomials<F>) -> Result<Proof<F>, crate::Error> {
         let mut fs_rng = Blake2s512Rng::setup();
+        Self::prove_as_subprotocol(&mut fs_rng, polynomial).map(|r| r.0)
+    }
+
+    /// This function does the same thing as `prove`, but it uses a `FeedableRNG` as the transcript/to generate the
+    /// verifier challenges. Additionally, it returns the prover's state in addition to the proof.
+    /// Both of these allow this sumcheck to be better used as a part of a larger protocol.
+    pub fn prove_as_subprotocol(
+        fs_rng: &mut impl FeedableRNG<Error = crate::Error>,
+        polynomial: &ListOfProductsOfPolynomials<F>,
+    ) -> Result<(Proof<F>, ProverState<F>), crate::Error> {
         fs_rng.feed(&polynomial.info())?;
 
         let mut prover_state = IPForMLSumcheck::prover_init(polynomial);
@@ -50,10 +60,10 @@ impl<F: Field> MLSumcheck<F> {
             let prover_msg = IPForMLSumcheck::prove_round(&mut prover_state, &verifier_msg);
             fs_rng.feed(&prover_msg)?;
             prover_msgs.push(prover_msg);
-            verifier_msg = Some(IPForMLSumcheck::sample_round(&mut fs_rng));
+            verifier_msg = Some(IPForMLSumcheck::sample_round(fs_rng));
         }
 
-        Ok(prover_msgs)
+        Ok((prover_msgs, prover_state))
     }
 
     /// verify the claimed sum using the proof
@@ -63,16 +73,24 @@ impl<F: Field> MLSumcheck<F> {
         proof: &Proof<F>,
     ) -> Result<SubClaim<F>, crate::Error> {
         let mut fs_rng = Blake2s512Rng::setup();
+        Self::verify_as_subprotocol(&mut fs_rng, polynomial_info, claimed_sum, proof)
+    }
+
+    /// This function does the same thing as `prove`, but it uses a `FeedableRNG` as the transcript/to generate the
+    /// verifier challenges. This allows this sumcheck to be used as a part of a larger protocol.
+    pub fn verify_as_subprotocol(
+        fs_rng: &mut impl FeedableRNG<Error = crate::Error>,
+        polynomial_info: &PolynomialInfo,
+        claimed_sum: F,
+        proof: &Proof<F>,
+    ) -> Result<SubClaim<F>, crate::Error> {
         fs_rng.feed(polynomial_info)?;
         let mut verifier_state = IPForMLSumcheck::verifier_init(polynomial_info);
         for i in 0..polynomial_info.num_variables {
             let prover_msg = proof.get(i).expect("proof is incomplete");
             fs_rng.feed(prover_msg)?;
-            let _verifier_msg = IPForMLSumcheck::verify_round(
-                (*prover_msg).clone(),
-                &mut verifier_state,
-                &mut fs_rng,
-            );
+            let _verifier_msg =
+                IPForMLSumcheck::verify_round((*prover_msg).clone(), &mut verifier_state, fs_rng);
         }
 
         IPForMLSumcheck::check_and_generate_subclaim(verifier_state, claimed_sum)
