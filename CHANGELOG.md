@@ -10,6 +10,8 @@
 
 ### Improvements
 
+- [\#73](https://github.com/arkworks-rs/sumcheck/pull/73) Add support for using `MLSumcheck` as subprotocol.
+
 - [\#72](https://github.com/arkworks-rs/sumcheck/pull/72) Uses `rayon` in the prover when the `parallel` feature is enabled.
 
 - [\#71](https://github.com/arkworks-rs/sumcheck/pull/71) Improve prover performance by using an arithmetic sequence rather than interpolation inside of the `prove_round` loop.

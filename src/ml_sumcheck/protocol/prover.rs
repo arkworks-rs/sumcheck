@@ -24,9 +24,12 @@ pub struct ProverState<F: Field> {
     pub list_of_products: Vec<(F, Vec<usize>)>,
     /// Stores a list of multilinear extensions in which `self.list_of_products` points to
     pub flattened_ml_extensions: Vec<DenseMultilinearExtension<F>>,
-    num_vars: usize,
-    max_multiplicands: usize,
-    round: usize,
+    /// Number of variables
+    pub num_vars: usize,
+    /// Max number of multiplicands in a product
+    pub max_multiplicands: usize,
+    /// The current round number
+    pub round: usize,
 }
 
 impl<F: Field> IPForMLSumcheck<F> {
