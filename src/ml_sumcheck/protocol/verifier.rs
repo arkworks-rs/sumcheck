@@ -143,12 +143,24 @@ pub(crate) fn interpolate_uni_poly<F: Field>(p_i: &[F], eval_at: F) -> F {
     let mut prod = eval_at;
     evals.push(eval_at);
 
-    // `prod = \prod_{j} (eval_at - j)`
-    for e in 1..len {
-        let tmp = eval_at - F::from(e as u64);
+    //`prod = \prod_{j} (eval_at - j)`
+    // we return early if 0 <= eval_at <  len
+    let mut check = F::zero();
+    for i in 1..len {
+        if eval_at == check {
+            return p_i[i - 1];
+        }
+        check += F::one();
+
+        let tmp = eval_at - check;
         evals.push(tmp);
         prod *= tmp;
     }
+
+    if eval_at == check {
+        return p_i[len - 1];
+    }
+
     let mut res = F::zero();
     // we want to compute \prod (j!=i) (i-j) for a given i
     //
