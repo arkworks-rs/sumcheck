@@ -132,9 +132,10 @@ impl<F: Field> IPForMLSumcheck<F> {
     }
 }
 
-/// interpolate a uni-variate degree-`p_i.len()-1` polynomial and evaluate this
-/// polynomial at `eval_at`:
-///   \sum_{i=0}^len p_i * (\prod_{j!=i} (eval_at - j)/(i-j))
+/// interpolate the *unique* univariate polynomial of degree *at most* 
+/// p_i.len()-1 passing through the y-values in p_i at x = 0,..., p_i.len()-1 
+/// and evaluate this  polynomial at `eval_at`. In other words, efficiently compute
+///  \sum_{i=0}^{len p_i - 1} p_i[i] * (\prod_{j!=i} (eval_at - j)/(i-j))
 pub(crate) fn interpolate_uni_poly<F: Field>(p_i: &[F], eval_at: F) -> F {
     let len = p_i.len();
 
