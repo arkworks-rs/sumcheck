@@ -144,7 +144,7 @@ pub(crate) fn interpolate_uni_poly<F: Field>(p_i: &[F], eval_at: F) -> F {
     evals.push(eval_at);
 
     //`prod = \prod_{j} (eval_at - j)`
-    // we return early if 0 <= eval_at <  len
+    // we return early if 0 <= eval_at <  len, i.e. if the desired value has been passed
     let mut check = F::zero();
     for i in 1..len {
         if eval_at == check {
@@ -320,5 +320,11 @@ mod test {
         let query = F::rand(&mut prng);
 
         assert_eq!(poly.evaluate(&query), interpolate_uni_poly(&evals, query));
+
+        // test interpolation when we ask for the value at an x-cordinate
+        // we are already passing, i.e. in the range 0 <= x < len(values) - 1
+        let evals = vec![0, 1, 4, 9]
+            .into_iter().map(|i| F::from(i)).collect::<Vec<F>>();
+        assert_eq!(interpolate_uni_poly(&evals, F::from(3)), F::from(9));
     }
 }
