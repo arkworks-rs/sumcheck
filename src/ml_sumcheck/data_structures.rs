@@ -1,7 +1,7 @@
 //! Defines the data structures used by the `MLSumcheck` protocol.
 
 use ark_ff::Field;
-use ark_poly::{DenseMultilinearExtension, MultilinearExtension};
+use ark_poly::{DenseMultilinearExtension, Polynomial};
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
 use ark_std::cmp::max;
 use ark_std::rc::Rc;
@@ -102,7 +102,7 @@ impl<F: Field> ListOfProductsOfPolynomials<F> {
             .map(|(c, p)| {
                 *c * p
                     .iter()
-                    .map(|&i| self.flattened_ml_extensions[i].evaluate(point).unwrap())
+                    .map(|&i| self.flattened_ml_extensions[i].evaluate(&point.to_vec()))
                     .product::<F>()
             })
             .sum()
