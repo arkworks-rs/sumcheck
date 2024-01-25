@@ -11,7 +11,9 @@ use crate::ml_sumcheck::protocol::prover::ProverState;
 use crate::ml_sumcheck::protocol::{IPForMLSumcheck, ListOfProductsOfPolynomials, PolynomialInfo};
 use crate::rng::FeedableRNG;
 use ark_ff::{Field, Zero};
-use ark_poly::{DenseMultilinearExtension, MultilinearExtension, SparseMultilinearExtension};
+use ark_poly::{
+    DenseMultilinearExtension, MultilinearExtension, Polynomial, SparseMultilinearExtension,
+};
 use ark_std::marker::PhantomData;
 use ark_std::rc::Rc;
 use ark_std::vec::Vec;
@@ -117,7 +119,7 @@ impl<F: Field> GKRRoundSumcheck<F> {
         }
 
         let f1_gu = initialize_phase_two(&f1_g, &u);
-        let mut phase2_ps = start_phase2_sumcheck(&f1_gu, f3, f2.evaluate(&u).unwrap());
+        let mut phase2_ps = start_phase2_sumcheck(&f1_gu, f3, f2.evaluate(&u));
         let mut phase2_vm = None;
         let mut phase2_prover_msgs = Vec::with_capacity(dim);
         let mut v = Vec::with_capacity(dim);
