@@ -1,7 +1,7 @@
 use crate::ml_sumcheck::data_structures::ListOfProductsOfPolynomials;
 use crate::ml_sumcheck::protocol::IPForMLSumcheck;
 use crate::ml_sumcheck::MLSumcheck;
-use crate::rng::Blake2s512Rng;
+use crate::rng::Blake2b512Rng;
 use crate::rng::FeedableRNG;
 use ark_ff::Field;
 use ark_poly::{DenseMultilinearExtension, MultilinearExtension};
@@ -128,9 +128,9 @@ fn test_trivial_polynomial() {
         test_polynomial(nv, num_multiplicands_range, num_products);
         test_protocol(nv, num_multiplicands_range, num_products);
 
-        let mut prover_rng = Blake2s512Rng::setup();
+        let mut prover_rng = Blake2b512Rng::setup();
         prover_rng.feed(b"Test Trivial Works").unwrap();
-        let mut verifier_rng = Blake2s512Rng::setup();
+        let mut verifier_rng = Blake2b512Rng::setup();
         verifier_rng.feed(b"Test Trivial Works").unwrap();
         test_polynomial_as_subprotocol(
             nv,
@@ -151,9 +151,9 @@ fn test_normal_polynomial() {
         test_polynomial(nv, num_multiplicands_range, num_products);
         test_protocol(nv, num_multiplicands_range, num_products);
 
-        let mut prover_rng = Blake2s512Rng::setup();
+        let mut prover_rng = Blake2b512Rng::setup();
         prover_rng.feed(b"Test Trivial Works").unwrap();
-        let mut verifier_rng = Blake2s512Rng::setup();
+        let mut verifier_rng = Blake2b512Rng::setup();
         verifier_rng.feed(b"Test Trivial Works").unwrap();
         test_polynomial_as_subprotocol(
             nv,
@@ -171,9 +171,9 @@ fn test_normal_polynomial_different_transcripts_fails() {
     let num_multiplicands_range = (4, 9);
     let num_products = 5;
 
-    let mut prover_rng = Blake2s512Rng::setup();
+    let mut prover_rng = Blake2b512Rng::setup();
     prover_rng.feed(b"Test Trivial Works").unwrap();
-    let mut verifier_rng = Blake2s512Rng::setup();
+    let mut verifier_rng = Blake2b512Rng::setup();
     verifier_rng.feed(b"Test Trivial Fails").unwrap();
     test_polynomial_as_subprotocol(
         nv,

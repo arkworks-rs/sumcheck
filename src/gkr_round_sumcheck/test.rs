@@ -1,5 +1,5 @@
 use crate::gkr_round_sumcheck::GKRRoundSumcheck;
-use crate::rng::{Blake2s512Rng, FeedableRNG};
+use crate::rng::{Blake2b512Rng, FeedableRNG};
 use ark_ff::Field;
 use ark_poly::{DenseMultilinearExtension, MultilinearExtension, SparseMultilinearExtension};
 use ark_std::rand::RngCore;
@@ -59,9 +59,9 @@ fn test_circuit<F: Field>(nv: usize) {
     let (f1, f2, f3) = random_gkr_instance(nv, &mut rng);
     let g: Vec<_> = (0..nv).map(|_| F::rand(&mut rng)).collect();
     let claimed_sum = calculate_sum_naive(&f1, &f2, &f3, &g);
-    let mut rng = Blake2s512Rng::setup();
+    let mut rng = Blake2b512Rng::setup();
     let proof = GKRRoundSumcheck::prove(&mut rng, &f1, &f2, &f3, &g);
-    rng = Blake2s512Rng::setup();
+    rng = Blake2b512Rng::setup();
     let subclaim = GKRRoundSumcheck::verify(&mut rng, f2.num_vars, &proof, claimed_sum)
         .expect("verification failed");
     let result = subclaim.verify_subclaim(&f1, &f2, &f3, &g);
@@ -80,7 +80,7 @@ fn test_extract() {
     let (f1, f2, f3) = random_gkr_instance(nv, &mut rng);
     let g: Vec<_> = (0..nv).map(|_| Fr::rand(&mut rng)).collect();
     let expected_sum = calculate_sum_naive(&f1, &f2, &f3, &g);
-    let mut rng = Blake2s512Rng::setup();
+    let mut rng = Blake2b512Rng::setup();
     let proof = GKRRoundSumcheck::prove(&mut rng, &f1, &f2, &f3, &g);
     let actual_sum = proof.extract_sum();
 
