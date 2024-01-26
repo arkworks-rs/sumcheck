@@ -107,7 +107,7 @@ fn test_polynomial_as_subprotocol(
     let (poly, asserted_sum) =
         random_list_of_products::<Fr, _>(nv, num_multiplicands_range, num_products, &mut rng);
     let poly_info = poly.info();
-    let (proof, _prover_state) =
+    let (proof, prover_state) =
         MLSumcheck::prove_as_subprotocol(prover_rng, &poly).expect("fail to prove");
     let subclaim =
         MLSumcheck::verify_as_subprotocol(verifier_rng, &poly_info, asserted_sum, &proof)
@@ -116,6 +116,7 @@ fn test_polynomial_as_subprotocol(
         poly.evaluate(&subclaim.point) == subclaim.expected_evaluation,
         "wrong subclaim"
     );
+    assert_eq!(prover_state.randomness, subclaim.point);
 }
 
 #[test]
