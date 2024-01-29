@@ -1,6 +1,6 @@
 [package]
 name = "ark-linear-sumcheck"
-version = "0.3.0"
+version = "0.4.0"
 authors = [
     "Tom Shen <tomshen@berkeley.edu>",
     "arkworks contributors"
@@ -58,10 +58,10 @@ std = ["ark-ff/std", "ark-serialize/std", "blake2/std", "ark-std/std", "ark-poly
 parallel = ["std", "ark-ff/parallel", "ark-poly/parallel", "ark-std/parallel", "rayon"]
 
 # To be removed in the new release.
-[patch.crates-io]
-ark-ec = { git = "https://github.com/arkworks-rs/algebra" }
-ark-ff = { git = "https://github.com/arkworks-rs/algebra" }
-ark-poly = { git = "https://github.com/arkworks-rs/algebra" }
-ark-serialize = { git = "https://github.com/arkworks-rs/algebra" }
-ark-test-curves = { git = "https://github.com/arkworks-rs/algebra" }
-ark-std = { git = "https://github.com/arkworks-rs/std" }
+# [patch.crates-io]
+# ark-ec = { git = "https://github.com/arkworks-rs/algebra" }
+# ark-ff = { git = "https://github.com/arkworks-rs/algebra" }
+# ark-poly = { git = "https://github.com/arkworks-rs/algebra" }
+# ark-serialize = { git = "https://github.com/arkworks-rs/algebra" }
+# ark-test-curves = { git = "https://github.com/arkworks-rs/algebra" }
+# ark-std = { git = "https://github.com/arkworks-rs/std" }
