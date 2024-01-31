@@ -62,6 +62,9 @@ impl<F: Field> MLSumcheck<F> {
             prover_msgs.push(prover_msg);
             verifier_msg = Some(IPForMLSumcheck::sample_round(fs_rng));
         }
+        prover_state
+            .randomness
+            .push(verifier_msg.unwrap().randomness);
 
         Ok((prover_msgs, prover_state))
     }
