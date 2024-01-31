@@ -2,7 +2,7 @@
 use ark_serialize::CanonicalSerialize;
 use ark_std::rand::RngCore;
 use ark_std::vec::Vec;
-use blake2::{Blake2s, Digest};
+use blake2::{Blake2b512, Digest};
 /// Random Field Element Generator where randomness `feed` adds entropy for the output.
 ///
 /// Implementation should support all types of input that has `ToBytes` trait.
@@ -19,17 +19,17 @@ pub trait FeedableRNG: RngCore {
 }
 
 /// 512-bits digest hash pseudorandom generator
-pub struct Blake2s512Rng {
+pub struct Blake2b512Rng {
     /// current digest instance
-    current_digest: Blake2s,
+    current_digest: Blake2b512,
 }
 
-impl FeedableRNG for Blake2s512Rng {
+impl FeedableRNG for Blake2b512Rng {
     type Error = crate::Error;
 
     fn setup() -> Self {
         Self {
-            current_digest: Blake2s::new(),
+            current_digest: Blake2b512::new(),
         }
     }
 
@@ -41,7 +41,7 @@ impl FeedableRNG for Blake2s512Rng {
     }
 }
 
-impl RngCore for Blake2s512Rng {
+impl RngCore for Blake2b512Rng {
     fn next_u32(&mut self) -> u32 {
         let mut temp = [0u8; 4];
         self.fill_bytes(&mut temp);
@@ -61,7 +61,7 @@ impl RngCore for Blake2s512Rng {
     fn try_fill_bytes(&mut self, dest: &mut [u8]) -> Result<(), ark_std::rand::Error> {
         let mut digest = self.current_digest.clone();
         let mut output = digest.finalize();
-        let output_size = Blake2s::output_size();
+        let output_size = Blake2b512::output_size();
         let mut ptr = 0;
         let mut digest_ptr = 0;
         while ptr < dest.len() {
@@ -86,7 +86,7 @@ mod tests {
     use ark_std::rand::Rng;
     use ark_std::rand::RngCore;
 
-    use crate::rng::{Blake2s512Rng, FeedableRNG};
+    use crate::rng::{Blake2b512Rng, FeedableRNG};
     use ark_serialize::CanonicalSerialize;
     use ark_std::test_rng;
     use ark_std::vec::Vec;
@@ -171,6 +171,6 @@ mod tests {
 
     #[test]
     fn test_blake2s_hashing() {
-        test_deterministic_pseudorandom_generator::<Blake2s512Rng, Fr>(5)
+        test_deterministic_pseudorandom_generator::<Blake2b512Rng, Fr>(5)
     }
 }

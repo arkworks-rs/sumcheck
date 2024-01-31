@@ -4,7 +4,7 @@ use crate::ml_sumcheck::data_structures::{ListOfProductsOfPolynomials, Polynomia
 use crate::ml_sumcheck::protocol::prover::{ProverMsg, ProverState};
 use crate::ml_sumcheck::protocol::verifier::SubClaim;
 use crate::ml_sumcheck::protocol::IPForMLSumcheck;
-use crate::rng::{Blake2s512Rng, FeedableRNG};
+use crate::rng::{Blake2b512Rng, FeedableRNG};
 use ark_ff::Field;
 use ark_std::marker::PhantomData;
 use ark_std::vec::Vec;
@@ -40,7 +40,7 @@ impl<F: Field> MLSumcheck<F> {
     ///
     /// $$\sum_{i=0}^{n}C_i\cdot\prod_{j=0}^{m_i}P_{ij}$$
     pub fn prove(polynomial: &ListOfProductsOfPolynomials<F>) -> Result<Proof<F>, crate::Error> {
-        let mut fs_rng = Blake2s512Rng::setup();
+        let mut fs_rng = Blake2b512Rng::setup();
         Self::prove_as_subprotocol(&mut fs_rng, polynomial).map(|r| r.0)
     }
 
@@ -75,7 +75,7 @@ impl<F: Field> MLSumcheck<F> {
         claimed_sum: F,
         proof: &Proof<F>,
     ) -> Result<SubClaim<F>, crate::Error> {
-        let mut fs_rng = Blake2s512Rng::setup();
+        let mut fs_rng = Blake2b512Rng::setup();
         Self::verify_as_subprotocol(&mut fs_rng, polynomial_info, claimed_sum, proof)
     }
 
