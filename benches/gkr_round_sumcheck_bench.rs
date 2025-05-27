@@ -8,8 +8,8 @@ use ark_sumcheck::{
     gkr_round_sumcheck::GKRRoundSumcheck,
     rng::{Blake2b512Rng, FeedableRNG},
 };
-use criterion::{black_box, BenchmarkId, Criterion};
-
+use criterion::{BenchmarkId, Criterion};
+use std::hint::black_box;
 const NUM_VARIABLES_RANGE: Range<usize> = 10..21;
 
 fn prove_bench<F: Field>(c: &mut Criterion) {

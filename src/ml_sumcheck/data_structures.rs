@@ -102,10 +102,7 @@ impl<F: Field> ListOfProductsOfPolynomials<F> {
             .map(|(c, p)| {
                 *c * p
                     .iter()
-                    .map(|&i| {
-                        self.flattened_ml_extensions[i]
-                            .evaluate(&point.to_vec())
-                    })
+                    .map(|&i| self.flattened_ml_extensions[i].evaluate(&point.to_vec()))
                     .product::<F>()
             })
             .sum()
