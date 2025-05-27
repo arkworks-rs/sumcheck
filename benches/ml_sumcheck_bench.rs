@@ -2,12 +2,12 @@
 extern crate criterion;
 
 use ark_ff::Field;
-use ark_linear_sumcheck::ml_sumcheck::protocol::ListOfProductsOfPolynomials;
-use ark_linear_sumcheck::ml_sumcheck::MLSumcheck;
 use ark_poly::{DenseMultilinearExtension, MultilinearExtension};
 use ark_std::ops::Range;
 use ark_std::rc::Rc;
 use ark_std::test_rng;
+use ark_sumcheck::ml_sumcheck::protocol::ListOfProductsOfPolynomials;
+use ark_sumcheck::ml_sumcheck::MLSumcheck;
 use criterion::{black_box, BenchmarkId, Criterion};
 
 const NUM_VARIABLES_RANGE: Range<usize> = 10..21;
