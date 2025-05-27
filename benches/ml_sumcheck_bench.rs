@@ -2,14 +2,14 @@
 extern crate criterion;
 
 use ark_ff::Field;
-use ark_linear_sumcheck::ml_sumcheck::protocol::ListOfProductsOfPolynomials;
-use ark_linear_sumcheck::ml_sumcheck::MLSumcheck;
 use ark_poly::{DenseMultilinearExtension, MultilinearExtension};
 use ark_std::ops::Range;
 use ark_std::rc::Rc;
 use ark_std::test_rng;
-use criterion::{black_box, BenchmarkId, Criterion};
-
+use ark_sumcheck::ml_sumcheck::protocol::ListOfProductsOfPolynomials;
+use ark_sumcheck::ml_sumcheck::MLSumcheck;
+use criterion::{BenchmarkId, Criterion};
+use std::hint::black_box;
 const NUM_VARIABLES_RANGE: Range<usize> = 10..21;
 
 fn prove_bench<F: Field>(c: &mut Criterion) {

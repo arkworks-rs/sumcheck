@@ -2,18 +2,18 @@
 extern crate criterion;
 
 use ark_ff::Field;
-use ark_linear_sumcheck::{
-    gkr_round_sumcheck::GKRRoundSumcheck,
-    rng::{Blake2s512Rng, FeedableRNG},
-};
 use ark_poly::{DenseMultilinearExtension, MultilinearExtension, SparseMultilinearExtension};
 use ark_std::ops::Range;
-use criterion::{black_box, BenchmarkId, Criterion};
-
+use ark_sumcheck::{
+    gkr_round_sumcheck::GKRRoundSumcheck,
+    rng::{Blake2b512Rng, FeedableRNG},
+};
+use criterion::{BenchmarkId, Criterion};
+use std::hint::black_box;
 const NUM_VARIABLES_RANGE: Range<usize> = 10..21;
 
 fn prove_bench<F: Field>(c: &mut Criterion) {
-    let mut rng = Blake2s512Rng::setup();
+    let mut rng = Blake2b512Rng::setup();
 
     let mut group = c.benchmark_group("Prove");
     for nv in NUM_VARIABLES_RANGE {
@@ -36,7 +36,7 @@ fn prove_bench<F: Field>(c: &mut Criterion) {
 }
 
 fn verify_bench<F: Field>(c: &mut Criterion) {
-    let mut rng = Blake2s512Rng::setup();
+    let mut rng = Blake2b512Rng::setup();
 
     let mut group = c.benchmark_group("Verify");
     for nv in NUM_VARIABLES_RANGE {

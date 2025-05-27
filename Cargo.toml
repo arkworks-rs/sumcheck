@@ -13,19 +13,20 @@ categories = ["cryptography"]
 include = ["Cargo.toml", "src", "README.md", "LICENSE-APACHE", "LICENSE-MIT"]
 license = "MIT/Apache-2.0"
 edition = "2018"
-resolver = "2"
+
 
 [dependencies]
-ark-ff = { version = "0.4.0", default-features = false }
-ark-serialize = { version = "0.4.0", default-features = false, features = ["derive"] }
-ark-std = { version = "0.4.0", default-features = false }
-ark-poly = { version = "0.4.0", default-features = false }
-hashbrown = { version = "0.15.0" }
+ark-ff = { version = "0.5.0", default-features = false }
+ark-serialize = { version = "0.5.0", default-features = false, features = ["derive"] }
+ark-std = { version = "0.5.0", default-features = false }
+ark-poly = { version = "0.5.0", default-features = false }
+hashbrown = { version = "0.15.3" }
 blake2 = { version = "0.10", default-features = false }
-rayon = { version = "1", optional = true }
+rayon = { version = "1.10.0", optional = true }
 
 [dev-dependencies]
-ark-test-curves = { version = "0.4.0", default-features = false, features = ["bls12_381_scalar_field", "bls12_381_curve"] }
+ark-test-curves = { version = "0.5.0", default-features = false, features = ["bls12_381_scalar_field", "bls12_381_curve"] }
+criterion = { version = "0.6.0", features = ["html_reports"], default-features = true }
 
 [profile.release]
 opt-level = 3
@@ -57,11 +58,13 @@ default = ["std"]
 std = ["ark-ff/std", "ark-serialize/std", "blake2/std", "ark-std/std", "ark-poly/std"]
 parallel = ["std", "ark-ff/parallel", "ark-poly/parallel", "ark-std/parallel", "rayon"]
 
-# To be removed in the new release.
-[patch.crates-io]
-ark-ec = { git = "https://github.com/arkworks-rs/algebra" }
-ark-ff = { git = "https://github.com/arkworks-rs/algebra" }
-ark-poly = { git = "https://github.com/arkworks-rs/algebra" }
-ark-serialize = { git = "https://github.com/arkworks-rs/algebra" }
-ark-test-curves = { git = "https://github.com/arkworks-rs/algebra" }
-ark-std = { git = "https://github.com/arkworks-rs/std" }
+
+[[bench]]
+name = "ml_sumcheck"
+path = "./benches/ml_sumcheck_bench.rs"
+harness = false
+
+[[bench]]
+name = "gkr_round_sumcheck"
+path = "benches/gkr_round_sumcheck_bench.rs"
+harness = false
