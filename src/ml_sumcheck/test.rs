@@ -549,16 +549,20 @@ fn test_multiple_constraints_with_eq_masking() {
         
         let poly_info = poly.info();
         let proof = MLSumcheck::prove(&poly).expect(&format!("prove failed for nv={}", nv));
+
+        
         let subclaim = MLSumcheck::verify(&poly_info, expected_sum, &proof)
             .expect(&format!("verification failed for nv={}", nv));
-
+        
         assert_eq!(
             poly.evaluate(&subclaim.point),
             subclaim.expected_evaluation,
             "failed for nv={}",
             nv
         );
-        
+
+       
+   
         // Additional check: verify that the sum is actually zero
         // because (1 - eq_{1,...,1}(1,...,1)) = 0
         println!("  Expected sum should be 0 due to (1 - eq_{{1,...,1}}) masking: {}", 
@@ -566,13 +570,14 @@ fn test_multiple_constraints_with_eq_masking() {
     }
 }
 
-
 #[test]
-fn test_with_g_polynomial() {
+fn test_compute_expected_full_sum() {
+    use std::time::Instant;
     use crate::ml_sumcheck::MLSumcheck;
     
     let mut rng = test_rng();
-    let nv = 4;
+    let nv = 11;
+    let all_ones_index = (1 << nv) - 1;
 
     // Create random eq_point
     let eq_point: Vec<Fr> = (0..nv).map(|_| Fr::rand(&mut rng)).collect();
@@ -588,10 +593,31 @@ fn test_with_g_polynomial() {
     let mut poly = BinaryConstraintPolynomial::new(nv, eq_point.clone(), alpha, g_polys.clone());
     let mut expected_sum = Fr::zero();
 
+    let start = Instant::now();
+
     // Add several constraints
-    for _ in 0..3 {
+    for _ in 0..40 {
         let coefficient = Fr::rand(&mut rng);
-        let p = DenseMultilinearExtension::rand(nv, &mut rng);
+
+
+        // Create polynomial that is 0 or 1 everywhere except at (1,...,1)
+            let mut evaluations = Vec::with_capacity(1 << nv);
+            for idx in 0..(1 << nv) {
+                if idx == all_ones_index {
+                    // Random value at (1,1,...,1)
+                    evaluations.push(Fr::rand(&mut rng));
+                } else {
+                    // Random boolean (0 or 1) at other points
+                    if rng.gen_bool(0.5) {
+                        evaluations.push(Fr::one());
+                    } else {
+                        evaluations.push(Fr::zero());
+                    }
+                }
+            }
+            
+            let p = DenseMultilinearExtension::from_evaluations_vec(nv, evaluations.clone());
+
         
         // Compute sum of binary constraint term
         for b in 0..(1 << nv) {
@@ -638,19 +664,131 @@ fn test_with_g_polynomial() {
         
         expected_sum += alpha * half_hypercube * (g_i_at_0 + g_i_at_1);
     }
+    let gen_time = start.elapsed();
+    println!("Generation time: {:?}", gen_time);
+    println!("Generation time (ms): {:.2}", gen_time.as_secs_f64() * 1000.0);
 
     println!("Expected sum with g polynomial: {:?}", expected_sum);
 
     let poly_info = poly.info();
+    let start = Instant::now();
+
     let proof = MLSumcheck::prove(&poly).expect("prove failed");
+
+    let prove_time = start.elapsed();
+    println!("Prove time: {:?}", prove_time);
+    println!("Prove time (ms): {:.2}", prove_time.as_secs_f64() * 1000.0);
+
+    // Time the verify operation
+    let start = Instant::now();
     let subclaim = MLSumcheck::verify(&poly_info, expected_sum, &proof)
         .expect("verification failed");
+    let verify_time = start.elapsed();
+    println!("Verify time: {:?}", verify_time);
+    println!("Verify time (ms): {:.2}", verify_time.as_secs_f64() * 1000.0);
 
     assert_eq!(
         poly.evaluate(&subclaim.point),
         subclaim.expected_evaluation,
         "Subclaim verification failed"
     );
+
+}
+
+
+#[test]
+fn test_with_g_polynomial() {
+    use std::time::Instant;
+    use crate::ml_sumcheck::MLSumcheck;
+    let start = Instant::now();
+    
+    let mut rng = test_rng();
+    let nv = 10;
+    let all_ones_index = (1 << nv) - 1;
+
+    // Create random eq_point
+    let eq_point: Vec<Fr> = (0..nv).map(|_| Fr::rand(&mut rng)).collect();
+    
+    // Create random α
+    let alpha = Fr::rand(&mut rng);
+    
+    // Create random g polynomials (one per variable)
+    let g_polys: Vec<Vec<Fr>> = (0..nv)
+        .map(|_| (0..5).map(|_| Fr::rand(&mut rng)).collect())
+        .collect();
+    
+    let mut poly = BinaryConstraintPolynomial::new(nv, eq_point.clone(), alpha, g_polys.clone());
+    let mut expected_sum = Fr::zero();
+
+    
+
+    // Add several constraints
+    for _ in 0..40 {
+        let coefficient = Fr::rand(&mut rng);
+
+
+        // Create polynomial that is 0 or 1 everywhere except at (1,...,1)
+            let mut evaluations = Vec::with_capacity(1 << nv);
+            for idx in 0..(1 << nv) {
+                if idx == all_ones_index {
+                    // Random value at (1,1,...,1)
+                    evaluations.push(Fr::rand(&mut rng));
+                } else {
+                    // Random boolean (0 or 1) at other points
+                    if rng.gen_bool(0.5) {
+                        evaluations.push(Fr::one());
+                    } else {
+                        evaluations.push(Fr::zero());
+                    }
+                }
+            }
+            
+            let p = DenseMultilinearExtension::from_evaluations_vec(nv, evaluations.clone());
+        
+        poly.add_constraint(coefficient, p);
+    }
+    
+    // Add α·g term
+    // Σ_{x∈{0,1}ⁿ} α·g(x) = α · Σᵢ 2^(n-1) · [gᵢ(0) + gᵢ(1)]
+    let half_hypercube = Fr::from(1u64 << (nv - 1));
+    for i in 0..nv {
+        let coeffs = &g_polys[i];
+        let g_i_at_0 = coeffs[0]; // r₀
+        let g_i_at_1 = coeffs[0] + coeffs[1] + coeffs[2] + coeffs[3] + coeffs[4]; // r₀ + r₁ + r₂ + r₃ + r₄
+        
+        expected_sum += alpha * half_hypercube * (g_i_at_0 + g_i_at_1);
+    }
+    let gen_time = start.elapsed();
+    println!("Generation time: {:?}", gen_time);
+    println!("Generation time (ms): {:.2}", gen_time.as_secs_f64() * 1000.0);
+
+    println!("Expected sum with g polynomial: {:?}", expected_sum);
+
+    let poly_info = poly.info();
+    let start = Instant::now();
+
+    let proof = MLSumcheck::prove(&poly).expect("prove failed");
+
+    let prove_time = start.elapsed();
+    println!("Prove time: {:?}", prove_time);
+    println!("Prove time (ms): {:.2}", prove_time.as_secs_f64() * 1000.0);
+
+    // Time the verify operation
+    let start = Instant::now();
+    let subclaim = MLSumcheck::verify(&poly_info, expected_sum, &proof)
+        .expect("verification failed");
+    let verify_time = start.elapsed();
+     assert_eq!(
+        poly.evaluate(&subclaim.point),
+        subclaim.expected_evaluation,
+        "Subclaim verification failed"
+    );
+
+    println!("Verify time: {:?}", verify_time);
+    println!("Verify time (ms): {:.2}", verify_time.as_secs_f64() * 1000.0);
+
+   
+
 }
 
 
